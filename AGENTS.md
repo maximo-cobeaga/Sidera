@@ -106,7 +106,7 @@ En cada iteración:
 8. Ejecutar smoke test si el cambio afecta integración, mapa o flujo principal.
 9. Analizar errores, warnings nuevos, crashes y resultados.
 10. Corregir y repetir hasta pasar o declarar bloqueo real.
-11. Actualizar `DEVELOPMENT_STATE.md`, `BACKLOG.md`, `TEST_REPORT.md` y deuda técnica.
+11. Actualizar `Docs/DEVELOPMENT_STATE.md`, `Docs/BACKLOG.md`, `Docs/TEST_REPORT.md` y deuda técnica.
 12. Crear un commit atómico sólo si el estado queda estable.
 13. Continuar automáticamente con la siguiente tarea.
 

@@ -65,6 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Narrative")
 	void RecordArgosBriefing();
 
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Narrative")
+	bool RecordSurfaceDeployment();
+
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Map")
 	int32 RevealMapAroundLocationMeters(FVector2D LocationMeters, int32 RadiusCells = 1);
 
@@ -82,6 +85,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Objectives")
 	FString GetObjectiveHint() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Feedback")
+	void SetLastFeedbackMessage(const FString& Message);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Feedback")
+	FString GetLastFeedbackMessage() const { return LastFeedbackMessage; }
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Objectives")
 	bool IsSignalResolved() const { return ObjectiveState == EAstraeonObjectiveState::Completed; }
@@ -102,6 +111,7 @@ public:
 
 private:
 	void UpsertRuntimeLogbookEntry(const FAstraeonLogbookEntry& Entry);
+	bool HasRuntimeLogbookEntry(FName EntryId) const;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Session")
 	bool bHasStartedGame = false;
@@ -123,6 +133,9 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Objectives")
 	EAstraeonObjectiveState ObjectiveState = EAstraeonObjectiveState::MeasureEnvironment;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Feedback")
+	FString LastFeedbackMessage;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Session")
 	TArray<FAstraeonLogbookEntry> RuntimeLogbookEntries;

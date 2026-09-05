@@ -1,17 +1,31 @@
 #include "AstraeonPlayerCharacter.h"
 
 #include "AstraeonGameInstance.h"
+#include "AstraeonGameModeBase.h"
 #include "Camera/CameraComponent.h"
 #include "Creatures/AstraeonCreatureActor.h"
 #include "Components/CapsuleComponent.h"
-#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Survival/AstraeonSuitComponent.h"
 #include "WorldGen/AstraeonRegionMarker.h"
+#include "WorldGen/AstraeonRegionMaterializer.h"
+
+namespace AstraeonPlayerCharacterRescue
+{
+	// How far below the last confirmed-safe standing position the character has to fall
+	// before an emergency recall kicks in. Large enough that a normal step off a ledge or a
+	// jump never triggers it, small enough that an actual fall through the world (missing
+	// or not-yet-registered collision, for example right after a SURFACE HATCH teleport) is
+	// caught within a fraction of a second instead of free-falling out of the level forever.
+	constexpr float RescueFallDistanceCm = 2000.0f;
+}
 
 AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 0.2f;
 
 	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
 	GetCharacterMovement()->MaxWalkSpeed = 520.0f;
@@ -40,6 +54,21 @@ void AAstraeonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	PlayerInputComponent->BindAction(TEXT("Scan"), IE_Pressed, this, &AAstraeonPlayerCharacter::ScanEnvironment);
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &AAstraeonPlayerCharacter::Interact);
 	PlayerInputComponent->BindAction(TEXT("Craft"), IE_Pressed, this, &AAstraeonPlayerCharacter::CraftSignalResonator);
+}
+
+void AAstraeonPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Whatever the level places the character on at spawn (PlayerStart) counts as the
+	// first known-safe ground location for the fall-rescue safety net.
+	MarkLocationAsSafeGround(GetActorLocation());
+}
+
+void AAstraeonPlayerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	RescueFromVoidIfNeeded();
 }
 
 void AAstraeonPlayerCharacter::MoveForward(float Value)
@@ -82,7 +111,6 @@ void AAstraeonPlayerCharacter::ScanEnvironment()
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(AstraeonScan), false, this);
 	const bool bHit = GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
 
-	FText Feedback = FText::FromString(TEXT("ARGOS: no active session to scan."));
 	bool bScanSucceeded = false;
 
 	if (bHit)
@@ -90,14 +118,12 @@ void AAstraeonPlayerCharacter::ScanEnvironment()
 		if (AAstraeonCreatureActor* Creature = Cast<AAstraeonCreatureActor>(HitResult.GetActor()))
 		{
 			bScanSucceeded = AstraeonGameInstance->RecordCreatureScan(Creature->GetCreatureProfile());
-			Feedback = FText::FromString(TEXT("ARGOS: organism observed and added to logbook."));
 		}
 	}
 
 	if (!bScanSucceeded)
 	{
 		bScanSucceeded = AstraeonGameInstance->ScanCurrentEnvironment();
-		Feedback = FText::FromString(TEXT("ARGOS: environmental scan confirmed in logbook."));
 	}
 
 	if (bScanSucceeded)
@@ -105,9 +131,9 @@ void AAstraeonPlayerCharacter::ScanEnvironment()
 		AstraeonGameInstance->RevealMapAroundLocationMeters(FVector2D(GetActorLocation().X, GetActorLocation().Y) / 100.0f, 2);
 	}
 
-	if (GEngine)
+	if (!bScanSucceeded)
 	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, bScanSucceeded ? FColor::Cyan : FColor::Red, Feedback.ToString());
+		AstraeonGameInstance->SetLastFeedbackMessage(TEXT("Sin sesión activa para escanear."));
 	}
 }
 
@@ -129,6 +155,7 @@ void AAstraeonPlayerCharacter::Interact()
 	bool bResolvedSignal = false;
 	bool bSignalSourceAttempted = false;
 	bool bArgosBriefingRead = false;
+	bool bSurfaceDeployed = false;
 	FName CollectedId;
 	if (bHit)
 	{
@@ -153,19 +180,117 @@ void AAstraeonPlayerCharacter::Interact()
 				AstraeonGameInstance->RecordArgosBriefing();
 				bArgosBriefingRead = true;
 			}
+			else if (Marker->GetMarkerId() == TEXT("itaca_surface_hatch"))
+			{
+				bSurfaceDeployed = DeployToSurface(*AstraeonGameInstance);
+			}
 		}
 	}
 
-	if (GEngine)
+	if (!(bCollected || bResolvedSignal || bArgosBriefingRead || bSurfaceDeployed))
 	{
-		const FString Message = bResolvedSignal
-			? TEXT("Signal source resolved. Vertical slice complete.")
-			: (bArgosBriefingRead
-				? TEXT("ARGOS briefing recorded in logbook.")
-				: (bSignalSourceAttempted
-					? TEXT("Signal source requires signal_resonator. Gather resources and craft it with C.")
-					: (bCollected ? FString::Printf(TEXT("Collected: %s"), *CollectedId.ToString()) : TEXT("No ARGOS console, collectible resource, or signal source in reach."))));
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, (bCollected || bResolvedSignal || bArgosBriefingRead) ? FColor::Green : FColor::Yellow, Message);
+		AstraeonGameInstance->SetLastFeedbackMessage(bSignalSourceAttempted
+			? TEXT("La fuente de señal requiere signal_resonator. Recoge recursos y fábrícalo con C.")
+			: TEXT("Sin consola ARGOS, escotilla, recurso recolectable ni fuente de señal al alcance."));
+	}
+}
+
+bool AAstraeonPlayerCharacter::DeployToSurface(UAstraeonGameInstance& AstraeonGameInstance)
+{
+	if (!AstraeonGameInstance.RecordSurfaceDeployment())
+	{
+		return false;
+	}
+
+	const FVector DeploymentLocationCm = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm();
+
+	FHitResult FloorHit;
+	if (!TraceForDeploymentFloor(DeploymentLocationCm, FloorHit))
+	{
+		// The runtime region surface (AAstraeonGameModeBase::MaterializeCurrentRegion)
+		// should already have a dedicated deployment pad under this point. If it is
+		// missing - for example the region was never materialized for this session -
+		// ask the GameMode to (re)materialize it instead of guessing at a homemade
+		// collision volume, then try the trace once more before giving up.
+		if (AAstraeonGameModeBase* AstraeonGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AAstraeonGameModeBase>() : nullptr)
+		{
+			AstraeonGameMode->MaterializeCurrentRegion();
+		}
+
+		if (!TraceForDeploymentFloor(DeploymentLocationCm, FloorHit))
+		{
+			AstraeonGameInstance.SetLastFeedbackMessage(TEXT("ESCOTILLA BLOQUEADA: no se detectó suelo transitable."));
+			return false;
+		}
+	}
+
+	const float SafeCapsuleHalfHeight = GetCapsuleComponent() ? GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 96.0f;
+	const FVector SafeActorLocation(DeploymentLocationCm.X, DeploymentLocationCm.Y, FloorHit.ImpactPoint.Z + SafeCapsuleHalfHeight + 4.0f);
+	SetActorLocation(SafeActorLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->SetMovementMode(MOVE_Walking);
+	}
+
+	// Record this as safe ground immediately: if the floor under the hatch destination
+	// turns out to be unreliable in some edge case the tick-based rescue net will bring
+	// the character straight back here rather than letting them fall indefinitely.
+	MarkLocationAsSafeGround(SafeActorLocation);
+
+	AstraeonGameInstance.RevealMapAroundLocationMeters(FVector2D(GetActorLocation().X, GetActorLocation().Y) / 100.0f, 2);
+	return true;
+}
+
+bool AAstraeonPlayerCharacter::TraceForDeploymentFloor(const FVector& DeploymentLocationCm, FHitResult& OutHit) const
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	FCollisionQueryParams FloorQueryParams(SCENE_QUERY_STAT(AstraeonSurfaceHatchFloor), false, this);
+	const FVector FloorTraceStart = DeploymentLocationCm + FVector(0.0f, 0.0f, 300.0f);
+	const FVector FloorTraceEnd = DeploymentLocationCm - FVector(0.0f, 0.0f, 600.0f);
+	return World->LineTraceSingleByChannel(OutHit, FloorTraceStart, FloorTraceEnd, ECC_Visibility, FloorQueryParams);
+}
+
+void AAstraeonPlayerCharacter::MarkLocationAsSafeGround(const FVector& LocationCm)
+{
+	LastSafeGroundLocationCm = LocationCm;
+	bHasSafeGroundLocation = true;
+}
+
+void AAstraeonPlayerCharacter::RescueFromVoidIfNeeded()
+{
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+
+	if (MovementComponent->IsMovingOnGround())
+	{
+		MarkLocationAsSafeGround(GetActorLocation());
+		return;
+	}
+
+	if (!bHasSafeGroundLocation)
+	{
+		return;
+	}
+
+	if (GetActorLocation().Z < LastSafeGroundLocationCm.Z - AstraeonPlayerCharacterRescue::RescueFallDistanceCm)
+	{
+		SetActorLocation(LastSafeGroundLocationCm, false, nullptr, ETeleportType::TeleportPhysics);
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->SetMovementMode(MOVE_Walking);
+
+		if (UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>())
+		{
+			AstraeonGameInstance->SetLastFeedbackMessage(TEXT("Rescate de emergencia: recuperado de una zona sin soporte."));
+		}
 	}
 }
 
@@ -174,12 +299,8 @@ void AAstraeonPlayerCharacter::CraftSignalResonator()
 	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	const bool bCrafted = AstraeonGameInstance && AstraeonGameInstance->CraftSignalResonator();
 
-	if (GEngine)
+	if (AstraeonGameInstance && !bCrafted)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			INDEX_NONE,
-			2.0f,
-			bCrafted ? FColor::Green : FColor::Yellow,
-			bCrafted ? TEXT("Crafted: signal_resonator") : TEXT("Missing resources for signal_resonator."));
+		AstraeonGameInstance->SetLastFeedbackMessage(TEXT("Faltan recursos para fabricar signal_resonator."));
 	}
 }

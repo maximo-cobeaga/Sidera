@@ -20,4 +20,6 @@ protected:
 
 private:
 	void RunCriticalPathSmokeIfRequested();
+	bool RunSurfaceHatchInteractionSmoke();
+	void EnsureRuntimeLighting();
 };

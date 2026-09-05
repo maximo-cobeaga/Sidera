@@ -10,6 +10,8 @@ namespace AstraeonSession
 {
 	constexpr int32 DefaultWorldSeed = 1001;
 	const FName InitialEnvironmentEntryId(TEXT("environment.initial_measurement"));
+	const FName ArgosBriefingEntryId(TEXT("argos.first_signal_briefing"));
+	const FName SurfaceDeploymentEntryId(TEXT("itaca.surface_deployment"));
 	const FName SignalResonatorItemId(TEXT("signal_resonator"));
 	const FName SilicateFiberItemId(TEXT("silicate_fiber"));
 	const FName FerriteNoduleItemId(TEXT("ferrite_nodule"));
@@ -35,12 +37,13 @@ void UAstraeonGameInstance::StartNewGame(int32 RequestedWorldSeed)
 	Inventory.Reset();
 	ObjectiveState = EAstraeonObjectiveState::MeasureEnvironment;
 	RuntimeLogbookEntries.Reset();
+	LastFeedbackMessage = TEXT("Nueva expedición iniciada. Interactúa con la consola ARGOS para comenzar.");
 
 	FAstraeonLogbookEntry InitialEnvironmentEntry;
 	InitialEnvironmentEntry.EntryId = AstraeonSession::InitialEnvironmentEntryId;
-	InitialEnvironmentEntry.Title = FText::FromString(TEXT("Initial environmental measurement"));
+	InitialEnvironmentEntry.Title = FText::FromString(TEXT("Medición ambiental inicial"));
 	InitialEnvironmentEntry.Summary = FText::Format(
-		FText::FromString(TEXT("ARGOS measured gravity {0} m/s^2, temperature {1} K and pressure {2} kPa.")),
+		FText::FromString(TEXT("ARGOS midió gravedad {0} m/s², temperatura {1} K y presión {2} kPa.")),
 		FText::AsNumber(CurrentEnvironment.GravityMS2),
 		FText::AsNumber(CurrentEnvironment.TemperatureKelvin),
 		FText::AsNumber(CurrentEnvironment.PressureKPa));
@@ -64,6 +67,7 @@ bool UAstraeonGameInstance::AddInventoryItem(FName ItemId, int32 Quantity)
 	}
 
 	Inventory.FindOrAdd(ItemId) += Quantity;
+	SetLastFeedbackMessage(FString::Printf(TEXT("Recolectado: %s"), *ItemId.ToString()));
 	if (ObjectiveState == EAstraeonObjectiveState::GatherResources && Inventory.Num() >= 3)
 	{
 		ObjectiveState = EAstraeonObjectiveState::CraftSignalResonator;
@@ -119,10 +123,12 @@ bool UAstraeonGameInstance::CraftSignalResonator()
 	AddInventoryItem(AstraeonSession::SignalResonatorItemId, 1);
 	ObjectiveState = EAstraeonObjectiveState::ReachSignalSource;
 
+	SetLastFeedbackMessage(TEXT("Fabricado: signal_resonator. Sigue el marcador SEÑAL e interactúa con E."));
+
 	FAstraeonLogbookEntry CraftingEntry;
 	CraftingEntry.EntryId = TEXT("recipe.signal_resonator");
-	CraftingEntry.Title = FText::FromString(TEXT("Signal resonator"));
-	CraftingEntry.Summary = FText::FromString(TEXT("A field-made resonator tuned with local material properties; it should stabilize the unknown signal path."));
+	CraftingEntry.Title = FText::FromString(TEXT("Resonador de señal"));
+	CraftingEntry.Summary = FText::FromString(TEXT("Un resonador de campo ajustado con propiedades locales; debería estabilizar el camino de la señal desconocida."));
 	CraftingEntry.Certainty = EAstraeonDiscoveryCertainty::Confirmed;
 	UpsertRuntimeLogbookEntry(CraftingEntry);
 	return true;
@@ -147,19 +153,20 @@ bool UAstraeonGameInstance::ScanCurrentEnvironment()
 
 	FAstraeonLogbookEntry ConfirmedEnvironmentEntry;
 	ConfirmedEnvironmentEntry.EntryId = AstraeonSession::InitialEnvironmentEntryId;
-	ConfirmedEnvironmentEntry.Title = FText::FromString(TEXT("Confirmed environmental scan"));
+	ConfirmedEnvironmentEntry.Title = FText::FromString(TEXT("Escaneo ambiental confirmado"));
 	ConfirmedEnvironmentEntry.Summary = FText::Format(
-		FText::FromString(TEXT("Scanner confirmation: gravity {0} m/s^2, temperature {1} K, pressure {2} kPa, breathable {3}.")),
+		FText::FromString(TEXT("Confirmación del escáner: gravedad {0} m/s², temperatura {1} K, presión {2} kPa, respirable {3}.")),
 		FText::AsNumber(CurrentEnvironment.GravityMS2),
 		FText::AsNumber(CurrentEnvironment.TemperatureKelvin),
 		FText::AsNumber(CurrentEnvironment.PressureKPa),
-		CurrentEnvironment.bBreathable ? FText::FromString(TEXT("yes")) : FText::FromString(TEXT("no")));
+		CurrentEnvironment.bBreathable ? FText::FromString(TEXT("sí")) : FText::FromString(TEXT("no")));
 	ConfirmedEnvironmentEntry.Certainty = EAstraeonDiscoveryCertainty::Confirmed;
 	UpsertRuntimeLogbookEntry(ConfirmedEnvironmentEntry);
 	if (ObjectiveState == EAstraeonObjectiveState::MeasureEnvironment)
 	{
 		ObjectiveState = EAstraeonObjectiveState::GatherResources;
 	}
+	SetLastFeedbackMessage(TEXT("Escaneo ambiental confirmado. Busca cubos VERDES con etiqueta RECURSO y recógelos con E."));
 	return true;
 }
 
@@ -176,6 +183,7 @@ bool UAstraeonGameInstance::RecordCreatureScan(const FAstraeonCreatureProfile& C
 	CreatureEntry.Summary = CreatureProfile.ScannerSummary;
 	CreatureEntry.Certainty = EAstraeonDiscoveryCertainty::Observed;
 	UpsertRuntimeLogbookEntry(CreatureEntry);
+	SetLastFeedbackMessage(TEXT("Organismo observado y añadido a la bitácora."));
 	return true;
 }
 
@@ -184,18 +192,31 @@ FString UAstraeonGameInstance::GetObjectiveHint() const
 	switch (ObjectiveState)
 	{
 	case EAstraeonObjectiveState::MeasureEnvironment:
-		return TEXT("Use the ARGOS console, then scan the environment with Left Mouse.");
+		if (!HasRuntimeLogbookEntry(AstraeonSession::ArgosBriefingEntryId))
+		{
+			return TEXT("Interactúa con la consola ARGOS (E) para recibir el briefing de la primera señal.");
+		}
+		if (!HasRuntimeLogbookEntry(AstraeonSession::SurfaceDeploymentEntryId))
+		{
+			return TEXT("Usa la ESCOTILLA (E) para despliegue controlado, luego escanea con Click Izq.");
+		}
+		return TEXT("Escanea el ambiente con Click Izq. para confirmar datos de supervivencia.");
 	case EAstraeonObjectiveState::GatherResources:
-		return TEXT("Find three labeled resources and collect each one with E.");
+		return TEXT("Busca cubos VERDES con etiqueta RECURSO dispersos en el área y recoge cada uno con E.");
 	case EAstraeonObjectiveState::CraftSignalResonator:
-		return TEXT("Press C to craft signal_resonator from the collected samples.");
+		return TEXT("Presiona C para fabricar signal_resonator con las muestras recogidas.");
 	case EAstraeonObjectiveState::ReachSignalSource:
-		return TEXT("Follow the SIGNAL marker and interact with E to stabilize it.");
+		return TEXT("Sigue el marcador SEÑAL e interactúa con E para estabilizarlo.");
 	case EAstraeonObjectiveState::Completed:
-		return TEXT("First signal resolved. Save with F5 or review the logbook entries.");
+		return TEXT("Primera señal resuelta. Guarda con F5 o revisa las entradas de la bitácora.");
 	default:
-		return TEXT("Continue exploring, measuring, acting, and recording.");
+		return TEXT("Continúa explorando, midiendo, actuando y registrando.");
 	}
+}
+
+void UAstraeonGameInstance::SetLastFeedbackMessage(const FString& Message)
+{
+	LastFeedbackMessage = Message;
 }
 
 void UAstraeonGameInstance::RecordArgosBriefing()
@@ -206,11 +227,29 @@ void UAstraeonGameInstance::RecordArgosBriefing()
 	}
 
 	FAstraeonLogbookEntry ArgosEntry;
-	ArgosEntry.EntryId = TEXT("argos.first_signal_briefing");
-	ArgosEntry.Title = FText::FromString(TEXT("ARGOS briefing"));
-	ArgosEntry.Summary = FText::FromString(TEXT("ARGOS isolated an anomalous narrow-band signal. Measure the region, collect resonant materials, craft a signal_resonator, then confirm the source."));
+	ArgosEntry.EntryId = AstraeonSession::ArgosBriefingEntryId;
+	ArgosEntry.Title = FText::FromString(TEXT("Briefing de ARGOS"));
+	ArgosEntry.Summary = FText::FromString(TEXT("ARGOS aisló una señal anómala de banda estrecha. Mide la región, recoge materiales resonantes, fabrica un signal_resonator y luego confirma la fuente."));
 	ArgosEntry.Certainty = EAstraeonDiscoveryCertainty::Confirmed;
 	UpsertRuntimeLogbookEntry(ArgosEntry);
+	SetLastFeedbackMessage(TEXT("Briefing de ARGOS registrado. Usa la ESCOTILLA a continuación."));
+}
+
+bool UAstraeonGameInstance::RecordSurfaceDeployment()
+{
+	if (!bHasStartedGame)
+	{
+		return false;
+	}
+
+	FAstraeonLogbookEntry DeploymentEntry;
+	DeploymentEntry.EntryId = AstraeonSession::SurfaceDeploymentEntryId;
+	DeploymentEntry.Title = FText::FromString(TEXT("Despliegue controlado en superficie"));
+	DeploymentEntry.Summary = FText::FromString(TEXT("La escotilla de superficie de Ítaca cicló correctamente. ARGOS ahora trata la región cercana como zona de expedición activa."));
+	DeploymentEntry.Certainty = EAstraeonDiscoveryCertainty::Observed;
+	UpsertRuntimeLogbookEntry(DeploymentEntry);
+	SetLastFeedbackMessage(TEXT("Despliegue en superficie registrado. Escanea el ambiente con Click Izq."));
+	return true;
 }
 
 bool UAstraeonGameInstance::TryResolveSignalSource()
@@ -224,10 +263,11 @@ bool UAstraeonGameInstance::TryResolveSignalSource()
 
 	FAstraeonLogbookEntry SignalEntry;
 	SignalEntry.EntryId = TEXT("signal.first_source");
-	SignalEntry.Title = FText::FromString(TEXT("The first signal"));
-	SignalEntry.Summary = FText::FromString(TEXT("The resonator stabilized the unknown signal. The origin is confirmed, but its maker remains unresolved."));
+	SignalEntry.Title = FText::FromString(TEXT("La primera señal"));
+	SignalEntry.Summary = FText::FromString(TEXT("El resonador estabilizó la señal desconocida. El origen está confirmado, pero su creador sigue siendo un misterio."));
 	SignalEntry.Certainty = EAstraeonDiscoveryCertainty::Confirmed;
 	UpsertRuntimeLogbookEntry(SignalEntry);
+	SetLastFeedbackMessage(TEXT("Fuente de señal resuelta. Vertical slice completo."));
 	return true;
 }
 
@@ -310,6 +350,14 @@ void UAstraeonGameInstance::UpsertRuntimeLogbookEntry(const FAstraeonLogbookEntr
 	}
 
 	RuntimeLogbookEntries.Add(Entry);
+}
+
+bool UAstraeonGameInstance::HasRuntimeLogbookEntry(FName EntryId) const
+{
+	return RuntimeLogbookEntries.ContainsByPredicate([EntryId](const FAstraeonLogbookEntry& Entry)
+	{
+		return Entry.EntryId == EntryId;
+	});
 }
 
 int32 UAstraeonGameInstance::NormalizeRequestedSeed(int32 RequestedWorldSeed)

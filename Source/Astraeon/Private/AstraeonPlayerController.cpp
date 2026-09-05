@@ -2,7 +2,6 @@
 
 #include "AstraeonGameInstance.h"
 #include "AstraeonGameModeBase.h"
-#include "Engine/Engine.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Survival/AstraeonSuitComponent.h"
@@ -65,12 +64,11 @@ void AAstraeonPlayerController::ContinueSavedGame()
 
 void AAstraeonPlayerController::SaveCurrentGame()
 {
-	const UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
+	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	const bool bSaved = !bMenuVisible && AstraeonGameInstance && AstraeonGameInstance->SaveCurrentGame();
-
-	if (GEngine)
+	if (AstraeonGameInstance)
 	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, bSaved ? FColor::Green : FColor::Yellow, bSaved ? TEXT("Game saved.") : TEXT("Start or continue a game before saving."));
+		AstraeonGameInstance->SetLastFeedbackMessage(bSaved ? TEXT("Partida guardada.") : TEXT("Inicia o continúa una partida antes de guardar."));
 	}
 }
 

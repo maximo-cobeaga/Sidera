@@ -95,6 +95,24 @@ bool FAstraeonRegionMaterializerSpecsTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonItacaMaterializerSpecsTest,
+	"Astraeon.WorldGen.Itaca.MaterializerSpecs",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonItacaMaterializerSpecsTest::RunTest(const FString& Parameters)
+{
+	const TArray<FAstraeonRegionActorSpec> Specs = UAstraeonRegionMaterializer::BuildItacaActorSpecs();
+
+	TestEqual(TEXT("Ítaca MVP has ARGOS console and surface hatch"), Specs.Num(), 2);
+	TestEqual(TEXT("First Ítaca actor is ARGOS console"), Specs[0].ActorId, FName(TEXT("itaca_argos_console")));
+	TestEqual(TEXT("Second Ítaca actor is surface hatch"), Specs[1].ActorId, FName(TEXT("itaca_surface_hatch")));
+	TestEqual(TEXT("Surface hatch is interactable POI"), Specs[1].Kind, EAstraeonRegionActorKind::PointOfInterest);
+	const FVector DeploymentLocationCm = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm();
+	TestTrue(TEXT("Surface deployment target is above walkable runtime surface"), DeploymentLocationCm.Z >= 120.0f);
+	TestTrue(TEXT("Surface deployment target is away from Ítaca hatch"), FVector2D(DeploymentLocationCm.X, DeploymentLocationCm.Y).Size() >= 1000.0f);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonRegionMarkerApplySpecTest,
 	"Astraeon.WorldGen.Region.MarkerApplySpec",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -122,6 +140,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonRegionMarkerVisualIdentityTest,
 bool FAstraeonRegionMarkerVisualIdentityTest::RunTest(const FString& Parameters)
 {
 	TestTrue(TEXT("ARGOS marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("itaca_argos_console"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("ARGOS")));
+	TestTrue(TEXT("Surface hatch marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("itaca_surface_hatch"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("SURFACE HATCH")));
 	TestTrue(TEXT("Signal source marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("signal_source"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("SIGNAL")));
 	TestTrue(TEXT("Resource marker label includes resource id"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("silicate_fiber"), EAstraeonRegionActorKind::Resource).ToString().Contains(TEXT("silicate_fiber")));
 	TestNotEqual(TEXT("ARGOS and signal colors differ"), AAstraeonRegionMarker::BuildMarkerColor(TEXT("itaca_argos_console"), EAstraeonRegionActorKind::PointOfInterest), AAstraeonRegionMarker::BuildMarkerColor(TEXT("signal_source"), EAstraeonRegionActorKind::PointOfInterest));
@@ -280,6 +299,28 @@ bool FAstraeonArgosBriefingLogbookTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonItacaSurfaceDeploymentLogbookTest,
+	"Astraeon.Narrative.Itaca.SurfaceDeploymentLogbook",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonItacaSurfaceDeploymentLogbookTest::RunTest(const FString& Parameters)
+{
+	UAstraeonGameInstance* GameInstance = NewObject<UAstraeonGameInstance>();
+	TestFalse(TEXT("No session means no surface deployment entry"), GameInstance->RecordSurfaceDeployment());
+
+	GameInstance->StartNewGame(8081);
+	TestTrue(TEXT("Initial hint asks for ARGOS briefing"), GameInstance->GetObjectiveHint().Contains(TEXT("ARGOS")));
+	GameInstance->RecordArgosBriefing();
+	TestTrue(TEXT("Briefing hint points to surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("SURFACE HATCH")));
+	TestTrue(TEXT("Surface deployment can be recorded"), GameInstance->RecordSurfaceDeployment());
+	TestTrue(TEXT("Surface deployment entry exists"), GameInstance->GetRuntimeLogbookEntries().ContainsByPredicate([](const FAstraeonLogbookEntry& Entry)
+	{
+		return Entry.EntryId == TEXT("itaca.surface_deployment") && Entry.Certainty == EAstraeonDiscoveryCertainty::Observed;
+	}));
+	TestTrue(TEXT("Deployment hint points to scanner"), GameInstance->GetObjectiveHint().Contains(TEXT("Left Mouse")));
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonSignalResolutionObjectiveTest,
 	"Astraeon.Narrative.Signal.ResolveObjective",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -326,6 +367,7 @@ bool FAstraeonCriticalPathFullFlowTest::RunTest(const FString& Parameters)
 	{
 		return Entry.EntryId == TEXT("argos.first_signal_briefing");
 	}));
+	TestTrue(TEXT("Surface deployment is recorded"), GameInstance->RecordSurfaceDeployment());
 
 	TestTrue(TEXT("Environment scan succeeds"), GameInstance->ScanCurrentEnvironment());
 	TestEqual(TEXT("Environment scan advances objective"), GameInstance->GetObjectiveState(), EAstraeonObjectiveState::GatherResources);
@@ -481,6 +523,7 @@ bool FAstraeonHUDStatusLinesTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("HUD shows pressure with explicit unit field"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("PressureKPa")); }));
 	TestTrue(TEXT("HUD shows map reveal count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Map revealed cells")); }));
 	TestTrue(TEXT("HUD shows objective hint"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Hint:")); }));
+	TestTrue(TEXT("HUD shows current feedback"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Feedback:")); }));
 	TestTrue(TEXT("HUD shows logbook count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Logbook entries: 1")); }));
 	return true;
 }
@@ -495,7 +538,11 @@ bool FAstraeonObjectiveHintProgressionTest::RunTest(const FString& Parameters)
 	GameInstance->StartNewGame(24601);
 	const FName SignatureResourceId = GameInstance->GetCurrentRegionLayout().Resources[2].ResourceId;
 
-	TestTrue(TEXT("Initial objective hints scan"), GameInstance->GetObjectiveHint().Contains(TEXT("scan")));
+	TestTrue(TEXT("Initial objective hints ARGOS"), GameInstance->GetObjectiveHint().Contains(TEXT("ARGOS")));
+	GameInstance->RecordArgosBriefing();
+	TestTrue(TEXT("Briefing objective hints surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("SURFACE HATCH")));
+	GameInstance->RecordSurfaceDeployment();
+	TestTrue(TEXT("Deployment objective hints scan"), GameInstance->GetObjectiveHint().Contains(TEXT("scan")));
 	GameInstance->ScanCurrentEnvironment();
 	TestTrue(TEXT("Resource objective hints collection"), GameInstance->GetObjectiveHint().Contains(TEXT("collect")));
 	GameInstance->AddInventoryItem(TEXT("silicate_fiber"), 1);

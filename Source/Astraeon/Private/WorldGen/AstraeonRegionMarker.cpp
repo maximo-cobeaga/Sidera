@@ -50,19 +50,24 @@ FText AAstraeonRegionMarker::BuildMarkerLabel(FName ActorId, EAstraeonRegionActo
 		return FText::FromString(TEXT("ARGOS"));
 	}
 
+	if (ActorId == TEXT("itaca_surface_hatch"))
+	{
+		return FText::FromString(TEXT("ESCOTILLA"));
+	}
+
 	if (ActorId == TEXT("signal_source"))
 	{
-		return FText::FromString(TEXT("SIGNAL"));
+		return FText::FromString(TEXT("SEÑAL"));
 	}
 
 	if (ActorId == TEXT("minor_anomaly"))
 	{
-		return FText::FromString(TEXT("ANOMALY"));
+		return FText::FromString(TEXT("ANOMALÍA"));
 	}
 
 	if (Kind == EAstraeonRegionActorKind::Resource)
 	{
-		return FText::FromString(FString::Printf(TEXT("RESOURCE\n%s"), *ActorId.ToString()));
+		return FText::FromString(FString::Printf(TEXT("RECURSO\n%s"), *ActorId.ToString()));
 	}
 
 	return FText::FromName(ActorId);
@@ -73,6 +78,11 @@ FColor AAstraeonRegionMarker::BuildMarkerColor(FName ActorId, EAstraeonRegionAct
 	if (ActorId == TEXT("itaca_argos_console"))
 	{
 		return FColor(80, 180, 255);
+	}
+
+	if (ActorId == TEXT("itaca_surface_hatch"))
+	{
+		return FColor(120, 255, 220);
 	}
 
 	if (ActorId == TEXT("signal_source"))

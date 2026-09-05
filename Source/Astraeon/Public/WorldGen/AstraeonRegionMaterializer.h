@@ -38,4 +38,10 @@ class ASTRAEON_API UAstraeonRegionMaterializer : public UBlueprintFunctionLibrar
 public:
 	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
 	static TArray<FAstraeonRegionActorSpec> BuildActorSpecs(const FAstraeonRegionLayout& Layout);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
+	static TArray<FAstraeonRegionActorSpec> BuildItacaActorSpecs();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
+	static FVector GetSurfaceDeploymentLocationCm();
 };

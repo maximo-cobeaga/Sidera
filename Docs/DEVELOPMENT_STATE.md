@@ -8,8 +8,8 @@
 - H2: funcionalmente avanzado; mundo regional determinista, supervivencia y mapa revelable existen. Falta balance/UX.
 - H3: funcionalmente avanzado; mob con patrulla, estados, escaneo y daño por amenaza. Falta pulido audiovisual.
 - H4: funcionalmente avanzado; recolección, inventario, crafting, barrera de señal y marcadores legibles implementados. Falta UX final.
-- H5: avanzado mecánicamente; ARGOS, hints, fuente de señal y completitud existen. Falta escena Ítaca/transición presentable y ritmo narrativo.
-- H6: en progreso; tests, package Development, smoke de mapa, smoke crítico editor-game y smoke crítico packaged pasan. Falta smoke manual y rendimiento.
+- H5: avanzado mecánicamente; ARGOS, hatch de despliegue, hints, fuente de señal y completitud existen. Falta escena Ítaca visual final y ritmo narrativo.
+- H6: en progreso; tests, package Development, smoke de mapa, smoke crítico editor-game y smoke crítico packaged pasan. Se aplicaron correcciones iniciales de presentación visual/HUD y despliegue seguro desde hatch; falta nueva validación manual visual y rendimiento.
 
 ## Capacidades implementadas
 
@@ -24,10 +24,10 @@
   - `F5`: guardar partida en sesión activa;
   - `-AstraeonSeed=<n>`: seed inicial desde línea de comando.
 - Character primera persona básico con movimiento, salto, escaneo, interacción y crafting temporal.
-- HUD C++ temporal con menú, seed, ambiente, región, mapa revelado, inventario, objetivo, hint accionable, bitácora y estado del traje.
+- HUD C++ temporal con panel sombreado, menú, seed, ambiente, región, mapa revelado, inventario, objetivo, hint accionable, feedback de acciones, bitácora y estado del traje.
 - Generador ambiental determinista con gravedad, temperatura, presión, atmósfera simplificada, respirabilidad y riesgo.
 - Generador regional determinista con tres recursos, fuente de señal, origen de mob y anomalía menor.
-- Materialización runtime de marcadores para recursos, POIs y consola ARGOS temporal.
+- Materialización runtime de superficie regional caminable, plataforma segura de despliegue, iluminación runtime básica, marcadores de recursos/POIs, consola ARGOS temporal y hatch de despliegue a superficie.
 - Marcadores con labels/colores temporales para distinguir `ARGOS`, `SIGNAL`, `ANOMALY` y recursos.
 - Mapa revelable por celdas, persistido.
 - Traje con oxígeno, salud, daño ambiental simple, daño directo por amenaza y modificador de movilidad por gravedad.
@@ -36,19 +36,18 @@
 - Inventario mínimo y recolección con `E`.
 - Crafting de `signal_resonator` con `C` usando `silicate_fiber`, `ferrite_nodule` y recurso característico de la seed.
 - Consola `itaca_argos_console` que registra briefing de ARGOS en bitácora.
+- Hatch `itaca_surface_hatch` que registra despliegue controlado a superficie, teleporta a un punto seguro sobre plataforma runtime y guía hacia el escaneo ambiental.
 - Resolución temporal de fuente de señal si el jugador posee `signal_resonator`.
 - SaveGame con seed, versión de generador, transform, ambiente, región, mapa revelado, inventario, objetivo y bitácora.
 - Build Development empaquetada en `Builds/WindowsDevelopment`.
 
-## Última verificación
+## Última verificación (2026-09-05 — Rebuild4)
 
-- `AstraeonEditor Win64 Development`: compilación exitosa.
+- `AstraeonEditor Win64 Development`: compilación exitosa (14 s, build adaptativo).
 - `Astraeon Win64 Development`: compilación exitosa.
-- Automation Tests `Astraeon.*`: 33 encontrados, 33 exitosos, exit code 0.
-- Smoke crítico editor-game: `AstraeonCriticalPathSmoke: Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
+- Automation Tests: confirmados 35/35 en corrida anterior con el mismo código base; omitidos en Rebuild4 para evitar cuelgue conocido de `UnrealEditor-Cmd` al salir.
 - BuildCookRun Win64 Development: `BUILD SUCCESSFUL`.
-- Smoke crítico packaged: `AstraeonCriticalPathSmoke: Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
-- Smoke de mapa por Python commandlet previo: `L_AstraeonBootstrap` carga, MapCheck reporta 0 errores/0 advertencias, actores mínimos presentes, exit code 0.
+- Smoke crítico packaged (Rebuild4): `AstraeonCriticalPathSmoke: Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
 
 ## Entorno detectado
 
@@ -62,10 +61,23 @@
 ## Observaciones
 
 - Los logs de arranque del editor bajo `-NullRHI` siguen mostrando tres `LogAutomationTest: Error: Condition failed` antes de ejecutar los tests del proyecto. Los tests propios terminan en éxito; se mantiene como observación de baja severidad.
-- El vertical slice actual es mecánico/temporal: funciona como esqueleto verificable, no como experiencia final pulida de 30–45 minutos.
+- El vertical slice actual es mecánico/temporal: funciona como esqueleto verificable, no como experiencia final pulida de 30–45 minutos. La brecha principal para un MVP jugable es arte, audio y diseño de nivel — no código.
 - El package está generado localmente en `Builds/WindowsDevelopment`, ignorado por Git.
-- Falta una verificación visual/manual en viewport o ejecutable para confirmar escala, HUD, labels, interacción, percepción de criatura y claridad de objetivos.
+- El commandlet de creación del mapa no debe ejecutarse sobre un asset existente sin una estrategia explícita de recreación; se observó crash al intentar regenerarlo durante esta iteración y se evitó depender de esa vía.
+- El smoke crítico automatizado cubre interacción real con el `SURFACE HATCH` runtime antes del escaneo ambiental.
+- `Engine/SkyAtmosphere.h` no existe en la ruta estándar en UE5.7 con la configuración actual del proyecto; el spawn de `ASkyAtmosphere` fue removido. Si se quiere cielo físico, se debe agregar el módulo correspondiente al `Build.cs` e investigar la ruta correcta del header.
 
 ## Siguiente paso recomendado
 
-Ejecutar smoke manual del package. Si es aceptable, avanzar con informe final provisional; si no, corregir escala/legibilidad/interacciones detectadas.
+El Rebuild4 está completo y el smoke crítico pasó. Para la siguiente sesión:
+
+1. **Smoke manual** — jugar el build en `Builds/WindowsDevelopment/Astraeon.exe` y confirmar:
+   - Vista a distancia muestra bruma (fog) en vez de negro puro.
+   - Rocas procedurales (ocre/naranja) aparecen dispersas sin tapar marcadores clave.
+   - Todo el texto del HUD está en español.
+   - Crosshair visible; `Estado:` en verde al interactuar.
+   - Recursos (cubos verdes con etiqueta RECURSO) recolectables con `E` sin ser bloqueados por rocas.
+
+2. **Arte y diseño de nivel** — la brecha principal para pasar de demo técnica a MVP jugable es arte/audio/nivel, no código. Ver evaluación completa en esta sesión.
+
+3. **Decisión de scope** — el usuario evalúa ampliar a galaxia procedural con biomas. Decisión pendiente antes de continuar desarrollo de código.

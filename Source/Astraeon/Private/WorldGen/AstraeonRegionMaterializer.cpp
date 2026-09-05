@@ -4,6 +4,34 @@ namespace AstraeonRegionMaterializer
 {
 	constexpr float MetersToCentimeters = 100.0f;
 	constexpr float MarkerHeightCm = 60.0f;
+	const FVector SurfaceDeploymentLocationCm(0.0f, 1200.0f, 150.0f);
+}
+
+FVector UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm()
+{
+	return AstraeonRegionMaterializer::SurfaceDeploymentLocationCm;
+}
+
+TArray<FAstraeonRegionActorSpec> UAstraeonRegionMaterializer::BuildItacaActorSpecs()
+{
+	TArray<FAstraeonRegionActorSpec> Specs;
+	Specs.Reserve(2);
+
+	FAstraeonRegionActorSpec ArgosConsole;
+	ArgosConsole.ActorId = TEXT("itaca_argos_console");
+	ArgosConsole.Kind = EAstraeonRegionActorKind::PointOfInterest;
+	ArgosConsole.LocationCm = FVector(250.0f, -140.0f, 80.0f);
+	ArgosConsole.Scale = FVector(0.6f, 0.6f, 1.2f);
+	Specs.Add(ArgosConsole);
+
+	FAstraeonRegionActorSpec SurfaceHatch;
+	SurfaceHatch.ActorId = TEXT("itaca_surface_hatch");
+	SurfaceHatch.Kind = EAstraeonRegionActorKind::PointOfInterest;
+	SurfaceHatch.LocationCm = FVector(620.0f, 0.0f, 80.0f);
+	SurfaceHatch.Scale = FVector(1.2f, 0.5f, 0.35f);
+	Specs.Add(SurfaceHatch);
+
+	return Specs;
 }
 
 TArray<FAstraeonRegionActorSpec> UAstraeonRegionMaterializer::BuildActorSpecs(const FAstraeonRegionLayout& Layout)
