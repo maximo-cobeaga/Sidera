@@ -8,9 +8,16 @@
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Survival/AstraeonSuitComponent.h"
 #include "WorldGen/AstraeonRegionMarker.h"
 #include "WorldGen/AstraeonRegionMaterializer.h"
+
+namespace AstraeonPlayerCharacterInteraction
+{
+	constexpr float InteractionTraceRangeCm = 3500.0f;
+	constexpr float ProximityInteractionRadiusCm = 180.0f;
+}
 
 namespace AstraeonPlayerCharacterRescue
 {
@@ -145,54 +152,101 @@ void AAstraeonPlayerCharacter::Interact()
 		return;
 	}
 
-	FHitResult HitResult;
-	const FVector TraceStart = FirstPersonCamera ? FirstPersonCamera->GetComponentLocation() : GetActorLocation();
-	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 3500.0f;
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(AstraeonInteract), false, this);
-	const bool bHit = GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
-
-	bool bCollected = false;
-	bool bResolvedSignal = false;
 	bool bSignalSourceAttempted = false;
-	bool bArgosBriefingRead = false;
-	bool bSurfaceDeployed = false;
-	FName CollectedId;
-	if (bHit)
+	bool bInteractionSucceeded = false;
+	if (AAstraeonRegionMarker* Marker = FindFocusedRegionMarker())
 	{
-		if (AAstraeonRegionMarker* Marker = Cast<AAstraeonRegionMarker>(HitResult.GetActor()))
-		{
-			if (Marker->GetMarkerKind() == EAstraeonRegionActorKind::Resource)
-			{
-				CollectedId = Marker->GetMarkerId();
-				bCollected = AstraeonGameInstance->AddInventoryItem(CollectedId, 1);
-				if (bCollected)
-				{
-					Marker->Destroy();
-				}
-			}
-			else if (Marker->GetMarkerId() == TEXT("signal_source"))
-			{
-				bSignalSourceAttempted = true;
-				bResolvedSignal = AstraeonGameInstance->TryResolveSignalSource();
-			}
-			else if (Marker->GetMarkerId() == TEXT("itaca_argos_console"))
-			{
-				AstraeonGameInstance->RecordArgosBriefing();
-				bArgosBriefingRead = true;
-			}
-			else if (Marker->GetMarkerId() == TEXT("itaca_surface_hatch"))
-			{
-				bSurfaceDeployed = DeployToSurface(*AstraeonGameInstance);
-			}
-		}
+		bInteractionSucceeded = InteractWithRegionMarker(*Marker, *AstraeonGameInstance, bSignalSourceAttempted);
+	}
+	else if (AAstraeonRegionMarker* NearbyMarker = FindNearestRegionMarkerInReach(AstraeonPlayerCharacterInteraction::ProximityInteractionRadiusCm))
+	{
+		// Manual play should not require pixel-perfect aim at temporary cube markers.
+		// The direct trace remains the preferred interaction, while this proximity
+		// fallback makes mandatory MVP interactions reliable when the player is close.
+		bInteractionSucceeded = InteractWithRegionMarker(*NearbyMarker, *AstraeonGameInstance, bSignalSourceAttempted);
 	}
 
-	if (!(bCollected || bResolvedSignal || bArgosBriefingRead || bSurfaceDeployed))
+	if (!bInteractionSucceeded)
 	{
 		AstraeonGameInstance->SetLastFeedbackMessage(bSignalSourceAttempted
 			? TEXT("La fuente de señal requiere signal_resonator. Recoge recursos y fábrícalo con C.")
 			: TEXT("Sin consola ARGOS, escotilla, recurso recolectable ni fuente de señal al alcance."));
 	}
+}
+
+AAstraeonRegionMarker* AAstraeonPlayerCharacter::FindFocusedRegionMarker() const
+{
+	FHitResult HitResult;
+	const FVector TraceStart = FirstPersonCamera ? FirstPersonCamera->GetComponentLocation() : GetActorLocation();
+	const FVector TraceEnd = TraceStart + GetControlRotation().Vector() * AstraeonPlayerCharacterInteraction::InteractionTraceRangeCm;
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(AstraeonInteract), false, this);
+	const bool bHit = GetWorld() && GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams);
+	return bHit ? Cast<AAstraeonRegionMarker>(HitResult.GetActor()) : nullptr;
+}
+
+AAstraeonRegionMarker* AAstraeonPlayerCharacter::FindNearestRegionMarkerInReach(float RadiusCm) const
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	TArray<AActor*> MarkerActors;
+	UGameplayStatics::GetAllActorsOfClass(World, AAstraeonRegionMarker::StaticClass(), MarkerActors);
+
+	AAstraeonRegionMarker* BestMarker = nullptr;
+	float BestDistanceSquared = FMath::Square(RadiusCm);
+	for (AActor* MarkerActor : MarkerActors)
+	{
+		AAstraeonRegionMarker* Marker = Cast<AAstraeonRegionMarker>(MarkerActor);
+		if (!Marker || Marker->IsActorBeingDestroyed())
+		{
+			continue;
+		}
+
+		const float DistanceSquared = FVector::DistSquared(GetActorLocation(), Marker->GetActorLocation());
+		if (DistanceSquared <= BestDistanceSquared)
+		{
+			BestDistanceSquared = DistanceSquared;
+			BestMarker = Marker;
+		}
+	}
+
+	return BestMarker;
+}
+
+bool AAstraeonPlayerCharacter::InteractWithRegionMarker(AAstraeonRegionMarker& Marker, UAstraeonGameInstance& AstraeonGameInstance, bool& bOutSignalSourceAttempted)
+{
+	if (Marker.GetMarkerKind() == EAstraeonRegionActorKind::Resource)
+	{
+		const FName CollectedId = Marker.GetMarkerId();
+		const bool bCollected = AstraeonGameInstance.AddInventoryItem(CollectedId, 1);
+		if (bCollected)
+		{
+			Marker.Destroy();
+		}
+		return bCollected;
+	}
+
+	if (Marker.GetMarkerId() == TEXT("signal_source"))
+	{
+		bOutSignalSourceAttempted = true;
+		return AstraeonGameInstance.TryResolveSignalSource();
+	}
+
+	if (Marker.GetMarkerId() == TEXT("itaca_argos_console"))
+	{
+		AstraeonGameInstance.RecordArgosBriefing();
+		return true;
+	}
+
+	if (Marker.GetMarkerId() == TEXT("itaca_surface_hatch"))
+	{
+		return DeployToSurface(AstraeonGameInstance);
+	}
+
+	return false;
 }
 
 bool AAstraeonPlayerCharacter::DeployToSurface(UAstraeonGameInstance& AstraeonGameInstance)

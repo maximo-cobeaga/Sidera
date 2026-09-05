@@ -1,5 +1,35 @@
 # Problemas conocidos — ASTRAEON
 
+## Pendiente de verificación manual
+
+### Interacción (`E`) sobre ESCOTILLA/recursos — fix automatizado, falta smoke real
+
+- **Síntoma original**: presionar `E` apuntando a la ESCOTILLA podía mostrar "Sin consola ARGOS, escotilla, recurso recolectable ni fuente de señal al alcance."; el usuario también reportó que un recurso escaneado no se recolectaba con `E`.
+- **Diagnóstico**: el line trace de interacción era demasiado estricto para marcadores temporales pequeños. La ESCOTILLA mide sólo ~50×35 cm de frente y requería apuntar con precisión al centro del cubo.
+- **Fix aplicado (2026-09-05 Rebuild5)**: `AAstraeonPlayerCharacter::Interact()` mantiene el trace directo, pero si no encuentra un `AAstraeonRegionMarker` usa fallback por proximidad de 180 cm y selecciona el marcador más cercano. El smoke crítico ahora reproduce la falla manual apuntando horizontalmente por encima de la ESCOTILLA y aun así pasa.
+- **Evidencia automática**: editor-game y packaged smoke reportan `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
+- **Acción pendiente**: smoke manual del ejecutable sin `-nullrhi` para confirmar sensación real de uso: acercarse a ESCOTILLA/recurso y presionar `E` sin apuntado perfecto.
+
+### Vista mayormente negra al alejarse del punto de despliegue — fix incluido, falta confirmación visual
+
+- **Síntoma**: caminando unos pocos pasos desde el spawn/hatch, la vista 3D pasaba a verse casi completamente negra; sólo el HUD era legible.
+- **Estado**: fix incluido desde Rebuild4/Rebuild5: `AExponentialHeightFog` runtime, sol con tinte dorado-cálido, rocas procedurales ocre/naranja, colores en suelo y pad.
+- **Impacto**: reducido por automatización, pero la calidad visual final depende de prueba humana.
+- **Acción pendiente**: jugar el build y confirmar que alejarse del pad muestra bruma/terreno en vez de negro plano.
+
+### Save/close/open/continue no validado manualmente
+
+- **Síntoma**: save/load pasa automáticamente, pero todavía falta una prueba humana del flujo `F5` → cerrar ejecutable → abrir → `F9`.
+- **Estado**: pendiente.
+- **Impacto**: medio para H6, porque AC-11 exige continuar correctamente desde una sesión real.
+
+### Rendimiento no medido en sesión jugable
+
+- **Síntoma**: no existe medición interactiva de FPS/frametime del build actual.
+- **Estado**: pendiente.
+- **Impacto**: medio para H6/AC-14.
+- **Acción recomendada**: después del smoke manual, registrar FPS promedio aproximado a 1080p en calidad por defecto y observar stutter/memoria.
+
 ## Baja severidad
 
 ### NullRHI automation bootstrap logs `Condition failed`
@@ -17,30 +47,6 @@
 - **Impacto**: bajo-medio. La evidencia de log confirma inicialización/salida limpia y recorrido crítico exitoso.
 - **Acción recomendada**: crear wrapper de smoke con timeout/proceso explícito o comando interno que escriba un sentinel file.
 
-### Falta smoke visual/manual (caída de mapa: CONFIRMADA RESUELTA)
-
-- **Síntoma original**: al presionar `E` sobre `SURFACE HATCH` en juego real, el jugador caía del mapa.
-- **Estado**: **resuelto y confirmado por el usuario** jugando el build recompilado (2026-09-05): "Ya no me caigo del mapa". El fix (piso único vía `MaterializeCurrentRegion`, reintento de materialización si falta piso, y red de rescate anti-caída general — ver `DECISIONS.md`) quedó validado con una sesión manual real, no sólo con el smoke automatizado.
-- **Impacto**: cerrado. Se mantiene la red de rescate anti-caída como protección general para el resto del juego.
-- **Seguimiento**: dos observaciones nuevas del usuario tras confirmar el fix — ver la entrada siguiente ("Interacción sin mira ni feedback notorio").
-
-### Interacción (`E`) sobre ESCOTILLA no registra — trace no alcanza el cubo
-
-- **Síntoma**: presionar `E` apuntando a la ESCOTILLA muestra "Sin consola ARGOS, escotilla, recurso recolectable ni fuente de señal al alcance." — el feedback correcto de despliegue nunca aparece.
-- **Estado**: confirmado por el usuario en Rebuild4 (2026-09-05). El crosshair y el verde en `Estado:` ya están presentes, pero la interacción no ocurre.
-- **Diagnóstico**: la causa más probable es que el hitbox de la ESCOTILLA es demasiado pequeño para alcanzarlo con un trace de punto único. El cubo está en `FVector(620, 0, 80)` con escala `(1.2, 0.5, 0.35)` → área frontal efectiva de solo **50 cm × 35 cm**. El jugador debe mirar levemente hacia abajo (~7° desde horizontal) y apuntar al centro exacto. Un trace de línea sin sweep no tiene margen de error.
-- **Causa secundaria posible**: el jugador llega a la ESCOTILLA sin haber interactuado primero con ARGOS; aunque el código no lo bloquea, el flujo de hints podría no estar apuntando a la escotilla todavía.
-- **Impacto**: alto — el primer punto de interacción obligatorio del juego no funciona de forma confiable.
-- **Solución recomendada para próxima sesión**: reemplazar el line trace puro en `Interact()` por una detección de proximidad esférica como fallback. Si ningún marker está en el rango del trace directo, hacer un `OverlapMultiByChannel` en radio de 180 cm centrado en el jugador y seleccionar el marker más cercano. Esto hace que acercarse a cualquier marcador y presionar `E` funcione sin necesidad de apuntar con precisión milimétrica. Alternativamente, aumentar el scale Z de la ESCOTILLA a ≥1.0 para que sea un blanco más fácil de alcanzar.
-- **Archivos a modificar**: `AstraeonPlayerCharacter.cpp` → `Interact()`, y/o `AstraeonRegionMaterializer.cpp` → `BuildItacaActorSpecs()` (scale del hatch).
-
-### Vista mayormente negra al alejarse del punto de despliegue (fix incluido en Rebuild4)
-
-- **Síntoma**: caminando unos pocos pasos desde el spawn/hatch, la vista 3D pasa a verse casi completamente negra; sólo el HUD de texto sigue siendo legible.
-- **Estado**: fix incluido en Rebuild4 (2026-09-05), smoke crítico pasó. `AExponentialHeightFog` (densidad 0.04, start 800 cm, falloff 0.15) + sol con tinte dorado-cálido + 12 rocas procedurales ocre/naranja + colores en suelo y pad. Pendiente confirmación visual manual.
-- **Impacto**: reducido — la bruma reemplaza el fondo vacío. Pendiente smoke manual para confirmar.
-- **Acción pendiente**: jugar el build y confirmar que alejarse del pad muestra bruma en vez de negro.
-
 ### Git Bash convierte rutas Unreal `/Game/...`
 
 - **Síntoma**: al ejecutar `UnrealEditor-Cmd.exe ... /Game/Maps/L_AstraeonBootstrap` desde Git Bash, MSYS puede convertir el argumento a `C:/Program Files/Git/Game/Maps/L_AstraeonBootstrap`, causando fallo de carga y crash posterior.
@@ -51,7 +57,7 @@
 ### `CreateBootstrapMap.py` no regenera sobre mapa existente
 
 - **Síntoma**: `EditorLevelLibrary.new_level` falla si `/Game/Maps/L_AstraeonBootstrap` ya existe; en UE 5.7 commandlet derivó en crash al intentar esa recreación.
-- **Estado**: reproducido una vez durante esta iteración; no afecta el flujo runtime ni el smoke de mapa existente.
+- **Estado**: reproducido una vez durante una iteración previa; no afecta el flujo runtime ni el smoke de mapa existente.
 - **Impacto**: bajo. Sólo afecta regenerar el `.umap` desde script.
 - **Acción recomendada**: antes de usar el script como regenerador, reemplazarlo por una rutina explícita y verificada de cargar/limpiar o crear con autorización sobre el asset binario.
 

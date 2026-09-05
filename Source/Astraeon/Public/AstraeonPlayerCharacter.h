@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "AstraeonPlayerCharacter.generated.h"
 
+class AAstraeonRegionMarker;
 class UAstraeonGameInstance;
 class UAstraeonSuitComponent;
 class UCameraComponent;
@@ -44,6 +45,9 @@ private:
 	void StopJump();
 	void ScanEnvironment();
 	void CraftSignalResonator();
+	AAstraeonRegionMarker* FindFocusedRegionMarker() const;
+	AAstraeonRegionMarker* FindNearestRegionMarkerInReach(float RadiusCm) const;
+	bool InteractWithRegionMarker(AAstraeonRegionMarker& Marker, UAstraeonGameInstance& AstraeonGameInstance, bool& bOutSignalSourceAttempted);
 	bool DeployToSurface(UAstraeonGameInstance& AstraeonGameInstance);
 	bool TraceForDeploymentFloor(const FVector& DeploymentLocationCm, FHitResult& OutHit) const;
 	void MarkLocationAsSafeGround(const FVector& LocationCm);

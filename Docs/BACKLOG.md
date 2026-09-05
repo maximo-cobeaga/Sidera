@@ -38,21 +38,27 @@
 - **H6.1 — Package Development**: BuildCookRun Win64 Development exitoso y smoke headless del ejecutable empaquetado.
 - **H6.2 parcial — Recorrido crítico automatizado**: test `Astraeon.Functional.CriticalPath.FullFlow` y flag runtime `-AstraeonAutoSmokeCriticalPath` verifican briefing → interacción real con hatch/despliegue → scan → recursos → crafting → señal → save/load.
 - **H6.3 parcial — Corrección inicial de presentación visual**: iluminación runtime básica, mensajes de feedback en HUD propio y panel/espaciado de HUD para evitar pantalla negra y textos solapados.
-- **H6.4 — Despliegue seguro desde hatch**: el hatch usa un punto de despliegue centralizado, detiene movimiento al teleportar, existe una plataforma runtime dedicada bajo el destino, y el fix anti-caída quedó **confirmado por el usuario en juego real** (ya no se cae del mapa).
-- **H6.5 — Mira y feedback de interacción legible**: se agregó una mira central al HUD y color distintivo para la línea `Feedback:`, como corrección para los reportes de que `E` sobre el hatch/recursos "no parece hacer nada" (diagnóstico: faltaba referencia de apuntado, no una falla de lógica). Pendiente de recompilar/probar.
+- **H6.4 — Despliegue seguro desde hatch**: el hatch usa un punto de despliegue centralizado, detiene movimiento al teleportar, existe una plataforma runtime dedicada bajo el destino, y el fix anti-caída quedó **confirmado por el usuario en juego real**.
+- **H6.5 — Mira y feedback de interacción legible**: se agregó una mira central al HUD y color distintivo para `Estado:`.
+- **H6.6 — Interacción `E` tolerante por proximidad**: si el line trace no impacta un marcador, el personaje busca el `AAstraeonRegionMarker` más cercano en 180 cm. El smoke crítico fue endurecido para apuntar por encima de la ESCOTILLA y aun así confirmar despliegue.
+- **H6.7 — Sincronización de pruebas con UI actual**: las pruebas de HUD/hints/labels ahora validan las cadenas españolas presentes en el build temporal.
 
 ## Próximas tareas desbloqueadas
 
-1. **Smoke manual obligatorio (mira/feedback)**
-   - Recompilar `AstraeonEditor`/`Astraeon` (cambio pendiente en `AstraeonHUD.cpp`, ver `Docs/DECISIONS.md` 2026-09-05 "Confirmación manual del fix anti-caída y mira/feedback de interacción") y volver a empaquetar `Builds/WindowsDevelopment` antes de probar.
+1. **Smoke manual obligatorio del Rebuild5**
    - Ejecutar `Builds/WindowsDevelopment/Astraeon.exe` sin `-nullrhi`.
-   - Usando la mira nueva, apuntar deliberadamente al `SURFACE HATCH` y presionar `E`: confirmar que `Logbook entries` sube y que `Feedback:` (verde) cambia a "Surface deployment recorded...".
-   - Apuntar a un recurso ya escaneado y presionar `E`: confirmar que `Inventory stacks` sube y `Feedback:` muestra "Collected: ...".
-   - La caída del mapa por `SURFACE HATCH` ya está confirmada resuelta por el usuario; no requiere reverificación, sólo mantener la red de rescate como red general.
-   - Nota aparte, no bloqueante: la vista se ve casi negra a pocos pasos del punto de despliegue por falta de atmósfera/niebla (ver `KNOWN_ISSUES.md`); no evaluar como regresión del fix de mira.
+   - `Enter`: nueva partida.
+   - Acercarse a `ARGOS`, presionar `E`, confirmar `Estado:` y bitácora.
+   - Acercarse a `ESCOTILLA`, presionar `E` sin apuntar perfecto, confirmar despliegue a superficie sin caída.
+   - Click izquierdo: escaneo ambiental.
+   - Acercarse a los tres recursos verdes, presionar `E`, confirmar que sube `Inventario`.
+   - `C`: fabricar `signal_resonator`.
+   - Ir a `SEÑAL`, `E`: confirmar final del vertical slice.
+   - `F5`: guardar, cerrar, reabrir, `F9`: continuar con seed/progreso/bitácora.
+   - Confirmar visualmente bruma, rocas, mira central y feedback verde.
 
 2. **H5.2 restante — Ítaca/narrativa mínima**
-   - Reemplazar los marcadores temporales por una estancia visualmente más presentable.
+   - Reemplazar marcadores temporales por una estancia visualmente más presentable.
    - Mejorar lectura/ritmo del briefing ARGOS.
    - Confirmar en smoke manual que la transición hatch → región es clara.
 
@@ -64,3 +70,9 @@
 4. **Pulido futuro no bloqueante**
    - Sonido/partículas/UI de alerta.
    - Arte final y mejor composición visual.
+
+## Congelado fuera del MVP
+
+- Galaxy procedural con biomas/sistemas múltiples.
+- Vuelo libre, múltiples planetas completos, civilizaciones, economía avanzada, colonias o sistemas sociales.
+- Cualquier expansión de visión completa hasta cerrar el vertical slice `La primera señal`.

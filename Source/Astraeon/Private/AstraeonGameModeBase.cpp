@@ -109,10 +109,12 @@ bool AAstraeonGameModeBase::RunSurfaceHatchInteractionSmoke()
 		return false;
 	}
 
-	const FVector HatchLocationCm(620.0f, 0.0f, 80.0f);
-	const FVector InteractionLocationCm(360.0f, 0.0f, 120.0f);
+	// Stand close enough for the proximity fallback, but aim horizontally above the
+	// short temporary hatch cube. This reproduces the manual failure mode where a
+	// point line trace can miss even though the player is clearly beside the hatch.
+	const FVector InteractionLocationCm(500.0f, 0.0f, 120.0f);
 	PlayerCharacter->SetActorLocation(InteractionLocationCm, false, nullptr, ETeleportType::TeleportPhysics);
-	PlayerController->SetControlRotation((HatchLocationCm - (InteractionLocationCm + FVector(-10.0f, 0.0f, 64.0f))).Rotation());
+	PlayerController->SetControlRotation(FRotator::ZeroRotator);
 	PlayerCharacter->Interact();
 
 	const bool bRecordedDeployment = AstraeonGameInstance->GetRuntimeLogbookEntries().ContainsByPredicate([](const FAstraeonLogbookEntry& Entry)

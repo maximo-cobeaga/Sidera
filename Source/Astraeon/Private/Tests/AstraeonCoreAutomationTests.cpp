@@ -140,8 +140,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonRegionMarkerVisualIdentityTest,
 bool FAstraeonRegionMarkerVisualIdentityTest::RunTest(const FString& Parameters)
 {
 	TestTrue(TEXT("ARGOS marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("itaca_argos_console"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("ARGOS")));
-	TestTrue(TEXT("Surface hatch marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("itaca_surface_hatch"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("SURFACE HATCH")));
-	TestTrue(TEXT("Signal source marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("signal_source"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("SIGNAL")));
+	TestTrue(TEXT("Surface hatch marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("itaca_surface_hatch"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("ESCOTILLA")));
+	TestTrue(TEXT("Signal source marker label is readable"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("signal_source"), EAstraeonRegionActorKind::PointOfInterest).ToString().Contains(TEXT("SEÑAL")));
 	TestTrue(TEXT("Resource marker label includes resource id"), AAstraeonRegionMarker::BuildMarkerLabel(TEXT("silicate_fiber"), EAstraeonRegionActorKind::Resource).ToString().Contains(TEXT("silicate_fiber")));
 	TestNotEqual(TEXT("ARGOS and signal colors differ"), AAstraeonRegionMarker::BuildMarkerColor(TEXT("itaca_argos_console"), EAstraeonRegionActorKind::PointOfInterest), AAstraeonRegionMarker::BuildMarkerColor(TEXT("signal_source"), EAstraeonRegionActorKind::PointOfInterest));
 	return true;
@@ -311,13 +311,13 @@ bool FAstraeonItacaSurfaceDeploymentLogbookTest::RunTest(const FString& Paramete
 	GameInstance->StartNewGame(8081);
 	TestTrue(TEXT("Initial hint asks for ARGOS briefing"), GameInstance->GetObjectiveHint().Contains(TEXT("ARGOS")));
 	GameInstance->RecordArgosBriefing();
-	TestTrue(TEXT("Briefing hint points to surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("SURFACE HATCH")));
+	TestTrue(TEXT("Briefing hint points to surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("ESCOTILLA")));
 	TestTrue(TEXT("Surface deployment can be recorded"), GameInstance->RecordSurfaceDeployment());
 	TestTrue(TEXT("Surface deployment entry exists"), GameInstance->GetRuntimeLogbookEntries().ContainsByPredicate([](const FAstraeonLogbookEntry& Entry)
 	{
 		return Entry.EntryId == TEXT("itaca.surface_deployment") && Entry.Certainty == EAstraeonDiscoveryCertainty::Observed;
 	}));
-	TestTrue(TEXT("Deployment hint points to scanner"), GameInstance->GetObjectiveHint().Contains(TEXT("Left Mouse")));
+	TestTrue(TEXT("Deployment hint points to scanner"), GameInstance->GetObjectiveHint().Contains(TEXT("Click Izq")));
 	return true;
 }
 
@@ -503,8 +503,8 @@ bool FAstraeonMenuHUDLinesTest::RunTest(const FString& Parameters)
 	const TArray<FString> Lines = AAstraeonHUD::BuildMenuLines(PlayerController);
 
 	TestTrue(TEXT("Menu is visible by default"), PlayerController->IsMenuVisible());
-	TestTrue(TEXT("Menu shows editable selected seed"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Selected seed: 1002")); }));
-	TestTrue(TEXT("Menu explains start input"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Enter: start new game")); }));
+	TestTrue(TEXT("Menu shows editable selected seed"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Semilla seleccionada: 1002")); }));
+	TestTrue(TEXT("Menu explains start input"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Intro: nueva partida")); }));
 	return true;
 }
 
@@ -519,12 +519,12 @@ bool FAstraeonHUDStatusLinesTest::RunTest(const FString& Parameters)
 
 	const TArray<FString> Lines = AAstraeonHUD::BuildStatusLines(GameInstance);
 	TestTrue(TEXT("HUD exposes enough bootstrap lines"), Lines.Num() >= 7);
-	TestTrue(TEXT("HUD shows seed"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Seed: 5150")); }));
-	TestTrue(TEXT("HUD shows pressure with explicit unit field"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("PressureKPa")); }));
-	TestTrue(TEXT("HUD shows map reveal count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Map revealed cells")); }));
-	TestTrue(TEXT("HUD shows objective hint"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Hint:")); }));
-	TestTrue(TEXT("HUD shows current feedback"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Feedback:")); }));
-	TestTrue(TEXT("HUD shows logbook count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Logbook entries: 1")); }));
+	TestTrue(TEXT("HUD shows seed"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Semilla: 5150")); }));
+	TestTrue(TEXT("HUD shows pressure with explicit unit field"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Presión kPa")); }));
+	TestTrue(TEXT("HUD shows map reveal count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Celdas reveladas")); }));
+	TestTrue(TEXT("HUD shows objective hint"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Pista:")); }));
+	TestTrue(TEXT("HUD shows current feedback"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Estado:")); }));
+	TestTrue(TEXT("HUD shows logbook count"), Lines.ContainsByPredicate([](const FString& Line) { return Line.Contains(TEXT("Bitácora: 1 entradas")); }));
 	return true;
 }
 
@@ -540,19 +540,19 @@ bool FAstraeonObjectiveHintProgressionTest::RunTest(const FString& Parameters)
 
 	TestTrue(TEXT("Initial objective hints ARGOS"), GameInstance->GetObjectiveHint().Contains(TEXT("ARGOS")));
 	GameInstance->RecordArgosBriefing();
-	TestTrue(TEXT("Briefing objective hints surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("SURFACE HATCH")));
+	TestTrue(TEXT("Briefing objective hints surface hatch"), GameInstance->GetObjectiveHint().Contains(TEXT("ESCOTILLA")));
 	GameInstance->RecordSurfaceDeployment();
-	TestTrue(TEXT("Deployment objective hints scan"), GameInstance->GetObjectiveHint().Contains(TEXT("scan")));
+	TestTrue(TEXT("Deployment objective hints scan"), GameInstance->GetObjectiveHint().Contains(TEXT("Escanea")));
 	GameInstance->ScanCurrentEnvironment();
-	TestTrue(TEXT("Resource objective hints collection"), GameInstance->GetObjectiveHint().Contains(TEXT("collect")));
+	TestTrue(TEXT("Resource objective hints collection"), GameInstance->GetObjectiveHint().Contains(TEXT("recoge")));
 	GameInstance->AddInventoryItem(TEXT("silicate_fiber"), 1);
 	GameInstance->AddInventoryItem(TEXT("ferrite_nodule"), 1);
 	GameInstance->AddInventoryItem(SignatureResourceId, 1);
-	TestTrue(TEXT("Crafting objective hints C input"), GameInstance->GetObjectiveHint().Contains(TEXT("Press C")));
+	TestTrue(TEXT("Crafting objective hints C input"), GameInstance->GetObjectiveHint().Contains(TEXT("Presiona C")));
 	GameInstance->CraftSignalResonator();
-	TestTrue(TEXT("Signal objective hints signal marker"), GameInstance->GetObjectiveHint().Contains(TEXT("SIGNAL")));
+	TestTrue(TEXT("Signal objective hints signal marker"), GameInstance->GetObjectiveHint().Contains(TEXT("SEÑAL")));
 	GameInstance->TryResolveSignalSource();
-	TestTrue(TEXT("Completed objective hints save"), GameInstance->GetObjectiveHint().Contains(TEXT("Save")));
+	TestTrue(TEXT("Completed objective hints save"), GameInstance->GetObjectiveHint().Contains(TEXT("Guarda")));
 	return true;
 }
 

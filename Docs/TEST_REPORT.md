@@ -1,5 +1,38 @@
 # Informe de pruebas — ASTRAEON
 
+## 2026-09-05 — Rebuild5: interacción `E` tolerante y pruebas sincronizadas
+
+### Comandos ejecutados
+
+```powershell
+& "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe" AstraeonEditor Win64 Development -Project="C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" -WaitMutex -NoHotReloadFromIDE
+& "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" -unattended -nullrhi -nosplash -nop4 -abslog="C:\Users\MAXIMO\Desktop\Astraeon\Saved\Logs\AstraeonAutomation.log" -ExecCmds="Automation RunTests Astraeon; Quit" -TestExit="Automation Test Queue Empty"
+& "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\DotNET\UnrealBuildTool\UnrealBuildTool.exe" Astraeon Win64 Development -Project="C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" -WaitMutex -NoHotReloadFromIDE
+$env:MSYS_NO_PATHCONV=1; & "C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" /Game/Maps/L_AstraeonBootstrap -game -unattended -nullrhi -nosplash -nop4 -AstraeonAutoSmokeCriticalPath -AstraeonSeed=13579 -abslog="C:\Users\MAXIMO\Desktop\Astraeon\Saved\Logs\AstraeonCriticalPathSmoke.log"
+& "C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive -archivedirectory="C:\Users\MAXIMO\Desktop\Astraeon\Builds\WindowsDevelopment" -utf8output
+$env:MSYS_NO_PATHCONV=1; & "C:\Users\MAXIMO\Desktop\Astraeon\Builds\WindowsDevelopment\Astraeon.exe" /Game/Maps/L_AstraeonBootstrap -AstraeonAutoSmokeCriticalPath -AstraeonSeed=13579 -nullrhi -unattended -nosplash -abslog="C:\Users\MAXIMO\Desktop\Astraeon\Saved\Logs\AstraeonPackagedCriticalPathSmoke.log"
+```
+
+### Resultado
+
+- `AstraeonEditor`: exitoso.
+- Automation Tests `Astraeon.*`: 35 encontrados, 35 exitosos, exit code 0.
+- `Astraeon`: exitoso.
+- Smoke crítico editor-game: `AstraeonCriticalPathSmoke: Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
+- BuildCookRun Win64 Development: `BUILD SUCCESSFUL`.
+- Smoke crítico packaged: `AstraeonCriticalPathSmoke: Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579`.
+
+### Cobertura nueva
+
+- `AAstraeonPlayerCharacter::Interact()` ahora usa fallback por proximidad de 180 cm si el trace directo no detecta un marcador.
+- El smoke crítico de `SURFACE HATCH` ahora apunta horizontalmente por encima del hatch temporal, por lo que valida que el fallback cubra el caso manual de apuntado imperfecto.
+- Las pruebas de HUD/hints/labels se sincronizaron con las cadenas españolas reales del build temporal.
+
+### Observaciones
+
+- La primera corrida de Automation Tests de esta sesión falló por expectativas obsoletas en inglés (`SURFACE HATCH`, `Seed`, `Hint`, etc.) frente a UI actual en español (`ESCOTILLA`, `Semilla`, `Pista`, etc.). Se corrigieron las pruebas; la corrida posterior pasó completa.
+- Falta smoke manual visual sin `-nullrhi`: interacción real con `E`, bruma/rocas, save/close/open/continue y rendimiento.
+
 ## 2026-09-05 — Fix caída al usar SURFACE HATCH
 
 ### Comandos ejecutados

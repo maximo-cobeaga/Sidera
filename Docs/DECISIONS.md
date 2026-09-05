@@ -64,3 +64,18 @@
 
 **Consecuencia:** se agregó una mira simple (cruz de 4 líneas) dibujada siempre en el centro exacto del canvas del HUD (excepto en el menú), y la línea `Feedback:` ahora se dibuja en un verde distintivo en vez de blanco plano, para que un cambio de estado tras `E`/click sea mucho más difícil de pasar por alto. Esto no cambia ninguna lógica de gameplay, sólo agrega una referencia visual de apuntado y mejora la legibilidad del HUD existente — cambio de bajo riesgo, sólo dibujo 2D en `AAstraeonHUD::DrawHUD()`. Queda como deuda técnica separada (no abordada en esta iteración por requerir más que un cambio de código verificable a ciegas) la falta de iluminación ambiental/atmósfera fuera de la plataforma materializada, que hace que alejarse del punto de despliegue muestre una vista mayormente negra; se documenta en `KNOWN_ISSUES.md`. Este cambio **no fue compilado ni probado todavía** en esta iteración — falta recompilar, repackagear y repetir el smoke manual apuntando deliberadamente con la nueva mira al hatch y a un recurso para confirmar que ambas interacciones sí registran (y que el jugador ahora lo nota).
 
+## 2026-09-05 — Interacción MVP por proximidad sobre marcadores
+
+**Decisión:** mantener el line trace directo como interacción preferida, pero agregar un fallback por proximidad de 180 cm que selecciona el marcador runtime más cercano cuando el trace no impacta un `AAstraeonRegionMarker`.
+
+**Motivo:** el jugador podía estar al lado de la ESCOTILLA o de un recurso y aun así fallar `E` porque los marcadores temporales son cubos pequeños y el trace exige apuntado preciso. Para un vertical slice jugable, la interacción obligatoria no debe depender de precisión milimétrica.
+
+**Consecuencia:** `E` ahora funciona de forma tolerante sobre ARGOS, ESCOTILLA, recursos y SEÑAL cuando el jugador está cerca. El smoke crítico automatizado reproduce el fallo manual —apunta horizontalmente por encima del cubo bajo de ESCOTILLA— y pasa gracias al fallback. Sigue siendo una solución temporal hasta reemplazar marcadores por meshes/UX finales.
+
+## 2026-09-05 — Sincronizar pruebas con UI española temporal
+
+**Decisión:** actualizar expectativas de Automation Tests para las cadenas actuales de UI/HUD en español (`Semilla`, `ESCOTILLA`, `SEÑAL`, `Pista`, `Estado`, etc.).
+
+**Motivo:** otro agente había cambiado/normalizado la presentación del HUD a español, pero varias pruebas seguían esperando textos en inglés. Eso rompía la suite sin indicar un bug de gameplay.
+
+**Consecuencia:** las pruebas vuelven a validar el contrato visible real del build actual. Si más adelante se decide localizar formalmente el juego, hay que separar IDs/semántica de tests de las cadenas localizadas.
