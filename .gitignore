@@ -1,0 +1,36 @@
+# Local Pi runtime state
+.atl/
+
+# Unreal generated folders
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+.idea/
+
+# Visual Studio / Rider
+*.VC.db
+*.VC.opendb
+*.sln.DotSettings.user
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+
+# Build artifacts
+Builds/
+*.target
+*.modules
+*.version
+*.pdb
+*.ilk
+*.obj
+*.log
+
+# OS noise
+.DS_Store
+Thumbs.db
