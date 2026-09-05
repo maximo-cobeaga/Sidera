@@ -69,15 +69,10 @@
 
 ## Siguiente paso recomendado
 
-El Rebuild4 está completo y el smoke crítico pasó. Para la siguiente sesión:
+**PRIORIDAD 1 — Bug crítico confirmado por el usuario (2026-09-05)**: la interacción con `E` sobre la ESCOTILLA falla. El trace de línea no alcanza el cubo del hatch (escala Z=0.35 → sólo 35 cm de altura, área frontal ~50×35 cm). Ver diagnóstico completo en `KNOWN_ISSUES.md`. Dos opciones de fix:
+- Rápido: en `AstraeonRegionMaterializer.cpp → BuildItacaActorSpecs()`, cambiar la escala del hatch de `(1.2, 0.5, 0.35)` a `(1.2, 0.5, 1.2)` para que sea un blanco de 120 cm de alto.
+- Robusto: en `AstraeonPlayerCharacter.cpp → Interact()`, agregar un fallback de `OverlapMultiByChannel` con radio 180 cm si el line trace no encuentra un marker. Esto hace que `E` funcione por proximidad, sin apuntar con precisión.
 
-1. **Smoke manual** — jugar el build en `Builds/WindowsDevelopment/Astraeon.exe` y confirmar:
-   - Vista a distancia muestra bruma (fog) en vez de negro puro.
-   - Rocas procedurales (ocre/naranja) aparecen dispersas sin tapar marcadores clave.
-   - Todo el texto del HUD está en español.
-   - Crosshair visible; `Estado:` en verde al interactuar.
-   - Recursos (cubos verdes con etiqueta RECURSO) recolectables con `E` sin ser bloqueados por rocas.
+**PRIORIDAD 2** — Confirmar visualmente en el build que la bruma, rocas y colores del Rebuild4 son visibles en gameplay.
 
-2. **Arte y diseño de nivel** — la brecha principal para pasar de demo técnica a MVP jugable es arte/audio/nivel, no código. Ver evaluación completa en esta sesión.
-
-3. **Decisión de scope** — el usuario evalúa ampliar a galaxia procedural con biomas. Decisión pendiente antes de continuar desarrollo de código.
+**PRIORIDAD 3** — Decisión de scope: galaxy procedural con biomas. Pendiente decisión del usuario antes de continuar código nuevo.

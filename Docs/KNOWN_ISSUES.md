@@ -24,11 +24,15 @@
 - **Impacto**: cerrado. Se mantiene la red de rescate anti-caída como protección general para el resto del juego.
 - **Seguimiento**: dos observaciones nuevas del usuario tras confirmar el fix — ver la entrada siguiente ("Interacción sin mira ni feedback notorio").
 
-### Interacción (`E`) sin mira ni feedback notorio (resuelto en Rebuild4)
+### Interacción (`E`) sobre ESCOTILLA no registra — trace no alcanza el cubo
 
-- **Síntoma original**: presionar `E` no producía efecto visible; recursos difíciles de recolectar.
-- **Estado**: resuelto en Rebuild4. Crosshair central en HUD, línea `Estado:` en verde, rocas de terreno no bloquean `ECC_Visibility`. Pendiente confirmación manual.
-- **Acción pendiente**: jugar el build y confirmar con la mira que `E` sobre ESCOTILLA y RECURSO produce feedback verde visible.
+- **Síntoma**: presionar `E` apuntando a la ESCOTILLA muestra "Sin consola ARGOS, escotilla, recurso recolectable ni fuente de señal al alcance." — el feedback correcto de despliegue nunca aparece.
+- **Estado**: confirmado por el usuario en Rebuild4 (2026-09-05). El crosshair y el verde en `Estado:` ya están presentes, pero la interacción no ocurre.
+- **Diagnóstico**: la causa más probable es que el hitbox de la ESCOTILLA es demasiado pequeño para alcanzarlo con un trace de punto único. El cubo está en `FVector(620, 0, 80)` con escala `(1.2, 0.5, 0.35)` → área frontal efectiva de solo **50 cm × 35 cm**. El jugador debe mirar levemente hacia abajo (~7° desde horizontal) y apuntar al centro exacto. Un trace de línea sin sweep no tiene margen de error.
+- **Causa secundaria posible**: el jugador llega a la ESCOTILLA sin haber interactuado primero con ARGOS; aunque el código no lo bloquea, el flujo de hints podría no estar apuntando a la escotilla todavía.
+- **Impacto**: alto — el primer punto de interacción obligatorio del juego no funciona de forma confiable.
+- **Solución recomendada para próxima sesión**: reemplazar el line trace puro en `Interact()` por una detección de proximidad esférica como fallback. Si ningún marker está en el rango del trace directo, hacer un `OverlapMultiByChannel` en radio de 180 cm centrado en el jugador y seleccionar el marker más cercano. Esto hace que acercarse a cualquier marcador y presionar `E` funcione sin necesidad de apuntar con precisión milimétrica. Alternativamente, aumentar el scale Z de la ESCOTILLA a ≥1.0 para que sea un blanco más fácil de alcanzar.
+- **Archivos a modificar**: `AstraeonPlayerCharacter.cpp` → `Interact()`, y/o `AstraeonRegionMaterializer.cpp` → `BuildItacaActorSpecs()` (scale del hatch).
 
 ### Vista mayormente negra al alejarse del punto de despliegue (fix incluido en Rebuild4)
 
