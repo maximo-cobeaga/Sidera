@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-09-09T19:23:57.143000",
+  "unreal_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "map": "/Game/Maps/TL_00_AssetCalibration",
+  "source_dir": "C:/Users/MAXIMO/Desktop/Astraeon/ContentPipeline\\Generated\\Calibration",
+  "expected": {
+    "cube_cm": 100.0,
+    "mannequin_cm": 183.0,
+    "tolerance_cm": 1.0
+  },
+  "measurements": {
+    "cube_cm": {
+      "x": 100.00000762939453,
+      "y": 100.00000762939453,
+      "z": 100.0
+    },
+    "axes_cm": {
+      "X": {
+        "measured_longest_cm": 50.00000021855686,
+        "expected_cm": 50.0
+      },
+      "Y": {
+        "measured_longest_cm": 34.99999992053366,
+        "expected_cm": 35.0
+      },
+      "Z": {
+        "measured_longest_cm": 20.000000149011612,
+        "expected_cm": 20.0
+      }
+    },
+    "mannequin_cm": {
+      "x": 30.0,
+      "y": 30.000001907348633,
+      "z": 183.0000021457672
+    },
+    "morph_targets": [
+      "Calibration_Widen"
+    ],
+    "animation": {
+      "seconds": 1.0,
+      "frames": 30
+    }
+  },
+  "failures": [],
+  "passed": true
+}

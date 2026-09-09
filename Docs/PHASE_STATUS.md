@@ -18,7 +18,7 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 - [x] El proyecto compila y **las 65 pruebas pasan** (58 previas + 7 nuevas del marco planetario).
 - [x] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
 - [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
-- [ ] La calibración Blender → Unreal respeta escala y ejes.
+- [x] La calibración Blender → Unreal respeta escala y ejes (`evidencia/CALIBRACION_BLENDER_UNREAL.md`).
 - [ ] El personaje se sostiene de pie en el polo opuesto del harness **sin que la cámara ruede**,
       probado a mano.
 
@@ -46,9 +46,9 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 
 ### Calibración Blender
 
-- [ ] Plantilla y preset `UE57_AST_V1` congelados; versiones de Blender, Higgsfield y add-on registradas.
-- [ ] `TL_00_AssetCalibration`: cubo de 1 m, mannequin de 1,83 m y ejes.
-- [ ] Static mesh, skeletal mesh, una Action y un shape key como morph, validados.
+- [x] Preset `UE57_AST_V1` congelado en `Tools/Blender/presets/`, con comprobación automática de deriva. Versiones de Blender y Unreal registradas. *(Higgsfield: sin generación en esta fase; su versión se registra cuando vuelva a usarse.)*
+- [x] `TL_00_AssetCalibration`: cubo de 1 m, mannequin de 1,83 m y tres ejes de largos distintos.
+- [x] Static mesh, skeletal mesh, una Action y un shape key como morph: los cuatro validados con números.
 
 ### Fuera de alcance en esta fase
 

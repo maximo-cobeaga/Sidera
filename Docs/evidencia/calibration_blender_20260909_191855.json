@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-09-09T19:18:55.752809",
+  "blender_version": "5.2.1 LTS",
+  "blender_build_date": "2026-08-25",
+  "python_version": "3.13.13",
+  "os": "Windows-11-10.0.26200-SP0",
+  "preset": {
+    "preset": "UE57_AST_V1",
+    "version": 1,
+    "axis_forward": "-Y",
+    "axis_up": "Z",
+    "global_scale": 1.0,
+    "apply_unit_scale": true,
+    "add_leaf_bones": false,
+    "primary_bone_axis": "Y",
+    "secondary_bone_axis": "X",
+    "animation_simplify_factor": 0.0
+  },
+  "preset_drift_check": {
+    "checked": true,
+    "differences": {}
+  },
+  "scene": {
+    "unit_system": "METRIC",
+    "unit_scale_length": 1.0,
+    "fps": 30,
+    "cube_size_m": 1.0,
+    "mannequin_height_m": 1.83,
+    "axis_lengths_m": {
+      "X": 0.5,
+      "Y": 0.35,
+      "Z": 0.2
+    },
+    "shape_keys": [
+      "Basis",
+      "Calibration_Widen"
+    ],
+    "action": "AN_Calibration_Rise",
+    "action_frames": [
+      1,
+      31
+    ],
+    "action_bone_z": {
+      "rest": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "peak": [
+        0.0,
+        0.0,
+        0.4999999701976776
+      ],
+      "displacement_m": 0.4999999701976767
+    }
+  },
+  "exported": {
+    "SM_Calibration_Cube_1m.fbx": 12316,
+    "SM_Calibration_Axis_X.fbx": 12316,
+    "SM_Calibration_Axis_Y.fbx": 12332,
+    "SM_Calibration_Axis_Z.fbx": 12332,
+    "SK_Calibration_Mannequin.fbx": 19548,
+    "AN_Calibration_Rise.fbx": 28140
+  },
+  "failures": [],
+  "passed": true
+}
