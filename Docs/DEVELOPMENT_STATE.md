@@ -479,3 +479,6 @@ solo nodo. Y sin medir, el patinaje de pies contra la velocidad real de movimien
 
 Estado de pruebas: 58 automáticas, smoke de cámara, recorrido crítico, `BUILD SUCCESSFUL` y
 ambos smokes sobre el ejecutable, todo en verde.
+
+Traspaso de la sesión, con lo que falta probar a mano y el siguiente paso:
+`HANDOFF_SESION_20260909.md`.
