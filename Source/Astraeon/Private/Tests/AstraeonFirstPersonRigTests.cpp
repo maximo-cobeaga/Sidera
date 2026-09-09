@@ -3,6 +3,7 @@
 #include "Misc/AutomationTest.h"
 #include "AstraeonPlayerCharacter.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Animation/Skeleton.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -100,6 +101,28 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		{
 			AddError(TEXT("Body mesh is not skinned to a skeleton"));
 		}
+		// El cuerpo NUNCA debe recibir un clip del esqueleto de las manos: evaluarlo con una
+		// secuencia ajena lo deja sin pose válida y deja de dibujarse. Este fue el defecto
+		// que hacía que el jugador viera "un cuerpo vacío" en tercera persona.
+		// En el mundo transitorio el BeginPlay del personaje no corre, así que se engancha
+		// el cuerpo a mano: es justamente la llamada que arranca su animación.
+		Rig->SetShadowBodyMesh(Body);
+		if (UAnimSingleNodeInstance* BodyAnim = Body->GetSingleNodeInstance())
+		{
+			UAnimationAsset* Playing = BodyAnim->GetAnimationAsset();
+			if (TestNotNull(TEXT("Body receives an animation of its own"), Playing))
+			{
+				TestNotEqual(TEXT("Body is not driven by the hands skeleton"),
+					Playing->GetSkeleton(), Skeleton);
+				TestEqual(TEXT("Body clip belongs to the body skeleton"),
+					Playing->GetSkeleton(), BodyMesh->GetSkeleton());
+			}
+		}
+		else
+		{
+			AddError(TEXT("Body has no animation instance after being wired as shadow body"));
+		}
+
 		// La sombra sólo sirve si la figura mide lo que mide el personaje.
 		const float BodyHeightCm = BodyMesh->GetBounds().BoxExtent.Z * 2.0f;
 		TestTrue(FString::Printf(TEXT("Body reads at human scale (%.1f cm)"), BodyHeightCm),

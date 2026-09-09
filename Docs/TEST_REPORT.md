@@ -722,3 +722,19 @@ Dos fallos intermedios, ambos reales y corregidos:
 2. La aserción del estado inicial se apoyaba en `IsActive`, que en el mundo transitorio de la
    prueba no es determinista. Se cambió por la bandera del personaje; a partir del primer
    toggle sí se comprueba `IsActive`, porque ahí `ApplyCameraView` la fija explícitamente.
+
+### Cuerpo invisible en tercera persona — corregido
+
+| Prueba | Resultado |
+|---|---|
+| `AstraeonEditor Win64 Development` | Succeeded, 24,43 s |
+| `Automation RunTests Astraeon` | **55 éxitos, 0 fallos** |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL` |
+| Smoke sobre el ejecutable | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579` |
+
+Causa: el rig de primera persona empujaba su clip de locomoción al cuerpo de sombra, y desde
+el cambio de malla ese clip vive en otro esqueleto (`SKEL_Humanoid_A`, 57 huesos, contra
+`SK_Astraeon_Player_Skeleton`, 75). Evidencia previa al fix en
+`ContentPipeline/reports/body_render_check.json`: `skeletons_match: false`, con materiales
+correctos y opacos. La prueba ahora exige que el cuerpo reciba una animación propia y que no
+pertenezca al esqueleto de las manos.

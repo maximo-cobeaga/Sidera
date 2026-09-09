@@ -25,6 +25,42 @@ cosas en ambos sentidos. El estado inicial se verifica por la bandera del person
 `IsActive`, porque en el mundo transitorio de la prueba la activación automática de
 componentes no es determinista.
 
+## Cuerpo invisible en tercera persona — CORREGIDO
+
+Con la cámara ya funcionando, el personaje seguía sin verse: "un cuerpo vacío".
+
+La causa la introduje yo al cambiar la malla del cuerpo. `UAstraeonFirstPersonRigComponent`
+empujaba **su** clip de locomoción también al cuerpo de sombra:
+
+```cpp
+ShadowBody->PlayAnimation(Sequence, bLoop);   // Sequence vive en SKEL_Humanoid_A
+```
+
+Mientras el cuerpo era el blockout humano, compartían esqueleto y funcionaba. Al pasar el
+cuerpo al protagonista dejaron de compartirlo —57 huesos contra 75— y evaluar una malla con
+una secuencia de otro esqueleto no produce pose válida: la malla deja de dibujarse.
+
+Verificado antes de tocar nada (`ContentPipeline/reports/body_render_check.json`):
+
+```
+body_skeleton   : SK_Astraeon_Player_Skeleton
+idle_skeleton   : SKEL_Humanoid_A
+skeletons_match : false
+```
+
+Los materiales estaban bien: `M_Player_Character` y `M_Player_Suit`, ambos opacos y
+asignados. No era un problema de material.
+
+**Fix:** el cuerpo tiene ahora su propio juego de clips, cargados de
+`/Game/Astraeon/Characters/Player/Optimized/`, y `BodyCounterpart()` traduce el clip de
+manos al equivalente del cuerpo. Antes de reproducir se comprueba que el esqueleto de la
+secuencia coincida con el de la malla; si no, el cuerpo conserva su pose en vez de quedar
+sin ninguna. `SetShadowBodyMesh()` arranca la animación al engancharse, porque el cuerpo
+puede asignarse después de que el rig ya eligió su clip.
+
+Cubierto por la prueba: el cuerpo recibe una animación propia, y esa animación **no**
+pertenece al esqueleto de las manos.
+
 ## Manos de primera persona — DEFECTO ABIERTO
 
 El jugador no ve sus manos. No es que falten: están fuera del encuadre.

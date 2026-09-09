@@ -1,0 +1,38 @@
+{
+  "mesh_loaded": true,
+  "body_skeleton": "/Game/Astraeon/Characters/Player/Optimized/SK_Astraeon_Player_Skeleton.SK_Astraeon_Player_Skeleton",
+  "material_slots": [
+    {
+      "slot": "MAT_Player_Character",
+      "material": "/Game/Astraeon/Characters/Player/Optimized/M_Player_Character.M_Player_Character",
+      "blend_mode": "<BlendMode.BLEND_OPAQUE: 0>",
+      "two_sided": false
+    },
+    {
+      "slot": "MAT_Player_Suit",
+      "material": "/Game/Astraeon/Characters/Player/Optimized/M_Player_Suit.M_Player_Suit",
+      "blend_mode": "<BlendMode.BLEND_OPAQUE: 0>",
+      "two_sided": false
+    }
+  ],
+  "idle_skeleton": "/Game/Astraeon/Art/Blockouts/Human/SKEL_Humanoid_A.SKEL_Humanoid_A",
+  "skeletons_match": false,
+  "blockout_slots": [
+    {
+      "slot": "M_Human_fabric",
+      "material": null
+    },
+    {
+      "slot": "M_Human_shell",
+      "material": null
+    },
+    {
+      "slot": "M_Human_visor",
+      "material": null
+    },
+    {
+      "slot": "M_Human_accent",
+      "material": null
+    }
+  ]
+}

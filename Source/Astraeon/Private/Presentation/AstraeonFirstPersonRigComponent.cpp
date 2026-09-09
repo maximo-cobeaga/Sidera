@@ -13,6 +13,7 @@ namespace AstraeonFirstPersonRig
 {
 	const TCHAR* HumanPath = TEXT("/Game/Astraeon/Art/Blockouts/Human/");
 	const TCHAR* ToolsPath = TEXT("/Game/Astraeon/Art/Blockouts/Tools/");
+	const TCHAR* PlayerPath = TEXT("/Game/Astraeon/Characters/Player/Optimized/");
 
 	// Por debajo de esto el personaje está efectivamente quieto; por encima del umbral de
 	// carrera usa el clip corto. Los dos valores salen de las velocidades reales del
@@ -106,6 +107,13 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 			ToolMeshesByItemId.Add(FName(Entry.Key), Mesh);
 		}
 	}
+
+	// Clips del protagonista, sobre su propio esqueleto, para el cuerpo de sombra.
+	BodyIdleSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Idle")));
+	BodyWalkSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Walk_F")));
+	BodyRunSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Run_F")));
+	BodyJumpSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop")));
+	BodyLandSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land")));
 
 	IdleSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Idle_Blockout")));
 	WalkSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Walk_Blockout")));
@@ -249,10 +257,52 @@ void UAstraeonFirstPersonRigComponent::PlaySequence(UAnimSequence* Sequence, boo
 
 	ActiveSequence = Sequence;
 	PlayAnimation(Sequence, bLoop);
-	if (ShadowBody)
+
+	// El cuerpo de sombra NO recibe el clip de las manos: vive sobre otro esqueleto y
+	// evaluarlo con una secuencia ajena lo deja sin pose válida, es decir invisible.
+	if (!ShadowBody)
 	{
-		ShadowBody->PlayAnimation(Sequence, bLoop);
+		return;
 	}
+	UAnimSequence* BodySequence = BodyCounterpart(Sequence);
+	if (!BodySequence)
+	{
+		return;
+	}
+	const USkeletalMesh* BodyMesh = ShadowBody->GetSkeletalMeshAsset();
+	if (BodyMesh && BodyMesh->GetSkeleton() == BodySequence->GetSkeleton())
+	{
+		ShadowBody->PlayAnimation(BodySequence, bLoop);
+	}
+}
+
+void UAstraeonFirstPersonRigComponent::SetShadowBodyMesh(USkeletalMeshComponent* BodyMesh)
+{
+	ShadowBody = BodyMesh;
+	// El cuerpo se asigna desde el BeginPlay del personaje, que puede correr después del de
+	// este componente. Sin este arranque quedaría en pose de referencia hasta el primer
+	// cambio de locomoción.
+	UAnimSequence* BodySequence = BodyCounterpart(ActiveSequence ? ActiveSequence : IdleSequence);
+	if (!ShadowBody || !BodySequence)
+	{
+		return;
+	}
+	const USkeletalMesh* Mesh = ShadowBody->GetSkeletalMeshAsset();
+	if (Mesh && Mesh->GetSkeleton() == BodySequence->GetSkeleton())
+	{
+		ShadowBody->PlayAnimation(BodySequence, true);
+	}
+}
+
+UAnimSequence* UAstraeonFirstPersonRigComponent::BodyCounterpart(UAnimSequence* HandSequence) const
+{
+	if (HandSequence == IdleSequence) return BodyIdleSequence;
+	if (HandSequence == WalkSequence) return BodyWalkSequence;
+	if (HandSequence == RunSequence) return BodyRunSequence;
+	if (HandSequence == JumpSequence) return BodyJumpSequence;
+	if (HandSequence == LandSequence) return BodyLandSequence;
+	// Los gestos son de manos: el cuerpo mantiene su locomoción en lugar de congelarse.
+	return nullptr;
 }
 
 void UAstraeonFirstPersonRigComponent::RefreshHeldTool()
