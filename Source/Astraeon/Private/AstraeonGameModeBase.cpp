@@ -4,6 +4,7 @@
 #include "AstraeonHUD.h"
 #include "AstraeonPlayerCharacter.h"
 #include "AstraeonPlayerController.h"
+#include "Planet/Gravity/AstraeonPlanetGravityHarness.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/LightComponent.h"
 #include "Components/SkyLightComponent.h"
@@ -53,10 +54,18 @@ void AAstraeonGameModeBase::BeginPlay()
 		GEngine->Exec(GetWorld(), TEXT("DisableAllScreenMessages"), *GLog);
 	}
 
-	TArray<AActor*> Interiors;
-	UGameplayStatics::GetAllActorsOfClass(this, AAstraeonItacaInterior::StaticClass(), Interiors);
-	if (Interiors.IsEmpty()) GetWorld()->SpawnActor<AAstraeonItacaInterior>();
-	EnsureRuntimeLighting();
+	// Un mapa con harness planetario es un banco de pruebas de gravedad, no el mundo del juego:
+	// la estancia de Ítaca nacería en el origen, que ahí es el centro de la esfera. La Ítaca
+	// sobre superficie esférica llega en la Fase 3.
+	const bool bPlanetaryTestLevel = AAstraeonPlanetGravityHarness::FindActiveHarness(GetWorld()) != nullptr;
+
+	if (!bPlanetaryTestLevel)
+	{
+		TArray<AActor*> Interiors;
+		UGameplayStatics::GetAllActorsOfClass(this, AAstraeonItacaInterior::StaticClass(), Interiors);
+		if (Interiors.IsEmpty()) GetWorld()->SpawnActor<AAstraeonItacaInterior>();
+		EnsureRuntimeLighting();
+	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokeRegionArt")))
 	{
 		GetWorld()->SpawnActor<AAstraeonRegionArtSmoke>();
@@ -274,6 +283,16 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 	const UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	if (!World || !AstraeonGameInstance || !AstraeonGameInstance->HasStartedGame())
 	{
+		return;
+	}
+
+	// En un mapa planetario la región plana no es el mundo: se materializaría en el origen, que
+	// es el centro de la esfera, y enterraría al jugador bajo un terreno que no le corresponde.
+	// La región esférica llega en la Fase 3; hasta entonces un mapa con harness no materializa.
+	if (AAstraeonPlanetGravityHarness::FindActiveHarness(World))
+	{
+		UE_LOG(LogTemp, Display,
+			TEXT("Astraeon: mapa planetario detectado; no se materializa la region plana (ADR 0004)."));
 		return;
 	}
 
