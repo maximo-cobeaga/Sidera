@@ -12,6 +12,7 @@ class UAstraeonGameInstance;
 class UAstraeonSuitComponent;
 class UAstraeonFirstPersonRigComponent;
 class UCameraComponent;
+class USpringArmComponent;
 struct FHitResult;
 
 UCLASS()
@@ -23,6 +24,15 @@ public:
 	AAstraeonPlayerCharacter();
 
 	void Interact();
+
+	// Alterna primera/tercera persona. En tercera se muestra el cuerpo al propio jugador y
+	// se ocultan las manos, que están pensadas para verse pegadas a la cámara. Pública para
+	// que la prueba de integración pueda alternar sin simular la tecla.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Camera")
+	void ToggleCameraView();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Camera")
+	bool IsThirdPersonView() const { return bThirdPersonView; }
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
 	bool IsBuildModeActive() const { return bBuildModeActive; }
@@ -48,6 +58,18 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Camera")
 	TObjectPtr<UCameraComponent> FirstPersonCamera;
+
+	// Vista en tercera persona: sirve para ver al protagonista —el traje, la escala, la
+	// silueta— que en primera persona sólo se insinúa por la sombra. El brazo hace prueba
+	// de colisión para no meter la cámara dentro de la geometría.
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Camera")
+	TObjectPtr<USpringArmComponent> ThirdPersonBoom;
+
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Camera")
+	TObjectPtr<UCameraComponent> ThirdPersonCamera;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Camera")
+	bool bThirdPersonView = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Survival")
 	TObjectPtr<UAstraeonSuitComponent> SuitComponent;
@@ -132,6 +154,8 @@ private:
 	// La mesa es una estación física dentro de Ítaca: alejarse de ella la cierra, en vez
 	// de dejar el panel abierto mientras el jugador camina por la superficie.
 	void CloseFabricatorIfOutOfReach();
+
+	void ApplyCameraView();
 
 	void ToggleBuildMode();
 	void CycleStructureType();

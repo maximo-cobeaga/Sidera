@@ -11,6 +11,7 @@
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
@@ -81,6 +82,26 @@ AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(-10.0f, 0.0f, 64.0f));
 	FirstPersonCamera->bUsePawnControlRotation = true;
+
+	// Vista de tercera persona. Arranca desactivada: la cámara activa es la de primera.
+	ThirdPersonBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("ThirdPersonBoom"));
+	ThirdPersonBoom->SetupAttachment(GetCapsuleComponent());
+	ThirdPersonBoom->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
+	ThirdPersonBoom->TargetArmLength = 320.0f;
+	// Desplazado a un lado para que el cuerpo no tape el centro de la pantalla.
+	ThirdPersonBoom->SocketOffset = FVector(0.0f, 55.0f, 20.0f);
+	ThirdPersonBoom->bUsePawnControlRotation = true;
+	// Sin esto la cámara atraviesa paredes y terreno al pegarse a una superficie.
+	ThirdPersonBoom->bDoCollisionTest = true;
+	ThirdPersonBoom->ProbeSize = 12.0f;
+
+	ThirdPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ThirdPersonCamera"));
+	ThirdPersonCamera->SetupAttachment(ThirdPersonBoom, USpringArmComponent::SocketName);
+	ThirdPersonCamera->bUsePawnControlRotation = false;
+	// `SetActive(false)` no alcanza: los componentes se auto-activan al registrarse y la
+	// vista arrancaría en tercera persona.
+	ThirdPersonCamera->bAutoActivate = false;
+	ThirdPersonCamera->SetActive(false);
 
 	SuitComponent = CreateDefaultSubobject<UAstraeonSuitComponent>(TEXT("SuitComponent"));
 
@@ -160,6 +181,7 @@ void AAstraeonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	PlayerInputComponent->BindAction(TEXT("Slot6"), IE_Pressed, this, &AAstraeonPlayerCharacter::SelectSlotSix);
 	PlayerInputComponent->BindAction(TEXT("UseHandItem"), IE_Pressed, this, &AAstraeonPlayerCharacter::UseHandItem);
 	PlayerInputComponent->BindAction(TEXT("CycleProtection"), IE_Pressed, this, &AAstraeonPlayerCharacter::CycleProtectionModule);
+	PlayerInputComponent->BindAction(TEXT("ToggleCameraView"), IE_Pressed, this, &AAstraeonPlayerCharacter::ToggleCameraView);
 	PlayerInputComponent->BindAction(TEXT("ToggleBuildMode"), IE_Pressed, this, &AAstraeonPlayerCharacter::ToggleBuildMode);
 	PlayerInputComponent->BindAction(TEXT("CycleStructure"), IE_Pressed, this, &AAstraeonPlayerCharacter::CycleStructureType);
 	PlayerInputComponent->BindAction(TEXT("RotateStructure"), IE_Pressed, this, &AAstraeonPlayerCharacter::RotateStructure);
@@ -172,6 +194,8 @@ void AAstraeonPlayerCharacter::BeginPlay()
 	// Whatever the level places the character on at spawn (PlayerStart) counts as the
 	// first known-safe ground location for the fall-rescue safety net.
 	MarkLocationAsSafeGround(GetActorLocation());
+
+	ApplyCameraView();
 
 	if (FirstPersonRig)
 	{
@@ -228,6 +252,38 @@ void AAstraeonPlayerCharacter::UpdateHavenAndRecall()
 	{
 		MovementComponent->StopMovementImmediately();
 		MovementComponent->SetMovementMode(MOVE_Walking);
+	}
+}
+
+void AAstraeonPlayerCharacter::ToggleCameraView()
+{
+	bThirdPersonView = !bThirdPersonView;
+	ApplyCameraView();
+	UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: %s"),
+		bThirdPersonView ? TEXT("tercera persona") : TEXT("primera persona"));
+}
+
+void AAstraeonPlayerCharacter::ApplyCameraView()
+{
+	if (FirstPersonCamera)
+	{
+		FirstPersonCamera->SetActive(!bThirdPersonView);
+	}
+	if (ThirdPersonCamera)
+	{
+		ThirdPersonCamera->SetActive(bThirdPersonView);
+	}
+	// En primera persona el cuerpo se oculta al propio jugador para no quedar dentro de la
+	// malla; en tercera es justamente lo que se quiere ver.
+	if (USkeletalMeshComponent* BodyMesh = GetMesh())
+	{
+		BodyMesh->SetOwnerNoSee(bThirdPersonView ? false : true);
+	}
+	// Las manos están pegadas a la cámara de primera persona: en tercera flotarían delante
+	// del encuadre.
+	if (FirstPersonRig)
+	{
+		FirstPersonRig->SetVisibility(!bThirdPersonView, true);
 	}
 }
 

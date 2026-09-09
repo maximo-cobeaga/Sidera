@@ -42,6 +42,43 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 
 	// El cuerpo completo sólo existe para la sombra propia: si el dueño lo viera, el
 	// jugador se encontraría dentro de su propia malla.
+	// La vista de tercera persona existe para poder ver al protagonista, que en primera
+	// sólo se insinúa por la sombra. Al alternar tienen que moverse tres cosas a la vez:
+	// qué cámara está activa, si el dueño ve su propio cuerpo, y si las manos —pegadas a la
+	// cámara de primera— siguen dibujándose.
+	UCameraComponent* FirstPerson = nullptr;
+	UCameraComponent* ThirdPerson = nullptr;
+	for (UActorComponent* Component : Character->GetComponents())
+	{
+		if (UCameraComponent* Camera = Cast<UCameraComponent>(Component))
+		{
+			if (Camera->GetName() == TEXT("FirstPersonCamera")) FirstPerson = Camera;
+			else if (Camera->GetName() == TEXT("ThirdPersonCamera")) ThirdPerson = Camera;
+		}
+	}
+	if (TestNotNull(TEXT("First person camera exists"), FirstPerson)
+		&& TestNotNull(TEXT("Third person camera exists"), ThirdPerson))
+	{
+		// En un mundo transitorio que nunca arranca, la activación automática de los
+		// componentes no es determinista, así que el estado inicial se comprueba por la
+		// bandera del personaje y no por `IsActive`. A partir del primer toggle sí,
+		// porque `ApplyCameraView` llama `SetActive` explícitamente en ambas.
+		TestFalse(TEXT("Starts in first person"), Character->IsThirdPersonView());
+		TestFalse(TEXT("Third person camera does not auto activate"), ThirdPerson->bAutoActivate);
+		Character->ToggleCameraView();
+		TestTrue(TEXT("Toggle flips the view flag"), Character->IsThirdPersonView());
+		TestTrue(TEXT("Toggle activates the third person camera"),
+			ThirdPerson->IsActive() && !FirstPerson->IsActive());
+		TestFalse(TEXT("Third person shows the body to its own player"),
+			Character->GetMesh()->bOwnerNoSee);
+		TestFalse(TEXT("Third person hides the first person hands"), Rig->IsVisible());
+		Character->ToggleCameraView();
+		TestTrue(TEXT("Toggling back returns to first person"),
+			FirstPerson->IsActive() && !ThirdPerson->IsActive());
+		TestTrue(TEXT("First person hides the body again"), Character->GetMesh()->bOwnerNoSee);
+		TestTrue(TEXT("First person shows the hands again"), Rig->IsVisible());
+	}
+
 	USkeletalMeshComponent* Body = Character->GetMesh();
 	if (!TestNotNull(TEXT("Character keeps its body mesh component"), Body)) return false;
 	// El cuerpo de sombra y las manos usan esqueletos distintos a propósito: el

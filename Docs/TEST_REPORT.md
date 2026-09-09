@@ -702,3 +702,23 @@ Detalle en `Docs/PENDIENTE_PROTAGONISTA.md`, P9.
 |---|---|
 | `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL`, 49,92 s; archive en `Builds/WindowsProtagonista` |
 | Smoke sobre el ejecutable | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579` |
+
+## 2026-09-08 — Vista en tercera persona (tecla V)
+
+| Prueba | Resultado |
+|---|---|
+| `AstraeonEditor Win64 Development` | Succeeded |
+| `Automation RunTests Astraeon` | **55 éxitos, 0 fallos**, exit code 0 |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL`, 42 s |
+| Smoke sobre el ejecutable | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579` |
+
+`FirstPersonRigIsWired` cubre ahora el alternado en ambos sentidos: cámara activa,
+`bOwnerNoSee` del cuerpo y visibilidad del rig de manos.
+
+Dos fallos intermedios, ambos reales y corregidos:
+
+1. La partida arrancaba en tercera persona. `SetActive(false)` en el constructor no alcanza
+   porque los componentes se auto-activan al registrarse; hace falta `bAutoActivate = false`.
+2. La aserción del estado inicial se apoyaba en `IsActive`, que en el mundo transitorio de la
+   prueba no es determinista. Se cambió por la bandera del personaje; a partir del primer
+   toggle sí se comprueba `IsActive`, porque ahí `ApplyCameraView` la fija explícitamente.

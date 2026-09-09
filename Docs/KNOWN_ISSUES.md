@@ -402,3 +402,13 @@ Estas limitaciones no se ocultaron mediante un cambio de colisión o de controle
   que falta es diseño de forma.
 - **Impacto**: se ve en cualquier plano del personaje con casco puesto.
 - **Cierre esperado**: rediseño de la cúpula y el visor, acordado como trabajo futuro.
+
+### Manos de primera persona fuera del encuadre
+
+- **Motivo**: `SK_Human_HandsFP_Blockout` mide ±59,1 cm de ancho con su centro a 104,6 cm de
+  altura: son brazos colgando a los costados, no manos sostenidas frente a la cara. Con la
+  cámara a 160 cm quedan 35–77 cm por debajo y hasta 59 cm a cada lado.
+- **Impacto**: el jugador no ve nada de su cuerpo en primera persona.
+- **Cierre esperado**: re-autorizar las poses de brazo del lote humano en Blender. Reencuadrar
+  la malla no sirve: a 30 cm de la cámara, ±59 cm son ~63° fuera de eje por lado.
+- **Paliativo disponible**: tecla **V**, vista en tercera persona.

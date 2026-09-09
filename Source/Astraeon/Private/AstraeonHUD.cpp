@@ -487,7 +487,7 @@ TArray<FString> AAstraeonHUD::BuildStatusLines(const UAstraeonGameInstance* Game
 		: FString::Printf(TEXT("En mano: %s"), *DescribeItem(GameInstance->GetHandItemId())));
 
 	Lines.Add(GameInstance->HasPulseCutter()
-		? TEXT("WASD | Shift correr | Click izq. escanear | Click der. disparar | E interactuar | I inventario | L bitácora | F6 guardar")
-		: TEXT("WASD | Shift correr | Espacio saltar | Click izq. escanear | E interactuar | I inventario | L bitácora | F6 guardar"));
+		? TEXT("WASD | Shift correr | Click izq. escanear | Click der. disparar | E interactuar | V cámara | I inventario | L bitácora | F6 guardar")
+		: TEXT("WASD | Shift correr | Espacio saltar | Click izq. escanear | E interactuar | V cámara | I inventario | L bitácora | F6 guardar"));
 	return Lines;
 }

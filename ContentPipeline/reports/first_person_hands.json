@@ -1,0 +1,74 @@
+{
+  "mesh_loaded": true,
+  "idle_loaded": true,
+  "mesh_bounds_cm": {
+    "origin": [
+      0.0,
+      0.0,
+      104.6
+    ],
+    "extent": [
+      59.1,
+      6.0,
+      21.4
+    ]
+  },
+  "skeleton": "/Game/Astraeon/Art/Blockouts/Human/SKEL_Humanoid_A.SKEL_Humanoid_A",
+  "bone_count": 0,
+  "idle_length_s": 3.0,
+  "pose_bone_count": 57,
+  "bone_positions_component_cm": {
+    "root": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "pelvis": [
+      0.0,
+      0.0,
+      0.9
+    ],
+    "head": [
+      0.0,
+      0.0,
+      1.6
+    ],
+    "hand_l": [
+      0.3,
+      0.0,
+      0.9
+    ],
+    "hand_r": [
+      -0.3,
+      0.0,
+      0.9
+    ]
+  },
+  "vs_camera": {
+    "root": {
+      "lateral_cm": 0.0,
+      "altura_vs_camara_cm": -160.0,
+      "delante_cm": 0.0
+    },
+    "pelvis": {
+      "lateral_cm": 0.0,
+      "altura_vs_camara_cm": -159.1,
+      "delante_cm": 0.0
+    },
+    "head": {
+      "lateral_cm": 0.0,
+      "altura_vs_camara_cm": -158.4,
+      "delante_cm": 0.0
+    },
+    "hand_l": {
+      "lateral_cm": 0.0,
+      "altura_vs_camara_cm": -159.1,
+      "delante_cm": 0.3
+    },
+    "hand_r": {
+      "lateral_cm": 0.0,
+      "altura_vs_camara_cm": -159.1,
+      "delante_cm": -0.3
+    }
+  }
+}
