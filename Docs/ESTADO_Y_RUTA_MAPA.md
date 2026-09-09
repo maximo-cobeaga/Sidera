@@ -1,5 +1,21 @@
 # Estado del proyecto contra el plan del mapa, y ruta al juego objetivo
 
+> **Parcialmente superado por el [ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md), 2026-09-09.**
+>
+> - **§1 a §5 siguen vigentes.** La medición del estado, el contraste fase por fase, el primer
+>   gran hito y —sobre todo— el diagnóstico de las tres deudas y del riesgo de pulido prematuro
+>   son la base sobre la que se decidió la transición.
+> - **§6 Bloque A: cerrado y conserva su valor.** La validación de tránsito sigue siendo el
+>   contrato del terreno; su validador se migra a patches, no se descarta.
+> - **§6 Bloque B: absorbido por la Fase 2.** El estado mutable dejó de ser deuda diferible: la
+>   puerta de la Fase 2 exige que ir y volver regenere el mismo patch, y MV4 dice que las
+>   criaturas muertas reaparecen. Los Data Assets de perfiles, en cambio, se difieren a la Fase 4
+>   a propósito (`PLAN_TRANSICION_EJECUCION.md` §6).
+> - **§6 Bloque C: cancelado.** Los sectores planos dentro de Region A no se construyen; los
+>   reemplaza el quadtree de patches por cara.
+>
+> Ruta vigente: `PLAN_TRANSICION_EJECUCION.md` §4. Fase activa: `PHASE_STATUS.md`.
+
 Fecha: 2026-09-08. Contrasta el estado real del repositorio con
 `ASTRAEON_PLAN_DESARROLLO_MAPA.md` (10 fases). No introduce alcance nuevo: ordena el que ya
 está acordado.

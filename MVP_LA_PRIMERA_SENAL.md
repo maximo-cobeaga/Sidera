@@ -1,8 +1,18 @@
 # MVP — La primera señal
 
-**Versión:** 1.0  
+> **Sincronizado con el [ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md) el 2026-09-09.**
+> Este documento **sigue vigente como alcance jugable**: sus criterios de aceptación son los que
+> hay que cumplir. Lo que cambió es *dónde* se cumplen. Desde el 2026-09-09 este alcance es el
+> destino de la **Fase 3 — La primera señal esférica**, y la región se materializa sobre el
+> núcleo planetario, no sobre un mapa plano. Ver `PLAN_TRANSICION_EJECUCION.md` §4.
+>
+> El único punto derogado es §3.3, "no requiere planeta esférico completo". Está marcado en su
+> sitio. Todo lo demás —bucle, ciencia, escáner, criatura, recursos, crafting, bitácora,
+> guardado y determinismo— se conserva sin cambios.
+
+**Versión:** 1.1  
 **Plataforma:** Windows 11 x64  
-**Motor:** Unreal Engine 5.7  
+**Motor:** Unreal Engine 5.7.4  
 **Duración objetivo:** 30–45 minutos  
 **Propósito:** validar el ciclo `explorar → medir → comprender → actuar → registrar`
 
@@ -57,7 +67,14 @@ No requiere nave pilotable ni interior completo.
 - Spawn de criatura.
 - Condiciones ambientales derivadas de parámetros válidos.
 
-La región puede ser acotada. No requiere planeta esférico completo.
+La región puede ser acotada en **extensión jugable**: no requiere que el planeta esté poblado de
+contenido, ni que toda su superficie tenga detalle.
+
+> ~~No requiere planeta esférico completo.~~ **Derogado por el ADR 0004 (2026-09-09).** La región
+> se materializa sobre un cuerpo esférico real: su posición es una dirección planetaria y una
+> altitud, no una coordenada en un plano. El planeta cerrado y su gravedad radial se construyen
+> **antes** que esta región (Fases 1 y 2), y esta región se reconstruye sobre él en la Fase 3.
+> Lo que sigue fuera de alcance es el *contenido* planetario masivo, no la geometría.
 
 ### 3.4 Ciencia ambiental
 

@@ -14,10 +14,10 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 
 ### Puerta de salida
 
-- [ ] No queda documento rector que prohíba la esfera ni que mande Landscape plano.
+- [x] No queda documento rector que prohíba la esfera ni que mande Landscape plano.
 - [ ] El proyecto compila y las ~43 pruebas sin dependencia geométrica siguen verdes.
 - [ ] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
-- [ ] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
+- [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
 - [ ] La calibración Blender → Unreal respeta escala y ejes.
 - [ ] El personaje se sostiene de pie en el polo opuesto del harness **sin que la cámara ruede**,
       probado a mano.
@@ -29,11 +29,11 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
       §5 límites (la prohibición de la esfera transitable era el bloqueo), §7 cuarentena,
       §8 presupuesto, §9 seeds en workers, §11 identidad planetaria, §15 cierre por fase.
 - [x] `Docs/PHASE_STATUS.md` (este archivo).
-- [ ] `Docs/MVP_LA_PRIMERA_SENAL.md`: la región se materializa sobre el planeta esférico.
-- [ ] `Docs/GAME_DESIGN_MASTER.md`: coordenadas, esfera y gravedad se adelantan.
-- [ ] `Docs/ASTRAEON_PLAN_DESARROLLO_MAPA.md`: cube-sphere y patches pasan a las primeras fases.
-- [ ] `Docs/GUIA_ARTE_PLANETAS_BLENDER.md`: radios de 150 m a 2 km reclasificados como Lab.
-- [ ] `Docs/ESTADO_Y_RUTA_MAPA.md`: Bloque C superado, Bloque B absorbido por la Fase 2.
+- [x] `Docs/MVP_LA_PRIMERA_SENAL.md`: la región se materializa sobre el planeta esférico.
+- [x] `Docs/GAME_DESIGN_MASTER.md`: coordenadas, esfera y gravedad se adelantan.
+- [x] `Docs/ASTRAEON_PLAN_DESARROLLO_MAPA.md`: cube-sphere y patches pasan a las primeras fases.
+- [x] `Docs/GUIA_ARTE_PLANETAS_BLENDER.md`: radios de 150 m a 2 km reclasificados como Lab.
+- [x] `Docs/ESTADO_Y_RUTA_MAPA.md`: Bloque C superado, Bloque B absorbido por la Fase 2.
 
 ### Rama técnica
 

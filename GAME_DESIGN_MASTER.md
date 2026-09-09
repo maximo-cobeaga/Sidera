@@ -2,12 +2,29 @@
 
 ## Documento maestro del juego
 
-**Versión:** 0.2 — inicio de desarrollo  
-**Estado:** visión rectora; el alcance ejecutable inmediato está definido en `MVP_LA_PRIMERA_SENAL.md`  
-**Motor:** Unreal Engine 5.7  
+**Versión:** 0.3 — sincronizado con el ADR 0004  
+**Estado:** visión rectora. El alcance ejecutable inmediato está en `PHASE_STATUS.md`  
+**Motor:** Unreal Engine 5.7.4  
 **Plataforma inicial:** Windows 11  
 **Modo principal:** un jugador, offline  
 **Perspectiva:** primera persona; tercera persona opcional sólo en una fase posterior
+
+> **Sincronizado con el [ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md) el 2026-09-09.**
+> La visión de este documento **no se recorta**: sigue siendo el destino. Lo que cambió es el
+> orden de construcción.
+>
+> Donde este documento sitúa el sistema estelar, los planetas esféricos y el viaje continuo en
+> una fase tardía, el ADR 0004 **adelanta su núcleo técnico** —coordenadas jerárquicas, cuerpo
+> esférico cerrado y gravedad radial— por delante del vertical slice. El razonamiento: no es
+> contenido, es la geometría sobre la que se apoya todo lo demás, y construir sistemas de
+> superficie sobre un plano significa construirlos dos veces.
+>
+> Lo que **sí** permanece tardío es el *contenido*: civilizaciones, ciudades, historia procedural,
+> genética, sucesión y expansión galáctica. La arquitectura debe admitirlos; ninguna fase actual
+> los implementa.
+>
+> Orden vigente: `PLAN_TRANSICION_EJECUCION.md` §4. Esta visión guía contratos; no habilita
+> implementación prematura.
 
 ---
 

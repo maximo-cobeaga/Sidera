@@ -1,8 +1,19 @@
 # Guía de arte — Planetas procedurales (Blender → Unreal)
 
-**Alcance de este documento:** especificación de assets y pipeline de Blender para el sistema de planetas (tamaño variable, terreno destructible/regenerable, biomas combinables por seed). Es preparación de arte, no desbloquea el alcance ampliado de `GAME_DESIGN_MASTER.md` — el MVP `La primera señal` sigue siendo la prioridad de código (`DEVELOPMENT_STATE.md`). Estos assets sirven para Fase 2 ("Mundo vivo") en adelante y para armar los test levels que validan el sistema a medida que se programa.
+> **Sincronizado con el [ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md) el 2026-09-09.**
+> Su **supuesto técnico anticipó la dirección actual**: cube-sphere procedural por caras
+> normalizadas, blending por datos de vértice generados en C++ y no por splat maps de Landscape,
+> y Blender que no modela el planeta final. Todo eso pasó de supuesto a requisito fundacional y
+> se conserva **sin cambios**.
+>
+> Cambiaron dos cosas: los tamaños de referencia se reclasificaron como laboratorio (ver §Tamaños)
+> y la prioridad — este trabajo ya no espera detrás del MVP plano.
 
-**Supuesto técnico asumido** (confirmado con el usuario): terreno = malla *cube-sphere* procedural (`ProceduralMeshComponent`, 6 caras deformadas por altura y normalizadas a esfera), destrucción/regeneración vía Chaos + remesh local, sin plugin de vóxeles de terceros. El blending entre biomas se resuelve en shader por **vertex color / datos por vértice generados en C++**, no por splat maps de Landscape pintados a mano por planeta. Blender no modela el planeta final: produce la malla de referencia, los sets de materiales tileables por bioma y los props.
+**Alcance de este documento:** especificación de assets y pipeline de Blender para el sistema de planetas (tamaño variable, terreno destructible/regenerable, biomas combinables por seed). Es preparación de arte: define qué produce Blender, no cuándo se construye el runtime planetario. Los seis kits de bioma son entregable de la **Fase 4**; las mallas de referencia y los props de escala se usan antes, para armar los test levels que validan el sistema a medida que se programa (`PHASE_STATUS.md`).
+
+**Supuesto técnico asumido** (confirmado con el usuario; **elevado a requisito por el ADR 0004**): terreno = malla *cube-sphere* procedural (`ProceduralMeshComponent`, 6 caras deformadas por altura y normalizadas a esfera), destrucción/regeneración vía Chaos + remesh local, sin plugin de vóxeles de terceros. El blending entre biomas se resuelve en shader por **vertex color / datos por vértice generados en C++**, no por splat maps de Landscape pintados a mano por planeta. Blender no modela el planeta final: produce la malla de referencia, los sets de materiales tileables por bioma y los props.
+
+> Matiz posterior al ADR 0004: `ProceduralMeshComponent` es **experimental** en 5.7.4. Se usa para el prototipo detrás de la abstracción `IPlanetPatchMeshBackend`, y la elección de producción se decide por ADR propio después de medir. Eso no afecta a lo que produce Blender.
 
 **Biomas propuestos** (ajustables, 6 para cubrir variedad visual y de gameplay sin dispersar el trabajo de arte):
 
@@ -31,14 +42,28 @@ El planeta real lo genera C++ en runtime. Blender entrega una **malla de referen
 - UVs: no se unwrapean para textura de superficie (el shader va a usar **triplanar**, ver 1.2). Dejar un UV0 básico por cara (proyección plana) solo para uso de debug/lightmap, no para color.
 - Un archivo FBX por tamaño: `SM_Planet_Ref_Small`, `SM_Planet_Ref_Medium`, `SM_Planet_Ref_Large`, `SM_Planet_Ref_Giant`.
 
-Tamaños de referencia (radio, diseñado para que la curvatura se note caminando — **no** son escalas astronómicas reales):
+> **Reclasificado por el [ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md) el 2026-09-09.**
+> Los cuatro tiers de abajo **dejaron de ser tamaños objetivo** y pasaron a ser **escalas de
+> laboratorio**: sirven para mallas de referencia y para leer curvatura, no para dimensionar un
+> planeta de producción. Un planeta de producción no es una malla de Blender: es un cube-sphere
+> por patches generado en runtime, y su radio es un **dato**, nunca el `Scale` de una malla.
+>
+> Los tiers de ingeniería vigentes están en `PLAN_TRANSICION_EJECUCION.md` §4, Fase 1:
+>
+> | Tier | Radio | Propósito |
+> |---|---:|---|
+> | Lab | 10 km | Depuración rápida |
+> | Target | 500 km | Prueba principal de escala |
+> | Stress | 2500 km | Precisión y cambio de representación |
 
-| Tier | Radio | Diámetro | Uso |
+Tamaños de referencia **de laboratorio** (radio, diseñado para que la curvatura se note caminando — **no** son escalas astronómicas reales ni tamaños de planeta objetivo):
+
+| Tier de laboratorio | Radio | Diámetro | Uso |
 |---|---|---|---|
-| Small (Pequeño) | 150 m | 300 m | Luna/asteroide grande, sesiones cortas |
-| Medium (Mediano) | 400 m | 800 m | Tamaño por defecto de exploración |
+| Small (Pequeño) | 150 m | 300 m | Malla de referencia, lectura de curvatura cerrada |
+| Medium (Mediano) | 400 m | 800 m | Malla de referencia por defecto |
 | Large (Grande) | 900 m | 1800 m | Curvatura sutil, más superficie por bioma |
-| Giant (Gigante) | 2000 m | 4000 m | Curvatura casi imperceptible a pie, para variedad |
+| Giant (Gigante) | 2000 m | 4000 m | Curvatura casi imperceptible a pie |
 
 Construir la malla de referencia directamente a esta escala en metros — no escalar "a ojo" después.
 

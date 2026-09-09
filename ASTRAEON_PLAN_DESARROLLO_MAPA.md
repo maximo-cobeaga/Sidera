@@ -6,6 +6,26 @@
 **Modo:** aventura científica, primera persona, principalmente offline y para un jugador  
 **Documento:** planificación técnica del mapa dinámico, ciudades, civilizaciones y sistema planetario abierto
 
+> **Sincronizado con el [ADR 0004](Docs/ADR/0004-planetas-esfericos-fundacionales.md) el 2026-09-09.**
+> **El orden de fases de este documento quedó invertido en su primer tramo.**
+>
+> Este plan construye la región plana primero y el planeta después. El ADR 0004 lo invirtió: el
+> cube-sphere, los patches y la gravedad radial pasan a las primeras fases, y la región se
+> reconstruye sobre ellos. Su fase 7 (streaming) tampoco se implementa como sectores planos, sino
+> como quadtree de patches por cara.
+>
+> **Qué se conserva de este documento, y es la mayor parte:** las cuatro propiedades
+> fundamentales del §1, la separación entre mundo base por seed y estado mutable, la derivación
+> de seeds por contexto, la generación por causas, los contratos de datos, y todo lo relativo a
+> civilizaciones, ciudades e historia —que siguen siendo posteriores y en el mismo orden relativo.
+>
+> **Qué queda superado:** la secuencia de sus fases 1, 2, 7 y 8 en tanto asumen una superficie
+> plana como punto de partida.
+>
+> El orden vigente está en `Docs/PLAN_TRANSICION_EJECUCION.md` §4 y la fase activa en
+> `Docs/PHASE_STATUS.md`. El contraste fase por fase de este plan contra el repositorio está en
+> `Docs/ESTADO_Y_RUTA_MAPA.md`, cuyo Bloque A sigue vigente y cerrado.
+
 ---
 
 ## 1. Propósito del documento
