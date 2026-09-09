@@ -1,5 +1,31 @@
 # Problemas conocidos — ASTRAEON
 
+## 2026-09-08 — Pendiente: 40 de los 45 clips del cuerpo no se reproducen
+
+Levantado por la auditoría de arte comparando `Content/` con lo cocinado en el paquete.
+
+- **Motivo**: el runtime sólo reproduce cinco clips del protagonista —`Idle`, `Walk_F`,
+  `Run_F`, `Jump_Loop` y `Jump_Land`—. Crouch, las variantes lateral y trasera de caminar y
+  correr, `Scan`, `Interact`, `Pickup`, `UseTool`, los gestos de agarre y todo el juego
+  `OneHand`/`TwoHand` están importados, a escala correcta y **sin enganchar a nada**.
+- **Impacto**: el personaje camina de lado con la animación de caminar de frente, no tiene
+  gesto al escanear, interactuar ni recoger, y agacharse no existe como animación. Se suma a
+  la ficha de calidad de locomoción de más arriba.
+- **Evidencia**: `Docs/AUDITORIA_ARTE.md`; los clips no cocinados son exactamente los que
+  ningún sistema referencia.
+- **Cierre esperado**: una máquina de estados de animación que consuma el set —dirección de
+  movimiento, agachado, gesto por acción— en vez de las cinco llamadas sueltas actuales.
+
+## 2026-09-08 — Duplicado: el import crudo del protagonista
+
+- **Motivo**: `/Game/Astraeon/Characters/Player` conserva el import previo (47 assets,
+  incluidos malla, esqueleto y 45 clips) que quedó superado por
+  `/Game/Astraeon/Characters/Player/Optimized`.
+- **Impacto**: ninguno en juego —no se cocina— pero pesa en el repositorio y confunde al
+  buscar el asset bueno. Su único slot de material apunta a un atlas que ya no existe.
+- **Cierre esperado**: decidir si se conserva como fuente de reimportación o se elimina.
+  Mientras tanto, `AuditArtUsage.py` lo reporta aparte para que no oculte un defecto real.
+
 ## 2026-09-08 — Pendiente: la animación del protagonista se ve rara
 
 Reportado por el propietario tras probar el ejecutable, ya con el personaje visible:

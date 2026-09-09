@@ -1,17 +1,8 @@
 #include "WorldGen/AstraeonTerrainSurfacePrototype.h"
-#include "WorldGen/AstraeonRegionASurface.h"
-#include "WorldGen/AstraeonWorldProfiles.h"
 
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
-
-namespace AstraeonTerrainPrototype
-{
-	// 4 m conserva la lectura de lomas sin llevar el primer prototipo por encima de 30k
-	// vértices para un campo de 640 m. La resolución final se decidirá con mediciones T01.
-	constexpr float SpacingCm = 400.0f;
-}
 
 AAstraeonTerrainSurfacePrototype::AAstraeonTerrainSurfacePrototype()
 {
@@ -32,7 +23,7 @@ AAstraeonTerrainSurfacePrototype::AAstraeonTerrainSurfacePrototype()
 
 float AAstraeonTerrainSurfacePrototype::GetPrototypeSpacingCm()
 {
-	return AstraeonTerrainPrototype::SpacingCm;
+	return AAstraeonTerrainField::GetSurfaceSpacingCm();
 }
 
 void AAstraeonTerrainSurfacePrototype::BuildMeshData(const FAstraeonTerrainSurfaceContext& Context,
@@ -59,9 +50,11 @@ void AAstraeonTerrainSurfacePrototype::BuildMeshData(const FAstraeonTerrainSurfa
 		{
 			const FVector2D PointCm(Context.CenterCm.X - RadiusCm + X * SafeSpacingCm,
 				Context.CenterCm.Y - RadiusCm + Y * SafeSpacingCm);
-			const FAstraeonTerrainSurfaceSample Sample = Context.RegionProfileId == UAstraeonWorldProfiles::GetRegionAProfileId()
-				? FAstraeonRegionASurface::Sample(PointCm)
-				: AAstraeonTerrainField::SampleSurface(Context, PointCm);
+			// Una sola fuente de superficie. La cuenca authored de prueba salía por aquí en
+			// cuanto el contexto traía el id de Region A, así que un campo suelto podía cambiar
+			// el terreno entero sin que nadie lo pidiera. Retirada del runtime según
+			// Docs/PROCEDURAL_TERRAIN_CONTRACT.md.
+			const FAstraeonTerrainSurfaceSample Sample = AAstraeonTerrainField::SampleSurface(Context, PointCm);
 			OutVertices.Add(FVector(PointCm.X, PointCm.Y, Sample.HeightCm));
 			OutNormals.Add(Sample.Normal);
 			OutUVs.Add(FVector2D(static_cast<float>(X) / QuadsPerSide, static_cast<float>(Y) / QuadsPerSide));

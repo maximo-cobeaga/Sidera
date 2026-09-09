@@ -1,5 +1,7 @@
 #include "WorldGen/AstraeonRegionMaterializer.h"
 
+#include "WorldGen/AstraeonWorldProfiles.h"
+
 namespace AstraeonRegionMaterializer
 {
 	constexpr float MetersToCentimeters = 100.0f;
@@ -86,4 +88,56 @@ TArray<FAstraeonRegionActorSpec> UAstraeonRegionMaterializer::BuildActorSpecs(co
 	}
 
 	return Specs;
+}
+
+FAstraeonTerrainSurfaceContext UAstraeonRegionMaterializer::BuildSurfaceContext(int32 TerrainSeed,
+	const FVector& ItacaOriginCm, const FAstraeonRegionLayout& Layout)
+{
+	FAstraeonTerrainSurfaceContext Context;
+	Context.RegionProfileId = Layout.RegionProfileId;
+	Context.WorldSeed = TerrainSeed;
+	// El campo cubre la región, que está fija en el mundo; la nave sólo aporta su huella.
+	Context.CenterCm = UAstraeonWorldProfiles::GetRegionAProfile().LandingZoneMeters * AstraeonRegionMaterializer::MetersToCentimeters;
+	Context.ItacaOriginCm = FVector2D(ItacaOriginCm.X, ItacaOriginCm.Y);
+
+	// Sólo Ítaca y su puerta exigen suelo llano: la estancia es rígida y no puede seguir el
+	// relieve. Todo lo demás se apoya sobre el terreno consultando su altura.
+	const FVector DeploymentCm = GetSurfaceDeploymentLocationCm(ItacaOriginCm);
+	Context.GroundFlatSpotsCm = {
+		FVector2D(ItacaOriginCm.X, ItacaOriginCm.Y),
+		FVector2D(DeploymentCm.X, DeploymentCm.Y)
+	};
+
+	// Ninguna montaña puede nacer sobre un punto jugable ni sobre un tramo de ruta authored.
+	Context.MountainKeepOutCm = Context.GroundFlatSpotsCm;
+	for (const FAstraeonRegionActorSpec& Spec : BuildActorSpecs(Layout))
+	{
+		Context.MountainKeepOutCm.Add(FVector2D(Spec.LocationCm.X, Spec.LocationCm.Y));
+	}
+	const FAstraeonRegionProfile RegionProfile = UAstraeonWorldProfiles::GetRegionAProfile();
+	for (const FVector2D& WaypointMeters : RegionProfile.DirectRouteWaypointsMeters)
+	{
+		Context.MountainKeepOutCm.Add(WaypointMeters * AstraeonRegionMaterializer::MetersToCentimeters);
+	}
+	for (const FVector2D& WaypointMeters : RegionProfile.SafeRouteWaypointsMeters)
+	{
+		Context.MountainKeepOutCm.Add(WaypointMeters * AstraeonRegionMaterializer::MetersToCentimeters);
+	}
+
+	Context.ItacaPadHeightCm = AAstraeonTerrainField::GetItacaPadHeightCm(TerrainSeed, ItacaOriginCm.X, ItacaOriginCm.Y);
+	return Context;
+}
+
+TArray<FAstraeonTraversalGoal> UAstraeonRegionMaterializer::BuildTraversalGoals(const FAstraeonRegionLayout& Layout)
+{
+	TArray<FAstraeonTraversalGoal> Goals;
+	Goals.Reserve(Layout.Resources.Num() + Layout.PointsOfInterest.Num());
+	for (const FAstraeonRegionActorSpec& Spec : BuildActorSpecs(Layout))
+	{
+		FAstraeonTraversalGoal Goal;
+		Goal.GoalId = Spec.ActorId;
+		Goal.LocationCm = FVector2D(Spec.LocationCm.X, Spec.LocationCm.Y);
+		Goals.Add(Goal);
+	}
+	return Goals;
 }

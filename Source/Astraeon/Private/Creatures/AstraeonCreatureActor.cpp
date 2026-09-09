@@ -135,14 +135,13 @@ void AAstraeonCreatureActor::Tick(float DeltaSeconds)
 	OneShotSecondsRemaining = FMath::Max(0.0f, OneShotSecondsRemaining - SafeDelta);
 
 	const UAstraeonGameInstance* AstraeonGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UAstraeonGameInstance>() : nullptr;
-	const int32 WorldSeed = AstraeonGameInstance ? AstraeonGameInstance->GetCurrentTerrainSeed() : 0;
 
 	// Un cadáver ya no persigue, ni hiere, ni cambia de estado: sólo se queda donde cayó
 	// hasta que termina su clip.
 	if (IsDead())
 	{
 		FVector RestingLocation = GetActorLocation();
-		RestingLocation.Z = AAstraeonTerrainField::GetGroundHeightCm(WorldSeed, RestingLocation.X, RestingLocation.Y);
+		RestingLocation.Z = AstraeonGameInstance ? AstraeonGameInstance->GetSurfaceHeightCm(FVector2D(RestingLocation.X, RestingLocation.Y)) : RestingLocation.Z;
 		SetActorLocation(RestingLocation);
 		return;
 	}
@@ -192,7 +191,9 @@ void AAstraeonCreatureActor::Tick(float DeltaSeconds)
 	// Se apoya sobre el relieve. El pivote de la malla está en las patas, así que la cota
 	// del terreno es directamente la del actor; el vaivén del cuerpo lo trae la animación,
 	// que antes había que falsear con un seno sobre la posición.
-	NextLocation.Z = AAstraeonTerrainField::GetGroundHeightCm(WorldSeed, NextLocation.X, NextLocation.Y);
+	// Se apoya en la superficie materializada, no en la capa de suelo desnuda: donde hay
+	// montaña permitida, el suelo pelado queda metros por debajo de lo que se ve.
+	NextLocation.Z = AstraeonGameInstance ? AstraeonGameInstance->GetSurfaceHeightCm(FVector2D(NextLocation.X, NextLocation.Y)) : NextLocation.Z;
 	SetActorLocation(NextLocation);
 
 	if (OneShotSecondsRemaining <= 0.0f)

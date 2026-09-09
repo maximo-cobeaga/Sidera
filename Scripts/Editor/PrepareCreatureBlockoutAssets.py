@@ -75,14 +75,25 @@ def assign_materials(mesh, spec, cache):
     """Slot names travel in the FBX from the Blender material names."""
     slots = mesh.get_editor_property('materials')
     names = []
+    rebuilt = []
     for slot in slots:
         name = str(slot.get_editor_property('material_slot_name'))
         key = name.replace('M_Creature_', '').replace('_Plated', '').lower()
         if key not in spec['palette']:
             raise RuntimeError('Unmapped material slot: ' + name)
-        slot.set_editor_property('material_interface', flat_material(name, spec['palette'][key], cache))
+        entry = unreal.SkeletalMaterial()
+        entry.set_editor_property('material_interface', flat_material(name, spec['palette'][key], cache))
+        entry.set_editor_property('material_slot_name', name)
+        rebuilt.append(entry)
         names.append(name)
-    mesh.set_editor_property('materials', slots)
+    # Se construye la lista entera: mutar los structs que devuelve get_editor_property
+    # opera sobre copias, así que la asignación no llegaba al paquete y las mallas se
+    # guardaban con los slots en nulo. Ver Docs/AUDITORIA_ARTE.md.
+    mesh.modify()
+    mesh.set_editor_property('materials', rebuilt)
+    written = list(mesh.get_editor_property('materials'))
+    for index, slot_name in enumerate(names):
+        assert written[index].get_editor_property('material_interface') is not None, 'Slot sin material: ' + slot_name
     return names
 
 

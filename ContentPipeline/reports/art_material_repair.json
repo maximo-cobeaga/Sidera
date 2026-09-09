@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "repaired": [
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Blockout.SK_Creature_UmbraGrazer_Blockout",
+      "slot": 0,
+      "slot_name": "M_Creature_Hide",
+      "material": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide",
+      "written": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide.M_Creature_Hide"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Blockout.SK_Creature_UmbraGrazer_Blockout",
+      "slot": 1,
+      "slot_name": "M_Creature_Plate",
+      "material": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate",
+      "written": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate.M_Creature_Plate"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Plated_Blockout.SK_Creature_UmbraGrazer_Plated_Blockout",
+      "slot": 0,
+      "slot_name": "M_Creature_Hide_Plated",
+      "material": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide_Plated",
+      "written": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide_Plated.M_Creature_Hide_Plated"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Plated_Blockout.SK_Creature_UmbraGrazer_Plated_Blockout",
+      "slot": 1,
+      "slot_name": "M_Creature_Plate_Plated",
+      "material": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate_Plated",
+      "written": "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate_Plated.M_Creature_Plate_Plated"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_Body_Blockout.SK_Human_Body_Blockout",
+      "slot": 0,
+      "slot_name": "M_Human_fabric",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric.M_Human_fabric"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_Body_Blockout.SK_Human_Body_Blockout",
+      "slot": 1,
+      "slot_name": "M_Human_shell",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell.M_Human_shell"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_Body_Blockout.SK_Human_Body_Blockout",
+      "slot": 2,
+      "slot_name": "M_Human_visor",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_visor",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_visor.M_Human_visor"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_Body_Blockout.SK_Human_Body_Blockout",
+      "slot": 3,
+      "slot_name": "M_Human_accent",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_accent",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_accent.M_Human_accent"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_HandsFP_Blockout.SK_Human_HandsFP_Blockout",
+      "slot": 0,
+      "slot_name": "M_Human_fabric",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric.M_Human_fabric"
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_HandsFP_Blockout.SK_Human_HandsFP_Blockout",
+      "slot": 1,
+      "slot_name": "M_Human_shell",
+      "material": "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell",
+      "written": "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell.M_Human_shell"
+    }
+  ],
+  "unresolved": [],
+  "unverified": []
+}

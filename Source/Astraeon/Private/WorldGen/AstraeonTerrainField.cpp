@@ -21,6 +21,10 @@ namespace AstraeonTerrain
 	// paisaje volvía el suelo intransitable, y bajarla para poder caminar dejaba el mundo
 	// plano. Separadas, cada una puede ir a su escala.
 	constexpr float TileSizeCm = 700.0f;
+
+	// Separación de la malla continua. Validar el tránsito a esta misma resolución mide lo
+	// que el jugador pisa: entre dos vértices la malla es un plano, no la curva del ruido.
+	constexpr float SurfaceSpacingCm = 400.0f;
 	constexpr float FieldRadiusCm = 32000.0f;
 	constexpr float MaxWalkableStepCm = 45.0f;
 
@@ -133,6 +137,24 @@ float AAstraeonTerrainField::GetFieldRadiusCm()
 	return AstraeonTerrain::FieldRadiusCm;
 }
 
+float AAstraeonTerrainField::GetSurfaceSpacingCm()
+{
+	return AstraeonTerrain::SurfaceSpacingCm;
+}
+
+float AAstraeonTerrainField::SampleHeightCm(const FAstraeonTerrainSurfaceContext& Context, const FVector2D& PointCm)
+{
+	const FVector2D LocalToItacaCm = PointCm - Context.ItacaOriginCm;
+	if (AAstraeonItacaInterior::IsInsideFootprint(LocalToItacaCm))
+	{
+		return Context.ItacaPadHeightCm;
+	}
+
+	const float GroundHeightCm = GetClearedGroundHeightCm(Context.WorldSeed, PointCm, Context.GroundFlatSpotsCm);
+	const bool bMountainAllowed = !IsWithinAnySpot(PointCm, Context.MountainKeepOutCm, AstraeonTerrain::MountainClearanceCm);
+	return GroundHeightCm + (bMountainAllowed ? GetMountainHeightCm(Context.WorldSeed, PointCm.X, PointCm.Y) : 0.0f);
+}
+
 FAstraeonTerrainSurfaceSample AAstraeonTerrainField::SampleSurface(const FAstraeonTerrainSurfaceContext& Context,
 	const FVector2D& PointCm)
 {
@@ -143,28 +165,14 @@ FAstraeonTerrainSurfaceSample AAstraeonTerrainField::SampleSurface(const FAstrae
 		return Result;
 	}
 
-	auto SampleHeight = [&Context](const FVector2D& SamplePointCm)
-	{
-		const FVector2D LocalToItacaCm = SamplePointCm - Context.CenterCm;
-		if (AAstraeonItacaInterior::IsInsideFootprint(LocalToItacaCm))
-		{
-			return Context.ItacaPadHeightCm;
-		}
-
-		const float GroundHeightCm = GetClearedGroundHeightCm(Context.WorldSeed, SamplePointCm, Context.GroundFlatSpotsCm);
-		const bool bMountainAllowed = !IsWithinAnySpot(SamplePointCm, Context.MountainKeepOutCm,
-			AstraeonTerrain::MountainClearanceCm);
-		return GroundHeightCm + (bMountainAllowed ? GetMountainHeightCm(Context.WorldSeed, SamplePointCm.X, SamplePointCm.Y) : 0.0f);
-	};
-
-	Result.HeightCm = SampleHeight(PointCm);
+	Result.HeightCm = SampleHeightCm(Context, PointCm);
 	// Diferencias centrales sobre la misma función que crea la malla: la normal describe
 	// el terreno final y no la altura base previa a claros o exclusiones.
 	constexpr float NormalSampleOffsetCm = 100.0f;
-	const float Left = SampleHeight(PointCm - FVector2D(NormalSampleOffsetCm, 0.0f));
-	const float Right = SampleHeight(PointCm + FVector2D(NormalSampleOffsetCm, 0.0f));
-	const float Down = SampleHeight(PointCm - FVector2D(0.0f, NormalSampleOffsetCm));
-	const float Up = SampleHeight(PointCm + FVector2D(0.0f, NormalSampleOffsetCm));
+	const float Left = SampleHeightCm(Context, PointCm - FVector2D(NormalSampleOffsetCm, 0.0f));
+	const float Right = SampleHeightCm(Context, PointCm + FVector2D(NormalSampleOffsetCm, 0.0f));
+	const float Down = SampleHeightCm(Context, PointCm - FVector2D(0.0f, NormalSampleOffsetCm));
+	const float Up = SampleHeightCm(Context, PointCm + FVector2D(0.0f, NormalSampleOffsetCm));
 	Result.Normal = FVector(-(Right - Left) / (2.0f * NormalSampleOffsetCm),
 		-(Up - Down) / (2.0f * NormalSampleOffsetCm), 1.0f).GetSafeNormal();
 	Result.bIsValid = true;

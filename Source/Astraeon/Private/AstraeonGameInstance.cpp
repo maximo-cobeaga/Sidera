@@ -7,6 +7,7 @@
 #include "Building/AstraeonBuiltStructure.h"
 #include "Survival/AstraeonSuitComponent.h"
 #include "Environment/AstraeonItacaInterior.h"
+#include "WorldGen/AstraeonRegionMaterializer.h"
 #include "WorldGen/AstraeonTerrainField.h"
 #include "WorldGen/AstraeonWorldGenerator.h"
 #include "WorldGen/AstraeonWorldProfiles.h"
@@ -51,6 +52,10 @@ void UAstraeonGameInstance::StartNewGame(int32 RequestedWorldSeed)
 	// variación, nunca una causa de geografía o de los valores ambientales authored.
 	CurrentEnvironment.WorldSeed = CurrentWorldSeed;
 	CurrentRegionLayout = UAstraeonWorldProfiles::BuildFixedRegionLayout(CurrentWorldSeed);
+	// Nueva expedición: la nave arranca en el origen y el relieve validado de la partida
+	// anterior ya no describe esta región.
+	ItacaOriginCm = FVector::ZeroVector;
+	InvalidateTerrainSurface();
 	RevealedMap = FAstraeonRevealedMap();
 	UAstraeonMapRevealLibrary::RevealRadius(RevealedMap, FVector2D::ZeroVector, 1);
 	Inventory.Reset();
@@ -783,6 +788,8 @@ bool UAstraeonGameInstance::CraftRecipe(FName RecipeId)
 void UAstraeonGameInstance::SetItacaOriginCm(const FVector& OriginCm)
 {
 	ItacaOriginCm = OriginCm;
+	// Aterrizar mueve el centro de la región: claros, exclusiones y salida cambian de sitio.
+	InvalidateTerrainSurface();
 }
 
 bool UAstraeonGameInstance::EquipProtection(EAstraeonProtectionModule Protection)
@@ -962,6 +969,7 @@ bool UAstraeonGameInstance::LoadSavedGame(const FString& SlotName, int32 UserInd
 	RuntimeLogbookEntries = LoadedSave->LogbookEntries;
 	EquippedProtection = LoadedSave->EquippedProtection;
 	ItacaOriginCm = LoadedSave->ItacaOriginCm;
+	InvalidateTerrainSurface();
 	PlacedStructures = LoadedSave->PlacedStructures;
 	HandItemId = LoadedSave->HandItemId;
 	HungerPercent = LoadedSave->HungerPercent;
@@ -1013,9 +1021,68 @@ UAstraeonSaveGame* UAstraeonGameInstance::CreateSaveSnapshot() const
 
 int32 UAstraeonGameInstance::GetCurrentTerrainSeed() const
 {
-	// La seed de contenido deriva el relieve regional. El generador aplica zonas de garantía
-	// antes de materializarlo, por lo que variar la seed nunca puede invalidar Ítaca o rutas.
-	return CurrentWorldSeed;
+	// La seed de contenido deriva el relieve regional, y la validación de tránsito decide
+	// cuál de sus sub-seeds se publica: nadie puede materializar una región que deje un
+	// recurso crítico o la señal detrás de un muro.
+	EnsureTerrainSurface();
+	return CachedSeedResolution.TerrainSeed;
+}
+
+void UAstraeonGameInstance::EnsureTerrainSurface() const
+{
+	if (bTerrainSurfaceReady)
+	{
+		return;
+	}
+
+	// La seed de contenido es la que pide la partida; la de relieve es la que sobrevive a
+	// la validación de tránsito. Coinciden salvo que el relieve pedido dejara un objetivo
+	// crítico detrás de un muro, y entonces gana la que sí se puede recorrer.
+	const FAstraeonTerrainSurfaceContext RequestedContext =
+		UAstraeonRegionMaterializer::BuildSurfaceContext(CurrentWorldSeed, ItacaOriginCm, CurrentRegionLayout);
+	const FVector StartCm = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm(ItacaOriginCm);
+	CachedSeedResolution = FAstraeonTerrainTraversal::ResolveTerrainSeed(RequestedContext,
+		FVector2D(StartCm.X, StartCm.Y), UAstraeonRegionMaterializer::BuildTraversalGoals(CurrentRegionLayout));
+	CachedSurfaceContext = UAstraeonRegionMaterializer::BuildSurfaceContext(
+		CachedSeedResolution.TerrainSeed, ItacaOriginCm, CurrentRegionLayout);
+	bTerrainSurfaceReady = true;
+
+	if (CachedSeedResolution.AttemptsUsed > 1)
+	{
+		TArray<FString> Rejected;
+		for (const FName& GoalId : CachedSeedResolution.RejectedGoals)
+		{
+			Rejected.Add(GoalId.ToString());
+		}
+		UE_LOG(LogTemp, Display,
+			TEXT("AstraeonTerrainSeed: seed pedida %d descartada tras %d intentos; se materializa %d. Inalcanzable con la pedida: %s"),
+			CurrentWorldSeed, CachedSeedResolution.AttemptsUsed, CachedSeedResolution.TerrainSeed,
+			Rejected.Num() > 0 ? *FString::Join(Rejected, TEXT(", ")) : TEXT("(ninguno)"));
+	}
+}
+
+void UAstraeonGameInstance::InvalidateTerrainSurface()
+{
+	// Cambió la seed, el layout o el sitio donde está Ítaca: el relieve válido de antes no
+	// dice nada del de ahora.
+	bTerrainSurfaceReady = false;
+}
+
+const FAstraeonTerrainSurfaceContext& UAstraeonGameInstance::GetSurfaceContext() const
+{
+	EnsureTerrainSurface();
+	return CachedSurfaceContext;
+}
+
+const FAstraeonTerrainSeedResolution& UAstraeonGameInstance::GetTerrainSeedResolution() const
+{
+	EnsureTerrainSurface();
+	return CachedSeedResolution;
+}
+
+float UAstraeonGameInstance::GetSurfaceHeightCm(const FVector2D& PointCm) const
+{
+	return AAstraeonTerrainField::SampleHeightCm(GetSurfaceContext(), PointCm);
 }
 
 void UAstraeonGameInstance::UpsertRuntimeLogbookEntry(const FAstraeonLogbookEntry& Entry)

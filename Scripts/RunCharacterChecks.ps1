@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Audit','Repair','Automation','Visual','VisualFP','Package','PackagedVisual','Critical','PackagedCritical')]
+    [ValidateSet('Audit','ArtUsage','ArtMaterials','Repair','Automation','Visual','VisualFP','Package','PackagedVisual','Critical','PackagedCritical')]
     [string]$Check = 'Automation'
 )
 $ErrorActionPreference = 'Stop'
@@ -10,6 +10,8 @@ $log = Join-Path $repo "Saved\Logs\Character_$Check.log"
 $arguments = @((Join-Path $repo 'Astraeon.uproject'), '-unattended', '-nop4', '-nosplash', "-abslog=$log")
 switch ($Check) {
     'Audit' { $arguments += @('-nullrhi', "-ExecutePythonScript=$repo\Scripts\Editor\AuditCharacterPose.py") }
+    'ArtUsage' { $arguments += @('-nullrhi', "-ExecutePythonScript=$repo\Scripts\Editor\AuditArtUsage.py") }
+    'ArtMaterials' { $arguments += @('-nullrhi', "-ExecutePythonScript=$repo\Scripts\Editor\RepairArtMaterials.py") }
     'Repair' { $arguments += @('-nullrhi', "-ExecutePythonScript=$repo\Scripts\Editor\RepairCharacterPresentation.py") }
     'Automation' { $arguments += @('-nullrhi', '-ExecCmds="Automation RunTests Astraeon"', '-TestExit="Automation Test Queue Empty"') }
     'Package' {
@@ -41,7 +43,7 @@ if ($Check -ne 'Package') {
     if ($content -match 'LogPython: Error:|Result=\{Fail|Fatal error:') { throw "Failure in log: $log" }
     if ($Check -like '*Visual*' -and ([regex]::Matches($content, 'AstraeonCharacterViewSmoke: Passed=true').Count -ne 2)) { throw "Both camera input transitions must pass: $log" }
     if ($Check -like '*Critical' -and $content -notmatch 'Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true') { throw "Critical path did not pass: $log" }
-    if ($Check -eq 'Automation' -and ([regex]::Matches($content, 'Test Completed. Result=\{Success\}').Count -lt 55)) { throw "Automation queue incomplete: $log" }
+    if ($Check -eq 'Automation' -and ([regex]::Matches($content, 'Test Completed. Result=\{Success\}').Count -lt 57)) { throw "Automation queue incomplete: $log" }
 } else {
     if ((Get-Content -Raw -LiteralPath $stdout) -notmatch 'BUILD SUCCESSFUL') { throw "Package did not succeed: $stdout" }
 }

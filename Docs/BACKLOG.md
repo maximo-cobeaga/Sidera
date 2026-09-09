@@ -184,8 +184,9 @@ Este bloque no sustituye la prioridad del fallo manual de ESCOTILLA ni certifica
 ## Próximas tareas desbloqueadas
 
 > Orden vigente contra el plan del mapa: ver `Docs/ESTADO_Y_RUTA_MAPA.md`.
-> Bloque A (cerrar fase 1: terreno procedural coherente + prueba de conectividad) va antes
-> que el pulido de animación y que cualquier trabajo de civilizaciones, ciudades o planetas.
+> **Bloque A cerrado el 2026-09-08**: tránsito garantizado, seed validada antes de
+> publicarse y una sola consulta de altura. Sigue el **Bloque B**: perfiles de mundo a
+> datos, segundo bioma y capa explícita de estado mutable sobre la seed.
 
 1. **Animación del protagonista — calidad de locomoción (reportado por el propietario, 2026-09-08)**
    - Camina raro, salta raro y los brazos se ven mal. El personaje ya es visible y funcional; esto es pulido de animación, no un fallo.

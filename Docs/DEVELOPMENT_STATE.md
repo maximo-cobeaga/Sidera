@@ -418,3 +418,46 @@ Ruta: **A** cerrar la fase 1 con el terreno procedural coherente de
 mover perfiles a datos, añadir un segundo bioma y la capa de estado mutable; **C** celdas
 lógicas, streaming de sectores y segunda región. El arte se mantiene en Q1 y el pulido de
 animación entra como tarea acotada, no como fase.
+
+## 2026-09-08 — Bloque A cerrado: la región garantiza que se puede recorrer
+
+Primer bloque de `ESTADO_Y_RUTA_MAPA.md`. El terreno procedural coherente ya se materializaba;
+lo que faltaba era la garantía que pide el plan del mapa en su §1.3 y
+`PROCEDURAL_TERRAIN_CONTRACT.md`: **nadie comprobaba que la región se pudiera recorrer**.
+
+- `FAstraeonTerrainTraversal` inunda la superficie desde la salida de la escotilla a la
+  resolución de la malla (400 cm) con el límite real del motor —escalón de 45 cm o pendiente
+  de 44,765°— y exige que los cinco recursos, la señal, la anomalía y los dos nidos queden
+  alcanzables a pie.
+- La seed que se materializa es la que **pasa** esa validación: `ResolveTerrainSeed` prueba
+  hasta 8 sub-seeds deterministas y, si ninguna sirviera, la variante segura documentada.
+  Con la seed por defecto 1001 esto ya cambia el resultado: la región que se publicaba dejaba
+  la **anomalía geológica** inalcanzable.
+- Una sola consulta de altura (`GetSurfaceHeightCm`) para marcadores, criaturas, obras y
+  diagnóstico. Las criaturas caminaban sobre la capa de suelo desnuda y se hundían bajo las
+  montañas.
+- El campo de terreno pasa a centrarse en la **región** y no en la nave: antes aterrizar
+  movía el relieve entero bajo un contenido fijo, y las esquinas de la región podían quedar
+  fuera del campo. Aterrizar se limita al interior de la región.
+- La cuenca authored de prueba queda retirada del constructor de malla: un campo del contexto
+  podía cambiar el terreno entero sin que nadie lo pidiera.
+
+Estado de pruebas: 57 automáticas, smoke de cámara, recorrido crítico, `BUILD SUCCESSFUL` y
+ambos smokes sobre el ejecutable, todo en verde.
+
+### Auditoría de arte
+
+`AUDITORIA_ARTE.md`. De 209 assets, el juego cocinaba 106. Defecto real encontrado: **11
+slots de material en nulo** en criatura, cuerpo humano y manos de primera persona —el motor
+dibujaba su material por defecto—. Reparados 10 y verificados releyendo el asset guardado;
+el undécimo pertenece al import crudo del personaje, superado por `Optimized/`.
+
+La causa estaba en los scripts de preparación: mutaban copias de los structs de slot, así
+que la asignación no llegaba al paquete. Corregido en origen y con aserción de verificación.
+
+Lo que existe y el juego no usa, ya decidido: 47 assets del import crudo (duplicado),
+40 de los 45 clips del cuerpo (**el runtime reproduce 5**), los clips de manos superados por
+`AN_HandsFP_*`, el prop de referencia de escala y el mapa de pruebas de arte.
+
+Siguiente: **Bloque B** —perfiles a datos, segundo bioma y capa explícita de estado mutable—
+y, dentro de él o antes, enganchar los clips del cuerpo que hoy no se reproducen.

@@ -15,7 +15,7 @@ es de **datos y estado**.
 | | |
 |---|---|
 | Código | 11.296 líneas C++, 34 headers, 32 `.cpp` |
-| Pruebas | 55 automáticas en verde, smoke del recorrido crítico y packaging verificado |
+| Pruebas | 57 automáticas en verde, smoke del recorrido crítico y packaging verificado |
 | Mundo | 1 planeta, 1 región (500 × 500 m), **1 bioma**, 1 mapa (`L_AstraeonBootstrap`), sin World Partition |
 | Bucle jugable | explorar → medir → decidir protección → recolectar → fabricar → construir → cazar/comer → resolver señal → guardar/cargar. Completo y probado |
 | Arte | personaje, criatura, Ítaca interior/exterior, kit regional y herramientas: todo Q1 propio e integrado |
@@ -28,7 +28,7 @@ es de **datos y estado**.
 | Fase del plan | Estado | Qué falta de verdad |
 |---|---|---|
 | **0 — Contratos y seeds** | Parcial | `UAstraeonWorldGenerator::DeriveSeed(root, contexto)` usa clave versionada + CRC32 y hay `GeneratorVersion`: cumple §2.2 **bien**. Pero los perfiles están *hardcodeados* en `AstraeonWorldProfiles.cpp`, no en datos. El criterio de salida "los datos pueden crearse sin modificar la lógica" **no se cumple** |
-| **1 — Región jugable** | Casi, bloqueada en A03 | Falta la **superficie diseñada** (P0, pendiente desde el 2026-09-06) y las **celdas lógicas** con `RegionId`, bounds y estado de generación. No hay prueba de **conectividad** de la ruta crítica: `Astraeon.WorldGen.Terrain.Relief` valida el escalón caminable, no que exista camino. Los 30–45 min del criterio nunca se midieron |
+| **1 — Región jugable** | Cerrada salvo celdas lógicas | Conectividad **resuelta** el 2026-09-08 (`Astraeon.WorldGen.Terrain.Connectivity`, 7 seeds). Siguen faltando las **celdas lógicas** con `RegionId`, bounds y estado de generación —que son ya trabajo del Bloque C— y medir los 30–45 min del criterio |
 | **2 — Biomas y recursos** | Parcial | Recursos deterministas ✓ y seeds secundarias declaradas ✓ (`FAstraeonSecondaryContentSeeds`). Pero `EAstraeonBiomeId` tiene **un solo valor** y no existe `BiomeProfile` con vegetación, rocas, fauna, densidad y exclusiones |
 | **3 — Civilizaciones** | Sin empezar | Correcto: el plan la sitúa después |
 | **4 — Historia emergente** | Sin empezar | Correcto |
@@ -37,7 +37,7 @@ es de **datos y estado**.
 | **7 — Streaming** | Inexistente | Ni sectores, ni estados `Unloaded → Active`, ni World Partition. `MaterializeCurrentRegion()` **rehace la región entera** al aterrizar |
 | **8 — Sistema planetario** | Sólo el dato | Un `PlanetProfile` fijo. Sin representaciones por distancia ni jerarquía de coordenadas |
 | **9 — Viaje superficie-espacio** | Prototipo | Vuelo atmosférico con techo narrativo de 240 m. Sin la máquina de estados `Docked → … → Landing` |
-| **10 — Validación y calidad** | **Por encima de lo pedido** | 55 tests, determinismo, migración de saves v1→v2, smoke sobre ejecutable, `-AstraeonDiag`. Falta sólo el **presupuesto de rendimiento explícito** (ms/frame, draw calls, memoria) |
+| **10 — Validación y calidad** | **Por encima de lo pedido** | 57 tests, determinismo, migración de saves v1→v2, smoke sobre ejecutable, `-AstraeonDiag`. Falta sólo el **presupuesto de rendimiento explícito** (ms/frame, draw calls, memoria) |
 
 ---
 
@@ -88,10 +88,10 @@ golpe no escala.
 
 ## 5. El riesgo real, hoy
 
-No es alcance excesivo hacia el futuro: es **pulido prematuro del presente**. El arte del
-protagonista consumió las últimas sesiones, y su continuación natural —pulir animaciones—
-consumiría más, mientras **A03 lleva días parada** y el resto del plan de terreno (T01–T06 en
-`PLAN_TERRENO_REGIONAL.md`) depende de ella.
+No era alcance excesivo hacia el futuro: era **pulido prematuro del presente**. El arte del
+protagonista consumió las últimas sesiones mientras la fase 1 seguía sin cerrar. Corregido el
+2026-09-08 con el Bloque A; la lección se conserva porque el mismo riesgo reaparece cada vez
+que hay arte nuevo que pulir y una fase abierta.
 
 El plan dice literalmente que no se debe avanzar de fase sólo porque el código compile. El
 converso también aplica: **no se debe pulir una fase que todavía no cerró.**
@@ -100,15 +100,19 @@ converso también aplica: **no se debe pulir una fase que todavía no cerró.**
 
 ## 6. Ruta recomendada
 
-### Bloque A — cerrar la fase 1 (el desbloqueo)
+### Bloque A — cerrar la fase 1 (el desbloqueo) — **HECHO el 2026-09-08**
 
-Implementar el terreno procedural coherente ya especificado en
-`PROCEDURAL_TERRAIN_CONTRACT.md`: sampler con zonas de garantía, invariantes de pendiente y
-altura libre, malla continua. Añadir la **prueba de conectividad de la ruta crítica** que el
-plan §1.3 exige y que hoy no existe.
+> Cerrado. La validación de tránsito existe, la seed que se publica es la que la pasa, y
+> las alturas del runtime salen de una sola consulta. Detalle en
+> `PROCEDURAL_TERRAIN_CONTRACT.md` §Estado y en `TEST_REPORT.md`. Hallazgo: con la seed por
+> defecto, la región que se publicaba dejaba la anomalía geológica inalcanzable.
 
-*Criterio de salida:* cinco seeds recorren Ítaca → recursos → señal sin bloqueo, verificado
-en el ejecutable empaquetado, y el recorrido cronometrado contra los 30–45 min.
+Terreno procedural coherente con sampler, zonas de garantía e invariantes, más la **prueba
+de conectividad de la ruta crítica** que exige el plan §1.3.
+
+*Criterio de salida:* siete seeds recorren Ítaca → recursos → señal sin bloqueo, verificado
+en el ejecutable empaquetado. **Cumplido.** Queda fuera una sola cosa del criterio original:
+cronometrar el recorrido contra los 30–45 min, que necesita una partida humana.
 
 ### Bloque B — pagar la deuda de datos y estado
 

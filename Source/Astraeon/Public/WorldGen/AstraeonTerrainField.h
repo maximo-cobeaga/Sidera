@@ -13,7 +13,12 @@ struct FAstraeonTerrainSurfaceContext
 {
 	FName RegionProfileId;
 	int32 WorldSeed = 0;
+	// Centro del campo de terreno. Es el de la REGIÓN, no el de la nave: si siguiera a
+	// Ítaca, aterrizar movería el terreno entero bajo un contenido que está fijo en el
+	// mundo, y las esquinas de la región quedarían fuera del campo.
 	FVector2D CenterCm = FVector2D::ZeroVector;
+	// Dónde está la nave. Sólo decide la huella plana de la estancia.
+	FVector2D ItacaOriginCm = FVector2D::ZeroVector;
 	TArray<FVector2D> GroundFlatSpotsCm;
 	TArray<FVector2D> MountainKeepOutCm;
 	float ItacaPadHeightCm = 20.0f;
@@ -66,6 +71,16 @@ public:
 	// Consulta de la superficie que materializará el prototipo continuo. Incluye claros,
 	// exclusiones de montañas y la plataforma bajo Ítaca; no depende de actores del mundo.
 	static FAstraeonTerrainSurfaceSample SampleSurface(const FAstraeonTerrainSurfaceContext& Context, const FVector2D& PointCm);
+
+	// Sólo la altura de esa misma superficie. La validación de tránsito recorre decenas de
+	// miles de puntos y no necesita normal: calcularla costaba cuatro muestras de más por
+	// punto. SampleSurface la usa, así que ambas no pueden divergir.
+	static float SampleHeightCm(const FAstraeonTerrainSurfaceContext& Context, const FVector2D& PointCm);
+
+	// Separación entre vértices de la superficie continua. Es también la resolución a la
+	// que se valida el tránsito: lo que se camina es la malla, no la función.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
+	static float GetSurfaceSpacingCm();
 	static float GetFieldRadiusCm();
 
 	// 0 en el centro de un claro, 1 fuera de su radio, con transición suave.

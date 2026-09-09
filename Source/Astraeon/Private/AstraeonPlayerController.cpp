@@ -13,6 +13,14 @@
 #include "Survival/AstraeonSuitComponent.h"
 #include "WorldGen/AstraeonRegionMaterializer.h"
 #include "WorldGen/AstraeonTerrainField.h"
+#include "WorldGen/AstraeonWorldProfiles.h"
+
+namespace AstraeonPlayerControllerLanding
+{
+	// Margen para el casco: la nave mide 220 cm desde su origen hasta la proa, y posarse
+	// justo en el borde dejaría medio casco fuera del terreno generado.
+	constexpr float RegionMarginCm = 2000.0f;
+}
 
 AAstraeonPlayerController::AAstraeonPlayerController()
 {
@@ -230,7 +238,14 @@ bool AAstraeonPlayerController::RequestShipLanding()
 	// ARGOS, el pilotaje y la escotilla se remateralizan alrededor de la nave posada.
 	// La estancia se posa sobre la meseta que el terreno deja bajo ella, no en Z=0: con
 	// relieve, aterrizar a cota cero la habría enterrado.
-	const FVector ShipLocation = ShipPawn->GetActorLocation();
+	// El campo de terreno cubre la región, no todo el mundo: posar la nave fuera de ella
+	// la dejaría sobre una superficie que no existe. El techo atmosférico ya limita el
+	// vuelo en vertical; esto es el mismo límite en horizontal, y sólo actúa al posarse.
+	const float LandingLimitCm = UAstraeonWorldProfiles::GetRegionAProfile().HalfExtentMeters * 100.0f
+		- AstraeonPlayerControllerLanding::RegionMarginCm;
+	FVector ShipLocation = ShipPawn->GetActorLocation();
+	ShipLocation.X = FMath::Clamp(ShipLocation.X, -LandingLimitCm, LandingLimitCm);
+	ShipLocation.Y = FMath::Clamp(ShipLocation.Y, -LandingLimitCm, LandingLimitCm);
 	const float LandedGroundZ = AAstraeonTerrainField::GetItacaPadHeightCm(
 		AstraeonGameInstance->GetCurrentTerrainSeed(), ShipLocation.X - 220.0f, ShipLocation.Y);
 	// La cubierta se apoya sobre el terreno en vez de quedar a su misma cota. Posarla justo

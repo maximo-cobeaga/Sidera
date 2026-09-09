@@ -48,16 +48,17 @@ No implica abrir sesiones paralelas. Mantener una sola tarea técnica activa has
 | T00 | P0 | Línea base y contrato de superficie | Ingeniería + QA | — | Terminado |
 | A01 | P0 | Datos y layout fijo de Region A | Diseño + Ingeniería | T00 | Terminado |
 | A02 | P0 | Integrar perfiles a sesión, materialización y saves | Ingeniería + QA | A01 | Terminado |
-| A03 | P0 | Superficie diseñada de Region A | Diseño de nivel + Ingeniería | A02 | Pendiente |
-| T01 | P0 | Prototipo de malla continua y decisión técnica | Ingeniería | A03 | Diferido: debe consumir superficie diseñada |
-| T02 | P0 | Integración de alturas, Ítaca y persistencia | Ingeniería | T01 aceptado | Pendiente |
+| A03 | P0 | Superficie diseñada de Region A | Diseño de nivel + Ingeniería | A02 | Reemplazado por el terreno procedural coherente (ver `PROCEDURAL_TERRAIN_CONTRACT.md`) |
+| T01 | P0 | Prototipo de malla continua y decisión técnica | Ingeniería | A03 | Terminado: la malla continua es la superficie del runtime, validada por tránsito |
+| T02 | P0 | Integración de alturas, Ítaca y persistencia | Ingeniería | T01 aceptado | Terminado: una sola consulta (`GetSurfaceHeightCm`) para marcadores, criaturas, obras y diagnóstico |
 | T03 | P0 | Movimiento de criaturas con obstáculos | Gameplay + QA | T02 | Pendiente |
 | T04 | P1 | Dos rutas y composición regional | Diseño de nivel | T02, T03 | Pendiente |
 | T05 | P1 | Materiales y kit de rocas originales | Arte técnico | T04 | Pendiente |
 | T06 | P0 de cierre | Regresión, rendimiento y build | QA + Ingeniería | T00–T05 | Pendiente |
 
-Siguiente tarea al reanudar: **A03**, definir e implementar la superficie diseñada de Region A.
-T01 se retoma sólo al tener esa superficie disponible para medirla.
+Siguiente tarea al reanudar: **T03**, movimiento de criaturas con obstáculos. A03 y T01 se
+cerraron por la vía del terreno procedural coherente, con la validación de tránsito como
+criterio de aceptación.
 
 ### Evidencia T00 — 2026-09-06
 

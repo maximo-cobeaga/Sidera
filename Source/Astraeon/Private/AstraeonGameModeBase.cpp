@@ -362,46 +362,12 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 	// dejar esos puntos llanos: las colinas son el paisaje, no un obstáculo que entierre
 	// una veta o encierre a Ítaca.
 	{
-		const FVector DeploymentXY = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm(ItacaOrigin);
-
-		// Sólo Ítaca y su puerta exigen suelo llano: la estancia es rígida y no puede
-		// seguir el relieve. Todo lo demás se apoya sobre el terreno más abajo.
-		const TArray<FVector2D> GroundFlatSpots = {
-			FVector2D(ItacaOrigin.X, ItacaOrigin.Y),
-			FVector2D(DeploymentXY.X, DeploymentXY.Y)
-		};
-
-		// Ninguna montaña puede nacer sobre un punto jugable.
-		TArray<FVector2D> MountainKeepOut = GroundFlatSpots;
-		MountainKeepOut.Reserve(Specs.Num() + 2);
-		for (const FAstraeonRegionActorSpec& Spec : Specs)
-		{
-			MountainKeepOut.Add(FVector2D(Spec.LocationCm.X, Spec.LocationCm.Y));
-		}
-		for (const FAstraeonPointOfInterest& PointOfInterest : AstraeonGameInstance->GetCurrentRegionLayout().PointsOfInterest)
-		{
-			MountainKeepOut.Add(PointOfInterest.LocationMeters * 100.0f);
-		}
-		// Los ejes authored se convierten en exclusiones de montaña. Con radio de 90 m y
-		// waypoints separados menos de 180 m, cada tramo crítico queda cubierto completo.
-		const FAstraeonRegionProfile RegionProfile = UAstraeonWorldProfiles::GetRegionAProfile();
-		for (const FVector2D& WaypointMeters : RegionProfile.DirectRouteWaypointsMeters)
-		{
-			MountainKeepOut.Add(WaypointMeters * 100.0f);
-		}
-		for (const FVector2D& WaypointMeters : RegionProfile.SafeRouteWaypointsMeters)
-		{
-			MountainKeepOut.Add(WaypointMeters * 100.0f);
-		}
-
+		// El contexto lo construye el materializador: la seed se validó contra exactamente
+		// esta superficie, así que rearmarlo aquí a mano abriría la puerta a validar una
+		// región y materializar otra.
 		FActorSpawnParameters TerrainSpawnParameters;
 		TerrainSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		FAstraeonTerrainSurfaceContext SurfaceContext;
-		SurfaceContext.WorldSeed = AstraeonGameInstance->GetCurrentTerrainSeed();
-		SurfaceContext.CenterCm = FVector2D(ItacaOrigin.X, ItacaOrigin.Y);
-		SurfaceContext.GroundFlatSpotsCm = GroundFlatSpots;
-		SurfaceContext.MountainKeepOutCm = MountainKeepOut;
-		SurfaceContext.ItacaPadHeightCm = AAstraeonTerrainField::GetItacaPadHeightCm(SurfaceContext.WorldSeed, ItacaOrigin.X, ItacaOrigin.Y);
+		const FAstraeonTerrainSurfaceContext& SurfaceContext = AstraeonGameInstance->GetSurfaceContext();
 		AAstraeonTerrainSurfacePrototype* TerrainSurface = World->SpawnActor<AAstraeonTerrainSurfacePrototype>(
 			AAstraeonTerrainSurfacePrototype::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, TerrainSpawnParameters);
 		if (TerrainSurface)
@@ -416,7 +382,6 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 		// Los marcadores de región se posan sobre el relieve. Aplanar el terreno bajo cada
 		// uno producía un borde de acantilado alrededor del claro; consultar la altura y
 		// apoyarlos encima resuelve el mismo problema sin deformar el paisaje.
-		const int32 TerrainSeed = AstraeonGameInstance->GetCurrentTerrainSeed();
 		for (FAstraeonRegionActorSpec& Spec : Specs)
 		{
 			const bool bBelongsToItaca = Spec.ActorId.ToString().StartsWith(TEXT("itaca_"));
@@ -484,7 +449,7 @@ AAstraeonCreatureActor* AAstraeonGameModeBase::SpawnCreatureAtPoint(FName SpawnP
 	const FVector SpawnLocationCm(
 		CreatureXY.X,
 		CreatureXY.Y,
-		70.0f + AAstraeonTerrainField::GetGroundHeightCm(AstraeonGameInstance->GetCurrentTerrainSeed(), CreatureXY.X, CreatureXY.Y));
+		70.0f + AstraeonGameInstance->GetSurfaceHeightCm(CreatureXY));
 
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

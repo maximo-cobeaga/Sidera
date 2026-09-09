@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "WorldGen/AstraeonRegionTypes.h"
+#include "WorldGen/AstraeonTerrainTraversal.h"
 #include "AstraeonRegionMaterializer.generated.h"
 
 UENUM(BlueprintType)
@@ -53,4 +54,13 @@ public:
 	// Ítaca aterriza en otro lado, desplegar debe dejarte junto a la nave y no a un
 	// kilómetro de distancia.
 	static FVector GetSurfaceDeploymentLocationCm(const FVector& ItacaOriginCm = FVector::ZeroVector);
+
+	// Única fuente del contexto de superficie. La materialización y la validación de la
+	// seed tienen que mirar exactamente el mismo terreno: si divergen, se valida una
+	// región y se construye otra. No son UFUNCTION porque el contexto es un struct plano.
+	static FAstraeonTerrainSurfaceContext BuildSurfaceContext(int32 TerrainSeed, const FVector& ItacaOriginCm,
+		const FAstraeonRegionLayout& Layout);
+
+	// Todo lo que el jugador tiene que poder alcanzar a pie desde la escotilla.
+	static TArray<FAstraeonTraversalGoal> BuildTraversalGoals(const FAstraeonRegionLayout& Layout);
 };

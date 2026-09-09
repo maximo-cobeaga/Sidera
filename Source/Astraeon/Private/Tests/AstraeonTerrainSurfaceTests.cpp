@@ -61,9 +61,21 @@ bool FAstraeonTerrainSurfaceContractTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Designed Region A surface contains signal"), Signal.bIsValid);
 	TestTrue(TEXT("Designed signal ridge rises above landing basin"), Signal.HeightCm > Landing.HeightCm);
 	TestTrue(TEXT("Designed corridor remains walkable"), Landing.Normal.Z > 0.95f);
+	// La cuenca authored ya no sale por el constructor de malla: el runtime materializa una
+	// sola superficie, la procedural. Antes bastaba con que el contexto trajera el id de
+	// Region A para cambiar el terreno entero, y eso es exactamente lo que el contrato de
+	// `Docs/PROCEDURAL_TERRAIN_CONTRACT.md` manda retirar del build jugable.
 	MeshContext.RegionProfileId = UAstraeonWorldProfiles::GetRegionAProfileId();
-	AAstraeonTerrainSurfacePrototype::BuildMeshData(MeshContext, 400.0f, Vertices, Triangles, Normals, UVs);
-	TestTrue(TEXT("Prototype consumes designed Region A surface"), Vertices.ContainsByPredicate([](const FVector& Vertex) { return Vertex.Z > 1000.0f; }));
+	TArray<FVector> ProceduralVertices;
+	AAstraeonTerrainSurfacePrototype::BuildMeshData(MeshContext, 400.0f, ProceduralVertices, Triangles, Normals, UVs);
+	TestEqual(TEXT("El id de región ya no cambia la superficie que se materializa"),
+		ProceduralVertices.Num(), Vertices.Num());
+	bool bMatchesProcedural = ProceduralVertices.Num() == Vertices.Num();
+	for (int32 Index = 0; bMatchesProcedural && Index < ProceduralVertices.Num(); ++Index)
+	{
+		bMatchesProcedural = ProceduralVertices[Index].Equals(Vertices[Index]);
+	}
+	TestTrue(TEXT("La malla del runtime es la procedural con o sin id de región"), bMatchesProcedural);
 	return true;
 }
 

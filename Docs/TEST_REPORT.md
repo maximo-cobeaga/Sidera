@@ -764,3 +764,46 @@ El smoke de cámara ya no simula el toggle por código: inyecta la **tecla V rea
 `PlayerController::InputKey` en ambos sentidos y comprueba, un cuarto de segundo después,
 cámara activa, `bOwnerNoSee` del cuerpo, visibilidad del rig de manos y altura de cabeza
 entre 140 y 195 cm. La misma prueba corre sobre el editor y sobre el ejecutable.
+
+## 2026-09-08 — Bloque A: tránsito garantizado y auditoría de arte
+
+| Prueba | Resultado |
+|---|---|
+| `AstraeonEditor Win64 Development` | Succeeded |
+| `Automation RunTests Astraeon` | **57 éxitos, 0 fallos** (dos nuevas: `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls`) |
+| `RunCharacterChecks.ps1 -Check ArtUsage` | 36 mallas auditadas; 0 slots en nulo y 0 materiales por defecto en lo que el juego usa |
+| `RunCharacterChecks.ps1 -Check ArtMaterials` | 10 slots reenganchados, **verificados releyendo el asset ya guardado**, 0 sin resolver |
+| Smoke de cámara en editor | `Passed=true` en ambos sentidos, `HeadHeightCm=163.90` |
+| Recorrido crítico en editor | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true` |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL` |
+| Smoke de cámara y recorrido crítico sobre el **ejecutable** | Ambos en verde |
+
+### Qué cubre `Astraeon.WorldGen.Terrain.Connectivity`
+
+Siete seeds (100, 200, 300, 400, 500, 13579 y 1001). Por cada una: que la seed **publicada**
+deje alcanzables a pie los cinco recursos, la señal, la anomalía y los dos nidos; que no
+recurra a la variante segura; y que resolver dos veces dé el mismo relieve, porque si no,
+cargar una partida devolvería otra región. Además comprueba la variante segura por separado
+y el caso de Ítaca aterrizada lejos del origen.
+
+`Astraeon.WorldGen.Terrain.TraversalDetectsWalls` existe porque una prueba de conectividad
+que aprueba siempre no prueba nada: mete un objetivo fuera de la región y exige que la
+validación falle y lo nombre.
+
+### Hallazgo: la seed por defecto publicaba una región con un objetivo tapado
+
+Con `1001`, la seed pedida deja un objetivo inalcanzable. Antes se materializaba igual.
+Ahora el log de una partida normal registra el descarte y publica una sub-seed válida:
+
+```
+AstraeonTerrainSeed: seed pedida 1001 descartada tras 3 intentos; se materializa -1297777899.
+Inalcanzable con la pedida: minor_geologic_anomaly
+```
+
+### Hallazgo: la reparación de materiales que decía haber funcionado
+
+El primer intento de reenganche reportó "10 reparados" y **no persistió ninguno**: mutar los
+structs que devuelve `get_editor_property('materials')` opera sobre copias. Es la misma
+causa por la que los scripts de preparación creían haber asignado los materiales. Corregido
+en la reparación y en los scripts de origen, y ahora ambos **releen el asset después de
+guardar** antes de declarar éxito.

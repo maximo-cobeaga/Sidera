@@ -11,6 +11,7 @@
 #include "Survival/AstraeonProtectionTypes.h"
 #include "WorldGen/AstraeonEnvironmentTypes.h"
 #include "WorldGen/AstraeonRegionTypes.h"
+#include "WorldGen/AstraeonTerrainTraversal.h"
 #include "AstraeonGameInstance.generated.h"
 
 UENUM(BlueprintType)
@@ -48,6 +49,18 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
 	int32 GetCurrentTerrainSeed() const;
+
+	// Superficie efectiva de la región: la misma que se materializa y sobre la que se
+	// validó el tránsito. Criaturas, obras y diagnóstico consultan aquí y no la capa de
+	// suelo desnuda, que ignora claros, exclusiones de montaña y la plataforma de Ítaca.
+	const FAstraeonTerrainSurfaceContext& GetSurfaceContext() const;
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
+	float GetSurfaceHeightCm(const FVector2D& PointCm) const;
+
+	// Estado de la última resolución de seed de relieve. Lo consulta el smoke para exigir
+	// que una partida normal no dependa de la variante segura.
+	const FAstraeonTerrainSeedResolution& GetTerrainSeedResolution() const;
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
 	const FAstraeonEnvironmentalSnapshot& GetCurrentEnvironment() const { return CurrentEnvironment; }
@@ -278,6 +291,16 @@ public:
 	static int32 NormalizeRequestedSeed(int32 RequestedWorldSeed);
 
 private:
+	// Resuelve la seed de relieve y cachea el contexto. Es perezoso y mutable porque los
+	// consumidores consultan la superficie desde funciones const, y rehacerlo en cada
+	// consulta costaría reconstruir las listas de claros y exclusiones por criatura y frame.
+	void EnsureTerrainSurface() const;
+	void InvalidateTerrainSurface();
+
+	mutable bool bTerrainSurfaceReady = false;
+	mutable FAstraeonTerrainSurfaceContext CachedSurfaceContext;
+	mutable FAstraeonTerrainSeedResolution CachedSeedResolution;
+
 	void UpsertRuntimeLogbookEntry(const FAstraeonLogbookEntry& Entry);
 	bool HasRuntimeLogbookEntry(FName EntryId) const;
 

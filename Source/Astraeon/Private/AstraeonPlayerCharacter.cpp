@@ -1407,7 +1407,6 @@ void AAstraeonPlayerCharacter::LogDiagnosticState() const
 	const FVector Location = GetActorLocation();
 	const FVector ItacaOrigin = AstraeonGameInstance ? AstraeonGameInstance->GetItacaOriginCm() : FVector::ZeroVector;
 	const FVector2D Local(Location.X - ItacaOrigin.X, Location.Y - ItacaOrigin.Y);
-	const int32 WorldSeed = AstraeonGameInstance ? AstraeonGameInstance->GetCurrentTerrainSeed() : 0;
 
 	UE_LOG(LogAstraeonDiag, Log,
 		TEXT("PLAYER pos=(%.0f,%.0f,%.1f) vel=(%.0f,%.0f,%.0f) mode=%d onGround=%d ")
@@ -1423,7 +1422,7 @@ void AAstraeonPlayerCharacter::LogDiagnosticState() const
 		GetActorRotation().Yaw,
 		ItacaOrigin.X, ItacaOrigin.Y, ItacaOrigin.Z,
 		AAstraeonItacaInterior::IsInsideFootprint(Local) ? 1 : 0,
-		AAstraeonTerrainField::GetGroundHeightCm(WorldSeed, Location.X, Location.Y),
+		AstraeonGameInstance ? AstraeonGameInstance->GetSurfaceHeightCm(FVector2D(Location.X, Location.Y)) : 0.0f,
 		bHasSafeGroundLocation ? LastSafeGroundLocationCm.Z : -99999.0f,
 		*AstraeonDiagnostics::DescribeGroundUnder(*this, 30000.0f),
 		*AstraeonDiagnostics::DescribeBlockingOverlaps(*this,
