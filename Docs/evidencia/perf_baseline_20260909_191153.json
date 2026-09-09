@@ -1,0 +1,16 @@
+{
+	"timestamp": "2026-09-09T19:11:53.287Z",
+	"map": "TL_10_RadialGravity",
+	"warmup_seconds": 10,
+	"sample_seconds": 30,
+	"frame_count": 8972,
+	"mean_fps": 299.03525699877093,
+	"median_frame_ms": 3.3151991665363312,
+	"p99_frame_ms": 4.5015048980712882,
+	"worst_frame_ms": 7.6061002910137177,
+	"hitches_over_50ms": 0,
+	"memory_start_mb": 2311.68359375,
+	"memory_end_mb": 2300.9453125,
+	"command_line": "/Game/Maps/TL_10_RadialGravity -game -unattended -nop4 -nosplash -RenderOffscreen -windowed -ResX=1920 -ResY=1080 -AstraeonPerfBaseline -AstraeonPerfWarmup=10 -AstraeonPerfSeconds=30 -abslog=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Logs\\PerfBaseline_TL10.log",
+	"build_configuration": "Development"
+}

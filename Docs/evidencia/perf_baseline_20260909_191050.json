@@ -1,0 +1,16 @@
+{
+	"timestamp": "2026-09-09T19:10:50.958Z",
+	"map": "L_AstraeonBootstrap",
+	"warmup_seconds": 10,
+	"sample_seconds": 30,
+	"frame_count": 8694,
+	"mean_fps": 289.78612405760515,
+	"median_frame_ms": 3.371700644493103,
+	"p99_frame_ms": 5.1914638653397542,
+	"worst_frame_ms": 18.615499138832092,
+	"hitches_over_50ms": 0,
+	"memory_start_mb": 2349.40625,
+	"memory_end_mb": 2361.57421875,
+	"command_line": "/Game/Maps/L_AstraeonBootstrap -game -unattended -nop4 -nosplash -RenderOffscreen -windowed -ResX=1920 -ResY=1080 -AstraeonPerfBaseline -AstraeonPerfWarmup=10 -AstraeonPerfSeconds=30 -abslog=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Logs\\PerfBaseline_Bootstrap.log",
+	"build_configuration": "Development"
+}

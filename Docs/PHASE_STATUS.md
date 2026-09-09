@@ -42,7 +42,7 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 - [x] Harness aislado como `AAstraeonPlanetGravityHarness` (C++, no BP: no existía esfera previa que renombrar y `AGENTS.md` §4 reserva los BP para presentación).
 - [x] `UAstraeonPlanetGravityComponent` mínimo: `SetGravityDirection` + orientación de cápsula.
 - [x] Mapa `TL_10_RadialGravity` (radio 200 m, 4 balizas, generado por script).
-- [ ] Baseline de rendimiento registrado en `Docs/evidencia/`.
+- [x] Baseline de rendimiento en `Docs/evidencia/BASELINE_RENDIMIENTO.md` (dos mapas, JSON reproducible).
 
 ### Calibración Blender
 

@@ -13,7 +13,9 @@ public class Astraeon : ModuleRules
 			"Engine",
 			"InputCore",
 			"EnhancedInput",
-			"ProceduralMeshComponent"
+			"ProceduralMeshComponent",
+			// Informes de evidencia legibles y diffables (baseline de rendimiento).
+			"Json"
 		});
 	}
 }
