@@ -33,6 +33,7 @@ Origen: continuación de la sesión Codex `01a08295-325d-7a42-a145-f583b434625d`
 | **P4** | 3 morphs faciales autorizados y verificados | `docs/facial_morphs.json`, `QA_Morph_*.png` |
 | **P12** | Sets `Gear` y `Helmet` horneados + sombreado suave a 35° | `docs/equipment_bake.json`, `QA_Helmet_Smooth.png` |
 | **P6** | **Validación en Unreal SUPERADA**: `passed: true`, `saved_packages: true` | `ContentPipeline/reports/main_character_unreal_optimized.json` |
+| **P10** | Documentación al día y lote commiteado (`867c450`) | `DECISIONS.md`, `KNOWN_ISSUES.md`, `BACKLOG.md`, `TEST_REPORT.md` |
 | **P9** | **Integrado al juego**: el personaje es el cuerpo de sombra; build, 55 pruebas y smoke en verde | `ContentPipeline/reports/player_body_wiring.json` |
 
 #### P2 — qué era y qué se hizo
@@ -257,9 +258,11 @@ importados**: no hacían falta para la integración elegida, y subirlos obliga a
 Sirven para tercera persona o cinemáticas cuando se los necesite.
 
 
-### P10 · Documentación y commit
-Falta actualizar `docs/COMPLETION_PASSPORT.md` (fases D y E siguen en *pending*),
-`Docs/DEVELOPMENT_STATE.md`, `Docs/TEST_REPORT.md` y crear el commit atómico del lote.
+### Equipo sin montar en el jugador
+El casco, la mochila y la computadora de muñeca existen en Unreal como mallas propias sobre
+el mismo esqueleto, pero **no están adosadas** a `AstraeonPlayerCharacter`. La sombra que se
+ve en juego es la del traje, sin esas piezas. Cuando haga falta, se enganchan a los sockets
+`socket_helmet` y `socket_backpack`, que ya viajan en el esqueleto.
 
 ---
 
