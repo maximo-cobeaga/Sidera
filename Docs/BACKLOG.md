@@ -183,6 +183,10 @@ Este bloque no sustituye la prioridad del fallo manual de ESCOTILLA ni certifica
 
 ## Próximas tareas desbloqueadas
 
+> Orden vigente contra el plan del mapa: ver `Docs/ESTADO_Y_RUTA_MAPA.md`.
+> Bloque A (cerrar fase 1: terreno procedural coherente + prueba de conectividad) va antes
+> que el pulido de animación y que cualquier trabajo de civilizaciones, ciudades o planetas.
+
 1. **Animación del protagonista — calidad de locomoción (reportado por el propietario, 2026-09-08)**
    - Camina raro, salta raro y los brazos se ven mal. El personaje ya es visible y funcional; esto es pulido de animación, no un fallo.
    - Los 45 clips del cuerpo posan los brazos en cruz (medido: eje Z de brazo al frente usado entre 0,13 y 0,46; manos a x = ±0,48 m). Nunca tuvieron pasada de pulido.

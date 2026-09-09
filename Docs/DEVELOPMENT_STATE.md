@@ -400,3 +400,21 @@ ejecutable y reportó que camina raro, salta raro y los brazos se ven mal; ficha
 `KNOWN_ISSUES.md` y tarea 1 de `BACKLOG.md`—, retopología densa de la cabeza (parpadeo y
 apertura de boca), rediseño del casco y exportación de los seis gestos nuevos autorizados
 en Blender.
+
+## 2026-09-08 — Contraste con el plan del mapa y ruta acordada
+
+`ESTADO_Y_RUTA_MAPA.md` contrasta el repositorio con las 10 fases de
+`ASTRAEON_PLAN_DESARROLLO_MAPA.md`. Conclusión: el proyecto está en las **fases 1–2**, con la
+fase 10 (validación) sobrecumplida y la fase 6 (assets modulares) adelantada de orden. Del
+primer gran hito del plan (§17) están 10 de 11 puntos; falta "biomas" en plural y medir el
+recorrido.
+
+Las tres deudas que marcan el orden de trabajo: perfiles de mundo **hardcodeados en C++** en
+vez de datos, ausencia de una capa explícita de **estado mutable** sobre la seed (síntoma ya
+visible: las criaturas muertas reaparecen al rematerializar), y **un solo mapa sin sectores**.
+
+Ruta: **A** cerrar la fase 1 con el terreno procedural coherente de
+`PROCEDURAL_TERRAIN_CONTRACT.md` más una prueba de conectividad de la ruta crítica; **B**
+mover perfiles a datos, añadir un segundo bioma y la capa de estado mutable; **C** celdas
+lógicas, streaming de sectores y segunda región. El arte se mantiene en Q1 y el pulido de
+animación entra como tarea acotada, no como fase.
