@@ -395,5 +395,8 @@ Estado de pruebas: build editor, 55 Automation Tests, `BUILD SUCCESSFUL` y recor
 sobre el ejecutable, todo en verde. Detalle en `INVESTIGACION_PERSONAJE_INVISIBLE.md` y
 `TEST_REPORT.md`.
 
-Siguen pendientes, sin bloquear: retopología densa de la cabeza (parpadeo y apertura de
-boca), rediseño del casco y exportación de los seis gestos nuevos autorizados en Blender.
+Siguen pendientes, sin bloquear: **pulido del set de locomoción** —el propietario probó el
+ejecutable y reportó que camina raro, salta raro y los brazos se ven mal; ficha en
+`KNOWN_ISSUES.md` y tarea 1 de `BACKLOG.md`—, retopología densa de la cabeza (parpadeo y
+apertura de boca), rediseño del casco y exportación de los seis gestos nuevos autorizados
+en Blender.

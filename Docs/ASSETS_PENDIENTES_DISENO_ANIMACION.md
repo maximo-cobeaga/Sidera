@@ -104,7 +104,15 @@ Sacadas del código; **respetarlas o el gameplay se rompe**.
 
 ## 3. MODELADO pendiente
 
-### 3.1 Personaje jugable — `MVP_BLOCKER` de presentación
+### 3.1 Personaje jugable — resuelto el 2026-09-08
+
+> **Actualización 2026-09-08.** Esta sección quedó obsoleta: el protagonista existe
+> (65.284 tris, 4 LOD, 75 huesos, esqueleto propio `SK_Astraeon_Player_Skeleton`), está
+> montado en `AAstraeonPlayerCharacter` con casco, mochila y computadora de muñeca, y se ve
+> en juego en primera y tercera persona. Las manos de primera persona siguen sobre
+> `SKEL_Humanoid_A`, que sí existe. Lo que queda es calidad de animación (§4.1) y las dos
+> tareas de forma de `PENDIENTE_PROTAGONISTA.md` §3. Se conserva el texto original abajo
+> como registro del punto de partida.
 
 Hoy **no hay ningún mesh**: el jugador es una cápsula invisible con una cámara.
 
@@ -193,17 +201,37 @@ Hoy es una **esfera escalada** que cambia de tamaño según su estado de alerta.
 
 ## 4. ANIMACIÓN pendiente
 
-Nada de esto existe. Ordenado por lo que más se nota en juego.
+Ordenado por lo que más se nota en juego. El personaje jugable ya tiene su set integrado
+y es la excepción: ahí el pendiente es de calidad, no de existencia. El resto no existe.
 
-### 4.1 Personaje (bloqueado por `SKEL_Humanoid_A`)
+### 4.1 Personaje — existe y está integrado; falta calidad (actualizado 2026-09-08)
 
-- Idle, caminar, **correr** (`Shift`, ya implementado mecánicamente), saltar, aterrizar.
+Ya **no** está bloqueado ni vacío: el protagonista tiene 45 clips propios integrados al
+`AstraeonPlayerCharacter`, visibles en juego en primera y tercera persona. Lo que falta es
+pulido, reportado por el propietario al probar el ejecutable: **camina raro, salta raro y
+los brazos se ven mal**.
+
+- **Poses de brazo del set de locomoción.** Los 45 clips posan los brazos en cruz, no al
+  costado ni al frente (medido: el eje que lleva el brazo al frente es Z y los clips lo usan
+  entre 0,13 y 0,46; manos a x = ±0,48 m). Se autorizaron para validar el pipeline.
+- **Brazos de primera persona congelados.** `AN_HandsFP_*` copia la pose de agarre de
+  escáner sobre todo el clip: metió las manos en el encuadre, pero no se mueven al caminar.
+- **Salto.** Hoy es un clip suelto; falta separarlo en despegue, vuelo y aterrizaje.
+- **Contacto de pies.** Sin medir el patinaje contra la velocidad real de `CharacterMovement`.
+
+Siguen sin existir, ordenados por lo que más se nota:
+
 - **Interactuar** (`E`) — el gesto más repetido del juego.
 - **Escanear** (click izq.) — debe distinguirse claramente de disparar.
 - **Disparar** la cortadora (click der.) + retroceso.
 - **Extraer** con el taladro sobre una veta profunda: es la única acción con duración
   implícita del juego y hoy es instantánea y muda.
 - Equipar/cambiar módulo de protección (`1`/`2`/`3`).
+
+Seis gestos nuevos (`Pulse`, `Drill`, `Hammer`, `Maul`, `Consume`, `Present`) están
+autorizados en Blender y **sin exportar**. Ficha del pendiente de calidad en
+`KNOWN_ISSUES.md`; la normalización de escala de raíz ya está enganchada a la importación,
+así que reexportar es seguro.
 
 ### 4.2 Nave Ítaca
 

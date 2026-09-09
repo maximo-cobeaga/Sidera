@@ -268,7 +268,8 @@ ve en juego es la del traje, sin esas piezas. Cuando haga falta, se enganchan a 
 
 ## 3. Trabajo futuro acordado
 
-Ambos puntos se evaluaron, se decidieron y se aplazaron a conciencia el 2026-09-08.
+Los dos primeros se evaluaron, se decidieron y se aplazaron a conciencia el 2026-09-08;
+el tercero lo reportó el propietario ese mismo día al probar el ejecutable.
 
 1. **Retopología densa de la cabeza** (~8–10k tris con bucles de ojo y boca, y geometría
    interior de boca). Habilitaría `blink` y una apertura de boca real. Reabre bake y LOD.
@@ -276,6 +277,12 @@ Ambos puntos se evaluaron, se decidieron y se aplazaron a conciencia el 2026-09-
 2. **Rediseño del casco.** La forma sigue siendo simple y de bandas rectas; el visor no
    envuelve y queda un hueco entre el borde inferior y el cuello. El sombreado y las
    texturas ya están resueltos, así que esto es puramente trabajo de forma.
+3. **Pulido del set de locomoción** (reportado por el propietario el 2026-09-08 tras
+   probar el ejecutable: camina raro, salta raro y los brazos se ven mal). Los 45 clips se
+   autorizaron para validar el pipeline, sin pasada de pulido, y posan los brazos en cruz
+   —la medición está en la sección anterior—. Falta además revisar el patinaje de pies
+   contra la velocidad real del `CharacterMovement` y separar el salto en despegue, vuelo y
+   aterrizaje. Ficha completa en `KNOWN_ISSUES.md`.
 
 ---
 
@@ -308,6 +315,7 @@ pose de brazos del agarre de escáner ya autorizado sobre los clips de locomoci�
 la locomoción de torso y piernas ni re-autorizar los 45 clips del cuerpo. La decisión de
 convivir con dos esqueletos sigue vigente y sin coste añadido.
 
-Sigue pendiente lo de la sección 3 —retopología de la cabeza y rediseño del casco— más la
+Sigue pendiente lo de la sección 3 —retopología de la cabeza, rediseño del casco y **pulido
+del set de locomoción**, que el propietario reportó al probar el ejecutable— más la
 exportación de los seis gestos nuevos ya autorizados en Blender (`Pulse`, `Drill`, `Hammer`,
 `Maul`, `Consume`, `Present`).

@@ -1,5 +1,29 @@
 # Problemas conocidos — ASTRAEON
 
+## 2026-09-08 — Pendiente: la animación del protagonista se ve rara
+
+Reportado por el propietario tras probar el ejecutable, ya con el personaje visible:
+**camina raro, salta raro y los brazos se ven mal**. No es un fallo funcional —el personaje
+se ve, se mueve y el recorrido crítico pasa— sino calidad de animación.
+
+- **Motivo probable, ya medido**: los 45 clips del cuerpo posan **los brazos en cruz**, no al
+  costado ni al frente. El eje que lleva el brazo al frente en este rig es Z y los clips lo
+  usan entre 0,13 y 0,46; en `TwoHand_Idle` las manos quedan a **x = ±0,48 m** del cuerpo.
+  La medición está en `PENDIENTE_PROTAGONISTA.md` §"Por qué se eligió convivir con dos
+  esqueletos". El set nunca tuvo una pasada de pulido: se autorizó para validar el pipeline.
+- **En primera persona**, además, `AN_HandsFP_*` congela la pose de brazos del agarre de
+  escáner sobre todo el clip. Fue lo que metió las manos en el encuadre, pero implica que
+  los brazos **no se mueven** al caminar o correr.
+- **Sin medir todavía**: patinaje de pies en el ciclo de caminata (velocidad del clip contra
+  velocidad del `CharacterMovement`) y el arco del salto, que hoy es un clip suelto sin
+  fases de despegue, vuelo y aterrizaje encadenadas.
+- **Impacto**: estético y constante — se ve en cada partida, en tercera persona sobre todo.
+- **Cierre esperado**: re-autorizar en Blender las poses de brazo del set de locomoción,
+  revisar contacto de pies contra la velocidad real de movimiento, y separar el salto en
+  despegue/vuelo/aterrizaje. Reexportar e importar: la normalización de escala de raíz ya
+  está enganchada a los scripts de importación, así que no hay que repetir aquella
+  reparación.
+
 ## 2026-09-07 — Generación del protagonista: estimador ausente
 
 Conexión con Blender resuelta y edición probada. La API ofrece `bl_generate_3d` y el

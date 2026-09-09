@@ -183,15 +183,22 @@ Este bloque no sustituye la prioridad del fallo manual de ESCOTILLA ni certifica
 
 ## Próximas tareas desbloqueadas
 
-1. **H5.2 restante — Ítaca/narrativa visual (en pausa, a cargo de otra sesión de trabajo)**
+1. **Animación del protagonista — calidad de locomoción (reportado por el propietario, 2026-09-08)**
+   - Camina raro, salta raro y los brazos se ven mal. El personaje ya es visible y funcional; esto es pulido de animación, no un fallo.
+   - Los 45 clips del cuerpo posan los brazos en cruz (medido: eje Z de brazo al frente usado entre 0,13 y 0,46; manos a x = ±0,48 m). Nunca tuvieron pasada de pulido.
+   - En primera persona los brazos están congelados en la pose de agarre por `AN_HandsFP_*`.
+   - Sin medir: patinaje de pies contra la velocidad real de `CharacterMovement`, y el salto como clip suelto sin despegue/vuelo/aterrizaje.
+   - Detalle en `Docs/KNOWN_ISSUES.md` → "la animación del protagonista se ve rara".
+
+2. **H5.2 restante — Ítaca/narrativa visual (en pausa, a cargo de otra sesión de trabajo)**
    - Piso de Ítaca superpuesto con la nueva geometría de `AAstraeonItacaInterior` (paredes/caja). Ver `Docs/ART_ASSET_MASTER_PLAN.md` → "Hallazgo de smoke manual post-integración".
    - ESCOTILLA como puerta física (backlog, no bloqueante).
    - Mejorar lectura/ritmo del briefing ARGOS.
 
-2. **H6 — Informe final y cierre de MVP**
+3. **H6 — Informe final y cierre de MVP**
    - Redactar informe final con limitaciones conocidas (ver `Docs/KNOWN_ISSUES.md` y `Docs/TEST_REPORT.md`).
 
-3. **Pulido futuro no bloqueante**
+4. **Pulido futuro no bloqueante**
    - Sonido/partículas/UI de alerta.
    - Arte final y mejor composición visual (depende de H5.2).
 
