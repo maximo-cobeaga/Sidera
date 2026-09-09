@@ -1,0 +1,83 @@
+{
+  "passed": true,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "assets": [
+    {
+      "id": "SM_Resource_SilicateFiber_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_SilicateFiber_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        80.0,
+        80.0,
+        100.0
+      ],
+      "fbx_sha256": "b77e83bbd81da0f404013037e779c85dcfa8350f3ffc166548c8e3128b0cf931"
+    },
+    {
+      "id": "SM_Resource_FerriteNodule_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_FerriteNodule_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        80.0,
+        80.0,
+        100.0
+      ],
+      "fbx_sha256": "dbb76b20f8f536503c264ddc1ffcc8b8906ed7975fcea5a9aaf5d79340bdef44"
+    },
+    {
+      "id": "SM_Resource_SeedCrystal_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_SeedCrystal_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        110.0,
+        110.00000762939453,
+        115.0
+      ],
+      "fbx_sha256": "1c08369d77400e14af1175705bdcb89eef358af650a4324020526ffd669a35ba"
+    },
+    {
+      "id": "SM_Resource_CryoVein_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_CryoVein_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        110.0,
+        110.0,
+        115.0
+      ],
+      "fbx_sha256": "fe4dae3dba53d1587e767e97629e3bb60a3a9f5e43b4de4dcc48e8aecadcf4ec"
+    },
+    {
+      "id": "SM_Resource_QuartzVein_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_QuartzVein_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        110.0,
+        110.0,
+        115.0
+      ],
+      "fbx_sha256": "d000558a162de43173296b831883ab0b894cb7c67995bd938607d11c83f42837"
+    },
+    {
+      "id": "SM_Signal_Source_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Signal_Source_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        160.0,
+        160.0,
+        220.0
+      ],
+      "fbx_sha256": "1ed70e8c29f31087b3ca7530267ed8b1aee146f8dd3229e6aadecce1af23b1b5"
+    },
+    {
+      "id": "SM_Anomaly_Strata_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Anomaly_Strata_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        100.0,
+        100.0,
+        140.0
+      ],
+      "fbx_sha256": "380a62511b5462d84a878fa257168e93aced71bc36ead94e1316f73fa57327a1"
+    }
+  ]
+}

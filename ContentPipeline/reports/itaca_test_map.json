@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "map": "/Game/Maps/TL_Art_MVP",
+  "actors": [
+    "Itaca_Q1_ModularInterior",
+    "PlayerStart_ItacaArt",
+    "Reference_Human_180cm_NoCollision"
+  ]
+}

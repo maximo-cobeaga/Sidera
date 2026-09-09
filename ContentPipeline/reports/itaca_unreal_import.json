@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "saved_packages": false,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "assets": [
+    {
+      "id": "SM_Ref_Human_180_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        70.0,
+        30.0000057220459,
+        180.0
+      ],
+      "expected_dimensions_cm": [
+        70.0,
+        30.0,
+        180.0
+      ],
+      "fbx_sha256": "dcd9fe1773b413a0b7833d4caf2d3ad90197f020b715637aacf80263331172d6"
+    },
+    {
+      "id": "SM_Itaca_Floor_200_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        200.00001525878906,
+        200.00001525878906,
+        12.0
+      ],
+      "expected_dimensions_cm": [
+        200,
+        200,
+        12.0
+      ],
+      "fbx_sha256": "992e8d1528ba4bdee0c044014af31a135f744f2d7c8f2c8d453ddce169f781ce"
+    },
+    {
+      "id": "SM_Itaca_Wall_200_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        200.0,
+        12.000017166137695,
+        280.0
+      ],
+      "expected_dimensions_cm": [
+        200,
+        12.0,
+        280.0
+      ],
+      "fbx_sha256": "0c7b182cf314c6755b634e3c181a9aaca6e98720089a1d961f369fb7f29a41a1"
+    },
+    {
+      "id": "SM_Itaca_HatchFrame_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        180.0,
+        24.000015258789062,
+        250.0
+      ],
+      "expected_dimensions_cm": [
+        180.0,
+        24.0,
+        250.0
+      ],
+      "fbx_sha256": "9eb76db82ec5b0c5c2c69f54fb6b893bba8574fe428d7762d31400ca809a7312"
+    },
+    {
+      "id": "SM_Itaca_ARGOSConsole_Blockout",
+      "passed": true,
+      "dimensions_cm": [
+        80.00000762939453,
+        60.00000762939453,
+        120.00000762939453
+      ],
+      "expected_dimensions_cm": [
+        80.0,
+        60.0,
+        120.0
+      ],
+      "fbx_sha256": "754083434f8d81bae532292154ea4cc1b1aa61a8bdd3585816a6069711d76077"
+    }
+  ],
+  "scope": "transient_import_dimensions_only_not_collision_or_gameplay"
+}

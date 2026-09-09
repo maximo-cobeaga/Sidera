@@ -1,0 +1,26 @@
+{
+  "generator_version": 1,
+  "fps": 30,
+  "triangle_budget_per_mesh": 6000,
+  "grip_radius_m": 0.017,
+  "grip_length_m": 0.13,
+  "palette": {
+    "Shell": [0.43, 0.53, 0.59],
+    "Grip": [0.025, 0.04, 0.052],
+    "Metal": [0.16, 0.21, 0.25],
+    "Cyan": [0.025, 0.48, 0.58],
+    "Ochre": [0.68, 0.30, 0.055],
+    "Pouch": [0.42, 0.36, 0.24]
+  },
+  "assets": [
+    {"id": "SM_Tool_Scanner_Blockout", "item_id": null, "kind": "scanner", "label": "ESCANER", "action": "Scan"},
+    {"id": "SM_Tool_PulseCutter_Blockout", "item_id": "weapon_pulse_cutter", "kind": "cutter", "label": "CORTADORA", "action": "Pulse"},
+    {"id": "SM_Tool_CoreDrill_Blockout", "item_id": "tool_core_drill", "kind": "drill", "label": "TALADRO", "action": "Drill"},
+    {"id": "SM_Tool_BuildHammer_Blockout", "item_id": "tool_build_hammer", "kind": "hammer", "label": "MARTILLO", "action": "Hammer"},
+    {"id": "SM_Tool_DemolitionMaul_Blockout", "item_id": "tool_demolition_maul", "kind": "maul", "label": "MAZA", "action": "Maul"},
+    {"id": "SM_Item_RationPack_Blockout", "item_id": "ration_pack", "kind": "ration", "label": "RACION", "action": "Consume"},
+    {"id": "SM_Item_SignalResonator_Blockout", "item_id": "signal_resonator", "kind": "resonator", "label": "RESONADOR", "action": "Present"}
+  ],
+  "drill_rotor": {"id": "SM_Tool_CoreDrillRotor_Blockout", "offset_m": [0, -0.24, 0.14], "rotation_y_rad_per_second": 12.566370614359172},
+  "animation_frames": 31
+}

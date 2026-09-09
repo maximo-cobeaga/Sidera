@@ -1,0 +1,25 @@
+{
+  "status": "REBAKED_AWAITING_VISUAL_QA",
+  "completed": [
+    "Color",
+    "NormalGL",
+    "ORM",
+    "AO"
+  ],
+  "cage_extrusion": 0.008,
+  "max_ray_distance": 0.03,
+  "margin": 16,
+  "inpaint": {
+    "Character": {
+      "holes_before": 1205120,
+      "holes_filled": 164536,
+      "holes_remaining": 1040584
+    },
+    "Suit": {
+      "holes_before": 651642,
+      "holes_filled": 578147,
+      "holes_remaining": 73495
+    }
+  },
+  "elapsed_s": 262.3
+}

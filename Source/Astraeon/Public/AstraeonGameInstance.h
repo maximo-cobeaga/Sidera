@@ -1,11 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Building/AstraeonBuildingTypes.h"
+#include "Crafting/AstraeonCraftingTypes.h"
 #include "Creatures/AstraeonCreatureTypes.h"
 #include "Engine/GameInstance.h"
 #include "Exploration/AstraeonMapTypes.h"
 #include "Knowledge/AstraeonLogbookTypes.h"
 #include "Persistence/AstraeonSaveGame.h"
+#include "Survival/AstraeonProtectionTypes.h"
 #include "WorldGen/AstraeonEnvironmentTypes.h"
 #include "WorldGen/AstraeonRegionTypes.h"
 #include "AstraeonGameInstance.generated.h"
@@ -31,6 +34,20 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
 	int32 GetCurrentWorldSeed() const { return CurrentWorldSeed; }
+
+	// Nombre explícito para nuevas llamadas. GetCurrentWorldSeed se conserva temporalmente
+	// para compatibilidad: ya es seed de variación, no identidad/geografía del mundo.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
+	int32 GetCurrentContentSeed() const { return CurrentWorldSeed; }
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
+	FName GetCurrentPlanetProfileId() const { return CurrentRegionLayout.PlanetProfileId; }
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
+	FName GetCurrentRegionProfileId() const { return CurrentRegionLayout.RegionProfileId; }
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
+	int32 GetCurrentTerrainSeed() const;
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
 	const FAstraeonEnvironmentalSnapshot& GetCurrentEnvironment() const { return CurrentEnvironment; }
@@ -62,6 +79,134 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Crafting")
 	bool CraftSignalResonator();
 
+	// Recetas de la mesa de fabricación. Se construyen en runtime porque el recurso
+	// característico depende de la seed de la región.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Crafting")
+	TArray<FAstraeonCraftingRecipe> GetCraftingRecipes() const;
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Crafting")
+	bool CanCraftRecipe(const FAstraeonCraftingRecipe& Recipe, FString& OutReason) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Crafting")
+	bool CraftRecipe(FName RecipeId);
+
+	// Id de inventario del módulo de protección, para exigir que se haya fabricado antes
+	// de poder equiparlo.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Crafting")
+	static FName GetProtectionItemId(EAstraeonProtectionModule Protection);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Combat")
+	static FName GetPulseCutterItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Combat")
+	bool HasPulseCutter() const;
+
+	// Registra una criatura abatida: entrega lo que deja y anota el hallazgo.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Combat")
+	bool RecordCreatureKill(const FAstraeonCreatureProfile& CreatureProfile);
+
+	// --- Fauna ---
+	// Cazar es la fuente de comida, así que la fauna tiene que ser renovable: la muerte
+	// sobrevive al aterrizaje (antes bastaba despegar para tenerlas todas vivas de nuevo)
+	// pero el nido se repuebla solo pasado un rato.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Creatures")
+	void RecordCreatureDeath(FName SpawnPointId);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Creatures")
+	bool IsCreatureSpawnPopulated(FName SpawnPointId) const;
+
+	// Descuenta el reloj de repoblado y devuelve los nidos que acaban de quedar libres.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Creatures")
+	TArray<FName> AdvanceCreatureRespawns(float DeltaSeconds);
+
+	// Rescate de emergencia al caer incapacitado. Cuesta la carga opcional (muestras y
+	// vetas profundas) pero nunca los insumos del recorrido crítico ni el equipo fabricado:
+	// morir debe doler sin poder dejar la partida sin salida.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Survival")
+	bool RecordEmergencyRecall();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Survival")
+	bool IsCriticalPathResource(FName ItemId) const;
+
+	// --- Construcción ---
+	// Lo construido se guarda como datos y se reconstruye al materializar la región, porque
+	// la región se rehace cada vez que Ítaca aterriza.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	const TArray<FAstraeonPlacedStructure>& GetPlacedStructures() const { return PlacedStructures; }
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Building")
+	bool PlaceStructure(const FAstraeonPlacedStructure& Placement);
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Building")
+	bool DemolishStructureAt(const FVector& LocationCm, float ToleranceCm = 50.0f);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	bool CanPlaceStructure(EAstraeonStructureType Type) const;
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	static FName GetRegolithItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	static FName GetBrickItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	static FName GetBuildHammerItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	static FName GetDemolitionMaulItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	bool HasBuildHammer() const;
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Building")
+	bool HasDemolitionMaul() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Building")
+	bool ExtractRegolith();
+
+	// --- Objeto en mano ---
+	// Tener la herramienta en el inventario ya no basta: hay que llevarla en la mano. Eso
+	// obliga a elegir, que es lo que convierte el inventario en decisión y no en lista.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Hand")
+	FName GetHandItemId() const { return HandItemId; }
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Hand")
+	bool IsHolding(FName ItemId) const { return !ItemId.IsNone() && HandItemId == ItemId && GetInventoryItemCount(ItemId) > 0; }
+
+	// Los objetos que se pueden llevar en la mano, en orden estable, para la barra rápida.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Hand")
+	TArray<FName> GetHotbarItems() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Hand")
+	bool SelectHotbarSlot(int32 SlotIndex);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Hand")
+	static bool IsHandheldItem(FName ItemId);
+
+	// Usa lo que se tenga en la mano. Hoy sólo las raciones tienen un uso directo; el resto
+	// de las herramientas se usan con su propio gesto (disparar, construir, extraer).
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Hand")
+	bool UseHandItem();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Survival")
+	static FName GetRationItemId();
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Survival")
+	float GetHungerPercent() const { return HungerPercent; }
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Survival")
+	bool IsStarving() const { return HungerPercent <= 0.0f; }
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Survival")
+	void ConsumeHunger(float Amount) { HungerPercent = FMath::Clamp(HungerPercent - Amount, 0.0f, 100.0f); }
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Survival")
+	void Nourish(float Amount) { HungerPercent = FMath::Clamp(HungerPercent + Amount, 0.0f, 100.0f); }
+
+	// Cuánto rinde una veta al recolectarla, según la declara el generador de región.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Inventory")
+	int32 GetResourceNodeQuantity(FName ResourceId) const;
+
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Narrative")
 	void RecordArgosBriefing();
 
@@ -76,6 +221,29 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Scanning")
 	bool RecordCreatureScan(const FAstraeonCreatureProfile& CreatureProfile);
+
+	// El MVP (§3.5) exige que el escáner identifique ambiente, recursos, mob y señal/estructura.
+	// Ambiente y mob ya tenían camino propio; esto cubre recursos, fuente de señal y anomalía.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Scanning")
+	bool RecordMarkerScan(FName MarkerId, bool bIsResource);
+
+	// Inspección cercana de la anomalía (E). Sube la certeza de Observada a Medida.
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Scanning")
+	bool RecordAnomalyInspection();
+
+	// Ítaca es la nave: al aterrizar en otro punto, la estancia y sus marcadores se
+	// remateralizan alrededor de este origen en vez de quedar clavados en (0,0).
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Ship")
+	FVector GetItacaOriginCm() const { return ItacaOriginCm; }
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Ship")
+	void SetItacaOriginCm(const FVector& OriginCm);
+
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Survival")
+	EAstraeonProtectionModule GetEquippedProtection() const { return EquippedProtection; }
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Survival")
+	bool EquipProtection(EAstraeonProtectionModule Protection);
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Session")
 	bool HasStartedGame() const { return bHasStartedGame; }
@@ -133,6 +301,25 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Objectives")
 	EAstraeonObjectiveState ObjectiveState = EAstraeonObjectiveState::MeasureEnvironment;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Ship")
+	FVector ItacaOriginCm = FVector::ZeroVector;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Building")
+	TArray<FAstraeonPlacedStructure> PlacedStructures;
+
+	// Nido -> segundos que faltan para que vuelva a haber una criatura ahí.
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Creatures")
+	TMap<FName, float> CreatureRespawnTimers;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Hand")
+	FName HandItemId;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Survival", meta = (ClampMin = "0.0", ClampMax = "100.0"))
+	float HungerPercent = 100.0f;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Survival")
+	EAstraeonProtectionModule EquippedProtection = EAstraeonProtectionModule::None;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Feedback")
 	FString LastFeedbackMessage;

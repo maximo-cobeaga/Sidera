@@ -1,0 +1,19 @@
+{
+  "status": "TOPOLOGY_READY_AWAITING_BAKE_AND_DEFORMATION_AUDIT",
+  "method": "QuadriFlow on welded original source",
+  "target_quads": 36000,
+  "seed": 831,
+  "removed_dangling_faces": 1,
+  "split_bowtie_vertices": 2,
+  "nonmanifold_before_solver": 0,
+  "solver_coordinate_scale": 1000,
+  "operator": [
+    "FINISHED"
+  ],
+  "vertices": 32643,
+  "polygons": 32642,
+  "triangles": 65284,
+  "quads": 32642,
+  "checkpoint": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\BlenderRecovery\\CHK_Player_quad_topology_20260908.blend",
+  "elapsed_s": 60.40507459640503
+}

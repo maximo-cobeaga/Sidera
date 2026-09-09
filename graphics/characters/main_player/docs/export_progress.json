@@ -1,0 +1,197 @@
+{
+  "textures": [
+    {
+      "image": "T_Player_Character_AO",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Character_AO.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Character_Color",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Character_Color.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB"
+    },
+    {
+      "image": "T_Player_Character_NormalGL",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Character_NormalGL.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Character_ORM",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Character_ORM.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Gear_Color",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Gear_Color.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "sRGB"
+    },
+    {
+      "image": "T_Player_Gear_Emission",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Gear_Emission.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Gear_NormalGL",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Gear_NormalGL.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Gear_ORM",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Gear_ORM.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Helmet_Color",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Helmet_Color.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "sRGB"
+    },
+    {
+      "image": "T_Player_Helmet_Emission",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Helmet_Emission.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Helmet_NormalGL",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Helmet_NormalGL.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Helmet_ORM",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Helmet_ORM.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Suit_AO",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Suit_AO.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Suit_Color",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Suit_Color.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "sRGB"
+    },
+    {
+      "image": "T_Player_Suit_NormalGL",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Suit_NormalGL.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    },
+    {
+      "image": "T_Player_Suit_ORM",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\textures\\T_Player_Suit_ORM.png",
+      "size": [
+        2048,
+        2048
+      ],
+      "colorspace": "Non-Color"
+    }
+  ],
+  "fbx": [
+    {
+      "kind": "skeletal_mesh",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Player.fbx",
+      "bytes": 2699820
+    },
+    {
+      "kind": "lod1",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Player_LOD1.fbx",
+      "bytes": 1622556
+    },
+    {
+      "kind": "lod2",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Player_LOD2.fbx",
+      "bytes": 914924
+    },
+    {
+      "kind": "lod3",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Player_LOD3.fbx",
+      "bytes": 481916
+    },
+    {
+      "kind": "helmet",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Helmet.fbx",
+      "bytes": 208284
+    },
+    {
+      "kind": "backpack",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_Backpack.fbx",
+      "bytes": 180748
+    },
+    {
+      "kind": "wrist_computer",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\SK_Astraeon_WristComputer.fbx",
+      "bytes": 177788
+    },
+    {
+      "kind": "animations",
+      "file": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\exports\\AN_Astraeon_Player_All.fbx",
+      "bytes": 24880236
+    }
+  ],
+  "status": "EXPORTED",
+  "shape_keys": [
+    "Basis",
+    "jaw_open",
+    "brow_raise",
+    "brow_furrow"
+  ]
+}

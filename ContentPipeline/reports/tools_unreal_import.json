@@ -1,0 +1,219 @@
+{
+  "passed": true,
+  "saved_packages": false,
+  "gameplay_integrated": false,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "assets": [
+    {
+      "id": "SM_Tool_Scanner_Blockout",
+      "sha256": "f5e16dab77f0fd065bd249643cd16c672dfab9e62b58b1c86cb696f6fd072743",
+      "passed": true,
+      "dimensions_cm": [
+        12.000000476837158,
+        21.30000066757202,
+        24.849998474121094
+      ],
+      "origin_cm": [
+        2.384185791015625e-07,
+        3.000000238418579,
+        4.524999618530273
+      ],
+      "expected_origin_cm": [
+        0.0,
+        3.0000001192092896,
+        4.5249998569488525
+      ]
+    },
+    {
+      "id": "SM_Tool_PulseCutter_Blockout",
+      "sha256": "36b7eafaaa7e081a075539cb6f8435fa601e27e2adb65fc78d6e04d53a99e85b",
+      "passed": true,
+      "dimensions_cm": [
+        9.400001049041748,
+        38.0,
+        25.100000381469727
+      ],
+      "origin_cm": [
+        0.10000014305114746,
+        12.5,
+        4.65000057220459
+      ],
+      "expected_origin_cm": [
+        0.10000001639127731,
+        12.5,
+        4.650000482797623
+      ]
+    },
+    {
+      "id": "SM_Tool_CoreDrill_Blockout",
+      "sha256": "5955fa8d99c8cbc508cad3f75af38c7e5362fc17d700c9990f61d598de1e7c0f",
+      "passed": true,
+      "dimensions_cm": [
+        21.80000114440918,
+        31.299999237060547,
+        34.54999923706055
+      ],
+      "origin_cm": [
+        4.600000381469727,
+        7.549999237060547,
+        4.375
+      ],
+      "expected_origin_cm": [
+        4.600000008940697,
+        7.54999965429306,
+        4.375000298023224
+      ]
+    },
+    {
+      "id": "SM_Tool_BuildHammer_Blockout",
+      "sha256": "1ce0bc5da11de2ca96fabcf8d46408db1b1c533cb1f2747c408c44615c27e72d",
+      "passed": true,
+      "dimensions_cm": [
+        18.799999237060547,
+        6.250000953674316,
+        42.19999885559082
+      ],
+      "origin_cm": [
+        0.0,
+        0.1249997615814209,
+        13.199999809265137
+      ],
+      "expected_origin_cm": [
+        0.0,
+        0.12499997392296791,
+        13.199999928474426
+      ]
+    },
+    {
+      "id": "SM_Tool_DemolitionMaul_Blockout",
+      "sha256": "20f92c91a700d5d79e1ea8c9b99e46cf9579223e6888e6b38b96c363b5bc2bd4",
+      "passed": true,
+      "dimensions_cm": [
+        27.200002670288086,
+        10.500001907348633,
+        58.14999961853027
+      ],
+      "origin_cm": [
+        0.0,
+        0.0,
+        21.175000190734863
+      ],
+      "expected_origin_cm": [
+        0.0,
+        -0.0,
+        21.175000071525574
+      ]
+    },
+    {
+      "id": "SM_Item_RationPack_Blockout",
+      "sha256": "1f34dbac3c265e0fb3eda9085da70c6ce286b268d8549213f0c2e661af3cbe4e",
+      "passed": true,
+      "dimensions_cm": [
+        10.40000057220459,
+        5.250000834465027,
+        18.899999141693115
+      ],
+      "origin_cm": [
+        0.0,
+        1.3250001072883606,
+        3.799999475479126
+      ],
+      "expected_origin_cm": [
+        0.0,
+        1.3250000774860382,
+        3.7999995052814484
+      ]
+    },
+    {
+      "id": "SM_Item_SignalResonator_Blockout",
+      "sha256": "709715ae03fe8c4bb442763070517fcdf38549fe17de4901e7fc68eee8ee94d3",
+      "passed": true,
+      "dimensions_cm": [
+        17.200000762939453,
+        8.500000953674316,
+        33.79999923706055
+      ],
+      "origin_cm": [
+        0.0,
+        2.0,
+        10.899999618530273
+      ],
+      "expected_origin_cm": [
+        0.0,
+        1.9999999552965164,
+        10.899999924004078
+      ]
+    },
+    {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "sha256": "ecbd31d262ba78a9bed57c5c71252a34fb93a24003e03b8a68a83da1a4b095be",
+      "passed": true,
+      "dimensions_cm": [
+        5.799999952316284,
+        15.000001192092896,
+        5.799999713897705
+      ],
+      "origin_cm": [
+        1.0728836059570312e-06,
+        6.000000357627869,
+        0.0
+      ],
+      "expected_origin_cm": [
+        0.0,
+        6.000000238418579,
+        0.0
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "id": "AN_Human_Scan_Tool_Blockout",
+      "sha256": "f515ccda46cfed86b62efce40d794a3b9f2d5c495604738945b9cbee728b66c9",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Pulse_Tool_Blockout",
+      "sha256": "94077f8adc9f1bd1a9e04aea2c4ac8fc50427a32e3e7d346aaa7c11b9eaa3178",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Drill_Tool_Blockout",
+      "sha256": "c2b1a193198df8adb9b8f003518421f38892b81a2a5cd686928ee5a13fb15b16",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Hammer_Tool_Blockout",
+      "sha256": "ce0fdef58d8f95afb4e6103e28ce5d8c1973c97252b5bd08ea6be5a56afa0e41",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Maul_Tool_Blockout",
+      "sha256": "297ca5d42919b25942ed529d2a2a924d7a81e42c4e023c466db5953c3dd6a026",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Consume_Tool_Blockout",
+      "sha256": "58f407ddfd50a6993c0a6039bed0c7151bc9bba5ef76b2eb24f472485f35d4bf",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    },
+    {
+      "id": "AN_Human_Present_Tool_Blockout",
+      "sha256": "be0ddf38a7e4349b08f866dbe8ad434c92dac67ad1c65f151b7a690024bd2e6e",
+      "passed": true,
+      "duration_seconds": 1.0,
+      "bones": 57
+    }
+  ]
+}

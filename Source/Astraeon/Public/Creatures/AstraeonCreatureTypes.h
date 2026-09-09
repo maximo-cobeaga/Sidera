@@ -36,5 +36,15 @@ struct ASTRAEON_API FAstraeonCreatureProfile
 	float ThreatDamagePercentPerSecond = 4.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|Creatures")
+	float MaxHealth = 100.0f;
+
+	// Lo que deja al morir. Matar tiene que rendir algo o no compite con esquivar.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|Creatures")
+	FName HarvestItemId = TEXT("biomass_sample");
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|Creatures")
+	int32 HarvestQuantity = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|Creatures")
 	FText ScannerSummary = FText::FromString(TEXT("A cautious surface organism. It reacts to proximity before direct contact."));
 };

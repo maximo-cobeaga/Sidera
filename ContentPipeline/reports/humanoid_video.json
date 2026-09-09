@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "scope": "Blender review video, not gameplay capture",
+  "frames": 120,
+  "fps": 30,
+  "duration_seconds": 4.0,
+  "path": "ContentPipeline/Generated/HumanoidBlockout/Humanoid_Walk_Run.mp4"
+}

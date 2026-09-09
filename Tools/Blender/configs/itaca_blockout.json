@@ -1,0 +1,12 @@
+{
+  "generator_version": 1,
+  "seed": 13579,
+  "notes": "Fixed modular kit: seed recorded for provenance; geometry intentionally seed-independent.",
+  "assets": [
+    {"id":"SM_Ref_Human_180_Blockout","dimensions_m":[0.7,0.3,1.8],"triangle_budget":144,"expected_shells":8,"material":"M_Blockout_Human","color":[0.82,0.48,0.12],"boxes":[[[0,0,1.635],[0.24,0.25,0.33]],[[0,0,1.19],[0.4,0.28,0.56]],[[-0.29,0,1.13],[0.12,0.18,0.68]],[[0.29,0,1.13],[0.12,0.18,0.68]],[[-0.12,0,0.55],[0.18,0.22,0.72]],[[0.12,0,0.55],[0.18,0.22,0.72]],[[-0.12,0,0.095],[0.2,0.3,0.19]],[[0.12,0,0.095],[0.2,0.3,0.19]]]},
+    {"id":"SM_Itaca_Floor_200_Blockout","dimensions_m":[2,2,0.12],"triangle_budget":24,"expected_shells":1,"material":"M_Blockout_Hull","color":[0.23,0.29,0.32],"boxes":[[[0,0,0.06],[2,2,0.12]]]},
+    {"id":"SM_Itaca_Wall_200_Blockout","dimensions_m":[2,0.12,2.8],"triangle_budget":24,"expected_shells":1,"material":"M_Blockout_Hull","color":[0.23,0.29,0.32],"boxes":[[[0,0,1.4],[2,0.12,2.8]]]},
+    {"id":"SM_Itaca_HatchFrame_Blockout","dimensions_m":[1.8,0.24,2.5],"triangle_budget":64,"expected_shells":1,"material":"M_Blockout_Service","color":[0.65,0.72,0.7],"profile_xz":[[-0.9,0],[-0.9,2.5],[0.9,2.5],[0.9,0],[0.65,0],[0.65,2.2],[-0.65,2.2],[-0.65,0]]},
+    {"id":"SM_Itaca_ARGOSConsole_Blockout","dimensions_m":[0.8,0.6,1.2],"triangle_budget":48,"expected_shells":2,"material":"M_Blockout_Instrument","color":[0.08,0.48,0.53],"boxes":[[[0,0,0.45],[0.58,0.48,0.9]],[[0,0,1.05],[0.8,0.6,0.3]]]}
+  ]
+}

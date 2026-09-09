@@ -1,0 +1,744 @@
+{
+  "schema_version": 1,
+  "supplemental_manifests": ["ContentPipeline/region_asset_manifest.json"],
+  "scope": "MVP-first art catalog; family rows are plans, not produced assets",
+  "assets": [
+    {
+      "id": "SM_Ref_Human_180_Blockout",
+      "entry_type": "asset",
+      "category": "Reference",
+      "family": "Character_Player_A",
+      "source": "Tools/Blender/configs/itaca_blockout.json",
+      "generator": "Tools/Blender/generators/itaca_blockout.py",
+      "generator_version": 1,
+      "output": "ContentPipeline/Generated/ItacaBlockout/SM_Ref_Human_180_Blockout.fbx",
+      "status": "blockout_export_validated",
+      "priority": "MVP_SUPPORTING",
+      "mvp_relevance": "Scale reference",
+      "dependencies": [],
+      "validation_state": {
+        "source": "passed",
+        "fbx_roundtrip": "passed",
+        "unreal_dimensions": "passed_transient_import",
+        "report": "ContentPipeline/reports/itaca_blockout_validation.json"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Ref_Human_180_Blockout",
+      "unreal_integrated": false,
+      "license_provenance": "Original repository-authored procedural blockout; no third-party assets",
+      "geometry_sha256": "5d016e833c65df452096e17554b8ebe37ff039876ad946e2aebc6b80ecb5edff",
+      "fbx_sha256": "dcd9fe1773b413a0b7833d4caf2d3ad90197f020b715637aacf80263331172d6"
+    },
+    {
+      "id": "SM_Itaca_Floor_200_Blockout",
+      "entry_type": "asset",
+      "category": "Environment",
+      "family": "Ship_Itaca_Interior",
+      "source": "Tools/Blender/configs/itaca_blockout.json",
+      "generator": "Tools/Blender/generators/itaca_blockout.py",
+      "generator_version": 1,
+      "output": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_Floor_200_Blockout.fbx",
+      "status": "blockout_export_validated",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "AC-03 Itaca presentation",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "passed",
+        "fbx_roundtrip": "passed",
+        "unreal_dimensions": "passed_transient_import",
+        "report": "ContentPipeline/reports/itaca_blockout_validation.json"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_Floor_200_Blockout",
+      "unreal_integrated": false,
+      "license_provenance": "Original repository-authored procedural blockout; no third-party assets",
+      "geometry_sha256": "65a2df3e1830e62672248ea6f3a7e5fad27fe116288a22b34dc639c80cbec0e1",
+      "fbx_sha256": "992e8d1528ba4bdee0c044014af31a135f744f2d7c8f2c8d453ddce169f781ce"
+    },
+    {
+      "id": "SM_Itaca_Wall_200_Blockout",
+      "entry_type": "asset",
+      "category": "Environment",
+      "family": "Ship_Itaca_Interior",
+      "source": "Tools/Blender/configs/itaca_blockout.json",
+      "generator": "Tools/Blender/generators/itaca_blockout.py",
+      "generator_version": 1,
+      "output": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_Wall_200_Blockout.fbx",
+      "status": "blockout_export_validated",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "AC-03 Itaca presentation",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "passed",
+        "fbx_roundtrip": "passed",
+        "unreal_dimensions": "passed_transient_import",
+        "report": "ContentPipeline/reports/itaca_blockout_validation.json"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_Wall_200_Blockout",
+      "unreal_integrated": false,
+      "license_provenance": "Original repository-authored procedural blockout; no third-party assets",
+      "geometry_sha256": "759c5bc3c0efada1c65d256004b0cac6d4589702f1243bafee9ec76e40636c61",
+      "fbx_sha256": "0c7b182cf314c6755b634e3c181a9aaca6e98720089a1d961f369fb7f29a41a1"
+    },
+    {
+      "id": "SM_Itaca_HatchFrame_Blockout",
+      "entry_type": "asset",
+      "category": "Environment",
+      "family": "Ship_Itaca_Interior",
+      "source": "Tools/Blender/configs/itaca_blockout.json",
+      "generator": "Tools/Blender/generators/itaca_blockout.py",
+      "generator_version": 1,
+      "output": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_HatchFrame_Blockout.fbx",
+      "status": "blockout_export_validated",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "AC-03 Itaca presentation",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "passed",
+        "fbx_roundtrip": "passed",
+        "unreal_dimensions": "passed_transient_import",
+        "report": "ContentPipeline/reports/itaca_blockout_validation.json"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_HatchFrame_Blockout",
+      "unreal_integrated": false,
+      "license_provenance": "Original repository-authored procedural blockout; no third-party assets",
+      "geometry_sha256": "5a331721d3573e0496523f5a00694514345e88c721104a2b27ed73360c12afaa",
+      "fbx_sha256": "9eb76db82ec5b0c5c2c69f54fb6b893bba8574fe428d7762d31400ca809a7312"
+    },
+    {
+      "id": "SM_Itaca_ARGOSConsole_Blockout",
+      "entry_type": "asset",
+      "category": "Environment",
+      "family": "Ship_Itaca_Interior",
+      "source": "Tools/Blender/configs/itaca_blockout.json",
+      "generator": "Tools/Blender/generators/itaca_blockout.py",
+      "generator_version": 1,
+      "output": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_ARGOSConsole_Blockout.fbx",
+      "status": "blockout_export_validated",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "AC-03 Itaca presentation",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "passed",
+        "fbx_roundtrip": "passed",
+        "unreal_dimensions": "passed_transient_import",
+        "report": "ContentPipeline/reports/itaca_blockout_validation.json"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_ARGOSConsole_Blockout",
+      "unreal_integrated": false,
+      "license_provenance": "Original repository-authored procedural blockout; no third-party assets",
+      "geometry_sha256": "f7e4c505f606d759ed9ceed7057aee01edfa283d4d60da8f7c7f7fb9002d12fe",
+      "fbx_sha256": "754083434f8d81bae532292154ea4cc1b1aa61a8bdd3585816a6069711d76077"
+    },
+    {
+      "id": "Character_Player_A",
+      "entry_type": "family",
+      "category": "Characters",
+      "family": "Character_Player_A",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_SUPPORTING",
+      "mvp_relevance": "First-person scale, modular suit/body; rig not produced",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Characters/Character_Player_A",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Equipment_Scanner_Tools",
+      "entry_type": "family",
+      "category": "Equipment",
+      "family": "Equipment_Scanner_Tools",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_SUPPORTING",
+      "mvp_relevance": "Scanner, harvesting tool, FP hands and attachment sockets",
+      "dependencies": [
+        "Character_Player_A"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Equipment/Equipment_Scanner_Tools",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Equipment_Suit_Resonator",
+      "entry_type": "family",
+      "category": "Equipment",
+      "family": "Equipment_Suit_Resonator",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Protection and signal_resonator presentation",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Equipment/Equipment_Suit_Resonator",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Ship_Itaca_Interior",
+      "entry_type": "family",
+      "category": "Vehicles",
+      "family": "Ship_Itaca_Interior",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Room, ceiling, panels, hatch leaf; kit sample exported, room not assembled",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Vehicles/Ship_Itaca_Interior",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Itaca_Story_Props",
+      "entry_type": "family",
+      "category": "Story",
+      "family": "Itaca_Story_Props",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Titles, notes, original photographs and repairs",
+      "dependencies": [
+        "Ship_Itaca_Interior"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Story/Itaca_Story_Props",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Ship_Itaca_Exterior",
+      "entry_type": "family",
+      "category": "Vehicles",
+      "family": "Ship_Itaca_Exterior",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "POST_MVP_FOUNDATION",
+      "mvp_relevance": "Hull, cockpit, engines, landing gear, antenna and cargo",
+      "dependencies": [
+        "Ship_Itaca_Interior"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Vehicles/Ship_Itaca_Exterior",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Region_Ground",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Region_Ground",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Bounded runtime region; readable ground material",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Region_Ground",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Region_Rocky_Props",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Region_Rocky_Props",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_SUPPORTING",
+      "mvp_relevance": "Regional rocks and navigation landmarks",
+      "dependencies": [
+        "Region_Ground"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Region_Rocky_Props",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Resource_silicate_fiber",
+      "entry_type": "family",
+      "category": "Resources",
+      "family": "Resource_silicate_fiber",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Harvestable silicate_fiber node",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Resources/Resource_silicate_fiber",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Resource_ferrite_nodule",
+      "entry_type": "family",
+      "category": "Resources",
+      "family": "Resource_ferrite_nodule",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Harvestable ferrite_nodule node",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Resources/Resource_ferrite_nodule",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Resource_SeedSignature",
+      "entry_type": "family",
+      "category": "Resources",
+      "family": "Resource_SeedSignature",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Seed-selected resource; preserve the current C++ catalog IDs",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Resources/Resource_SeedSignature",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Signal_Source_Barrier",
+      "entry_type": "family",
+      "category": "Story",
+      "family": "Signal_Source_Barrier",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Signal source, progression barrier, small anomaly",
+      "dependencies": [
+        "Equipment_Suit_Resonator"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Story/Signal_Source_Barrier",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Creature_Quadruped_A",
+      "entry_type": "family",
+      "category": "Creatures",
+      "family": "Creature_Quadruped_A",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Umbra Grazer shared anatomy/rig and one compatible visual variant",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Creatures/Creature_Quadruped_A",
+      "unreal_integrated": false
+    },
+    {
+      "id": "UI_Visor_Logbook_Map",
+      "entry_type": "family",
+      "category": "UI",
+      "family": "UI_Visor_Logbook_Map",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_REQUIRED",
+      "mvp_relevance": "Instrument readouts, certainty, logbook and revealed map",
+      "dependencies": [],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/UI/UI_Visor_Logbook_Map",
+      "unreal_integrated": false
+    },
+    {
+      "id": "VFX_Scan_Alert",
+      "entry_type": "family",
+      "category": "VFX",
+      "family": "VFX_Scan_Alert",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "MVP_SUPPORTING",
+      "mvp_relevance": "Scan/hologram geometry and threat/damage feedback",
+      "dependencies": [
+        "UI_Visor_Logbook_Map"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/VFX/VFX_Scan_Alert",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Planet_References",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Planet_References",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "POST_MVP_FOUNDATION",
+      "mvp_relevance": "Small 150m, Medium 400m, Large 900m, Giant 2000m; 33x33 samples per face",
+      "dependencies": [
+        "SM_Ref_Human_180_Blockout"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Planet_References",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Desert",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Desert",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Desert",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Rocky",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Rocky",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Rocky",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Forest",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Forest",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Forest",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Ice",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Ice",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Ice",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Volcanic",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Volcanic",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Volcanic",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Biome_Saline",
+      "entry_type": "family",
+      "category": "Planets",
+      "family": "Biome_Saline",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Two 2K ground layers, 1K RGB DetailMask, rock/detail/unique prop catalog",
+      "dependencies": [
+        "Planet_References"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Planets/Biome_Saline",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Props_Destructible",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Props_Destructible",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Closed source meshes; Chaos/runtime implementation still required",
+      "dependencies": [
+        "Biome_Rocky"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Props_Destructible",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Creatures_OtherFamilies",
+      "entry_type": "family",
+      "category": "Creatures",
+      "family": "Creatures_OtherFamilies",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "PHASE_2",
+      "mvp_relevance": "Bipeds, flyers, crawlers, aquatic/exotic families as ecology requires",
+      "dependencies": [
+        "Creature_Quadruped_A"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Creatures/Creatures_OtherFamilies",
+      "unreal_integrated": false
+    },
+    {
+      "id": "NPC_Humanoids",
+      "entry_type": "family",
+      "category": "Characters",
+      "family": "NPC_Humanoids",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Citizen, scientist, engineer, trader, story and hostile roles only when justified",
+      "dependencies": [
+        "Character_Player_A"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Characters/NPC_Humanoids",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Vehicles_Other",
+      "entry_type": "family",
+      "category": "Vehicles",
+      "family": "Vehicles_Other",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "NPC ships, drones/probes, escape craft and wrecks",
+      "dependencies": [
+        "Ship_Itaca_Exterior"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Vehicles/Vehicles_Other",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Structures_Modular",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Structures_Modular",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Corridors, platforms, stations, settlements, doors and lights",
+      "dependencies": [
+        "Ship_Itaca_Interior"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Structures_Modular",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Ruins_AlienTechnology",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Ruins_AlienTechnology",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Expanded ruins, caves and alien machinery; no civilization produced now",
+      "dependencies": [
+        "Signal_Source_Barrier"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Ruins_AlienTechnology",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Machinery_Storage_Extraction",
+      "entry_type": "family",
+      "category": "Environment",
+      "family": "Machinery_Storage_Extraction",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Containers, extractors, lab, greenhouse and colony machinery",
+      "dependencies": [
+        "Structures_Modular"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Environment/Machinery_Storage_Extraction",
+      "unreal_integrated": false
+    },
+    {
+      "id": "Equipment_Weapons",
+      "entry_type": "family",
+      "category": "Equipment",
+      "family": "Equipment_Weapons",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Future weapon/tool families and sockets; not mandatory combat in MVP",
+      "dependencies": [
+        "Character_Player_A"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/Equipment/Equipment_Weapons",
+      "unreal_integrated": false
+    },
+    {
+      "id": "VFX_FutureSystems",
+      "entry_type": "family",
+      "category": "VFX",
+      "family": "VFX_FutureSystems",
+      "source": "Docs/ART_ASSET_MASTER_PLAN.md",
+      "generator": null,
+      "output": null,
+      "status": "planned",
+      "priority": "LATER",
+      "mvp_relevance": "Engine/shield/destruction support when gameplay exists; portals unrequested",
+      "dependencies": [
+        "Vehicles_Other"
+      ],
+      "validation_state": {
+        "source": "not_produced"
+      },
+      "unreal_destination": "/Game/Astraeon/Art/VFX/VFX_FutureSystems",
+      "unreal_integrated": false
+    }
+  ]
+}

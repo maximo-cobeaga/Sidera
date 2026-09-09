@@ -3,7 +3,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "Exploration/AstraeonMapTypes.h"
+#include "Building/AstraeonBuildingTypes.h"
 #include "Knowledge/AstraeonLogbookTypes.h"
+#include "Survival/AstraeonProtectionTypes.h"
 #include "WorldGen/AstraeonEnvironmentTypes.h"
 #include "WorldGen/AstraeonRegionTypes.h"
 #include "AstraeonSaveGame.generated.h"
@@ -25,7 +27,16 @@ class ASTRAEON_API UAstraeonSaveGame : public USaveGame
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
-	int32 SaveGameVersion = 1;
+	int32 SaveGameVersion = 2;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FName PlanetProfileId;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FName RegionProfileId;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	int32 ContentSeed = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
 	int32 WorldSeed = 0;
@@ -53,4 +64,22 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
 	TArray<FAstraeonLogbookEntry> LogbookEntries;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	EAstraeonProtectionModule EquippedProtection = EAstraeonProtectionModule::None;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FVector ItacaOriginCm = FVector::ZeroVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	TArray<FAstraeonPlacedStructure> PlacedStructures;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FName HandItemId;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	float HungerPercent = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	TMap<FName, float> CreatureRespawnTimers;
 };

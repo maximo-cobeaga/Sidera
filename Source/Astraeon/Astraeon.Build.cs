@@ -12,7 +12,8 @@ public class Astraeon : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
-			"EnhancedInput"
+			"EnhancedInput",
+			"ProceduralMeshComponent"
 		});
 	}
 }

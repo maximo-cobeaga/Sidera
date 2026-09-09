@@ -1,0 +1,40 @@
+{
+  "status": "EQUIPMENT_BAKED",
+  "size": 1024,
+  "gear_uv_split": {
+    "SK_Astraeon_Backpack": "ya repartido",
+    "SK_Astraeon_WristComputer": "ya repartido"
+  },
+  "smooth": {
+    "SK_Astraeon_Helmet": "shade_smooth_by_angle 35",
+    "SK_Astraeon_Backpack": "shade_smooth_by_angle 35",
+    "SK_Astraeon_WristComputer": "shade_smooth_by_angle 35"
+  },
+  "regions": {
+    "Helmet": {
+      "objects": [
+        "SK_Astraeon_Helmet"
+      ],
+      "dilated_texels": 143785,
+      "images": [
+        "T_Player_Helmet_Color",
+        "T_Player_Helmet_NormalGL",
+        "T_Player_Helmet_ORM",
+        "T_Player_Helmet_Emission"
+      ]
+    },
+    "Gear": {
+      "objects": [
+        "SK_Astraeon_Backpack",
+        "SK_Astraeon_WristComputer"
+      ],
+      "dilated_texels": 123043,
+      "images": [
+        "T_Player_Gear_Color",
+        "T_Player_Gear_NormalGL",
+        "T_Player_Gear_ORM",
+        "T_Player_Gear_Emission"
+      ]
+    }
+  }
+}

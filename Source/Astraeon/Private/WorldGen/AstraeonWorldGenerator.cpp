@@ -8,6 +8,9 @@ namespace AstraeonScience
 	constexpr float RegionRadiusMeters = 500.0f;
 	constexpr int32 RequiredResourceQuantity = 3;
 	constexpr int32 SeedSignatureResourceQuantity = 2;
+	constexpr int32 DeepResourceQuantity = 3;
+	constexpr int32 CreatureSpawnCount = 5;
+	const FName CoreDrillItemId(TEXT("tool_core_drill"));
 
 	constexpr float MinComfortTemperatureKelvin = 270.0f;
 	constexpr float MaxComfortTemperatureKelvin = 315.0f;
@@ -95,17 +98,38 @@ FAstraeonRegionLayout UAstraeonWorldGenerator::GenerateRegionLayout(int32 WorldS
 		Layout.Resources.Add(Resource);
 	}
 
+	// Vetas profundas: existen desde el primer momento y son visibles, pero no se pueden
+	// tocar sin taladro. Dan una razón concreta para volver a un sitio ya explorado.
+	const FName DeepResources[] = { TEXT("cryo_ferrite_vein"), TEXT("resonant_quartz_vein") };
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(DeepResources); ++Index)
+	{
+		FAstraeonResourceNode DeepNode;
+		DeepNode.ResourceId = DeepResources[Index];
+		DeepNode.LocationMeters = AstraeonScience::RandomPointInRegion(Stream, Layout.RegionRadiusMeters * 0.82f);
+		DeepNode.Quantity = AstraeonScience::DeepResourceQuantity;
+		DeepNode.bSeedSignature = false;
+		DeepNode.RequiredToolId = AstraeonScience::CoreDrillItemId;
+		Layout.Resources.Add(DeepNode);
+	}
+
 	FAstraeonPointOfInterest Signal;
 	Signal.PointId = TEXT("signal_source");
 	Signal.Type = EAstraeonPointOfInterestType::SignalSource;
 	Signal.LocationMeters = AstraeonScience::RandomPointInRegion(Stream, Layout.RegionRadiusMeters * 0.72f);
 	Layout.PointsOfInterest.Add(Signal);
 
-	FAstraeonPointOfInterest CreatureSpawn;
-	CreatureSpawn.PointId = TEXT("first_mob_patrol_origin");
-	CreatureSpawn.Type = EAstraeonPointOfInterestType::CreatureSpawn;
-	CreatureSpawn.LocationMeters = AstraeonScience::RandomPointInRegion(Stream, Layout.RegionRadiusMeters * 0.65f);
-	Layout.PointsOfInterest.Add(CreatureSpawn);
+	// Con un solo punto de aparición la región se sentía deshabitada y cazar dependía de
+	// encontrar al único bicho del planeta. Se reparten varios a distintas distancias.
+	for (int32 CreatureIndex = 0; CreatureIndex < AstraeonScience::CreatureSpawnCount; ++CreatureIndex)
+	{
+		const float RadiusFraction = 0.35f + (0.5f * static_cast<float>(CreatureIndex) / FMath::Max(1, AstraeonScience::CreatureSpawnCount - 1));
+
+		FAstraeonPointOfInterest CreatureSpawn;
+		CreatureSpawn.PointId = *FString::Printf(TEXT("creature_spawn_%d"), CreatureIndex);
+		CreatureSpawn.Type = EAstraeonPointOfInterestType::CreatureSpawn;
+		CreatureSpawn.LocationMeters = AstraeonScience::RandomPointInRegion(Stream, Layout.RegionRadiusMeters * RadiusFraction);
+		Layout.PointsOfInterest.Add(CreatureSpawn);
+	}
 
 	FAstraeonPointOfInterest MinorAnomaly;
 	MinorAnomaly.PointId = TEXT("minor_geologic_anomaly");

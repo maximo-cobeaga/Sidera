@@ -1,0 +1,401 @@
+{
+  "scope": "isolated local Blender; saved legacy file only",
+  "bridge_local_connection": "NOT VERIFIED",
+  "active_user_scene": "NOT VERIFIED",
+  "character_animation_service": "NOT VERIFIED",
+  "local_mesh_create_modify_cleanup": "PASS",
+  "local_object_keyframe_creation": "PASS",
+  "source_file_unchanged_sha256": "87325febd1433ce0d441083eb43c544bb44d6166439fd9dd1f973f5644932ccd",
+  "scene": {
+    "blender_version": "5.2.1 LTS",
+    "background": true,
+    "filepath": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\ContentPipeline\\Generated\\HumanoidBlockout\\Humanoid_Blockout_Source.blend",
+    "units": {
+      "system": "METRIC",
+      "scale_length": 1.0
+    },
+    "fps": 30.0,
+    "frame": 1,
+    "collections": [
+      "Collection"
+    ],
+    "objects": [
+      {
+        "name": "SKEL_Humanoid_A",
+        "type": "ARMATURE",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.7171300649642944,
+          0.4260392487049103,
+          1.7696467638015747
+        ],
+        "collections": [
+          "Collection"
+        ],
+        "bones": [
+          {
+            "name": "root",
+            "parent": null
+          },
+          {
+            "name": "pelvis",
+            "parent": "root"
+          },
+          {
+            "name": "spine_01",
+            "parent": "pelvis"
+          },
+          {
+            "name": "spine_02",
+            "parent": "spine_01"
+          },
+          {
+            "name": "spine_03",
+            "parent": "spine_02"
+          },
+          {
+            "name": "neck",
+            "parent": "spine_03"
+          },
+          {
+            "name": "head",
+            "parent": "neck"
+          },
+          {
+            "name": "socket_helmet",
+            "parent": "head"
+          },
+          {
+            "name": "clavicle_l",
+            "parent": "spine_03"
+          },
+          {
+            "name": "upperarm_l",
+            "parent": "clavicle_l"
+          },
+          {
+            "name": "lowerarm_l",
+            "parent": "upperarm_l"
+          },
+          {
+            "name": "hand_l",
+            "parent": "lowerarm_l"
+          },
+          {
+            "name": "index_01_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "index_02_l",
+            "parent": "index_01_l"
+          },
+          {
+            "name": "index_03_l",
+            "parent": "index_02_l"
+          },
+          {
+            "name": "middle_01_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "middle_02_l",
+            "parent": "middle_01_l"
+          },
+          {
+            "name": "middle_03_l",
+            "parent": "middle_02_l"
+          },
+          {
+            "name": "ring_01_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "ring_02_l",
+            "parent": "ring_01_l"
+          },
+          {
+            "name": "ring_03_l",
+            "parent": "ring_02_l"
+          },
+          {
+            "name": "pinky_01_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "pinky_02_l",
+            "parent": "pinky_01_l"
+          },
+          {
+            "name": "pinky_03_l",
+            "parent": "pinky_02_l"
+          },
+          {
+            "name": "thumb_01_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "thumb_02_l",
+            "parent": "thumb_01_l"
+          },
+          {
+            "name": "thumb_03_l",
+            "parent": "thumb_02_l"
+          },
+          {
+            "name": "socket_tool_l",
+            "parent": "hand_l"
+          },
+          {
+            "name": "clavicle_r",
+            "parent": "spine_03"
+          },
+          {
+            "name": "upperarm_r",
+            "parent": "clavicle_r"
+          },
+          {
+            "name": "lowerarm_r",
+            "parent": "upperarm_r"
+          },
+          {
+            "name": "hand_r",
+            "parent": "lowerarm_r"
+          },
+          {
+            "name": "index_01_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "index_02_r",
+            "parent": "index_01_r"
+          },
+          {
+            "name": "index_03_r",
+            "parent": "index_02_r"
+          },
+          {
+            "name": "middle_01_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "middle_02_r",
+            "parent": "middle_01_r"
+          },
+          {
+            "name": "middle_03_r",
+            "parent": "middle_02_r"
+          },
+          {
+            "name": "ring_01_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "ring_02_r",
+            "parent": "ring_01_r"
+          },
+          {
+            "name": "ring_03_r",
+            "parent": "ring_02_r"
+          },
+          {
+            "name": "pinky_01_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "pinky_02_r",
+            "parent": "pinky_01_r"
+          },
+          {
+            "name": "pinky_03_r",
+            "parent": "pinky_02_r"
+          },
+          {
+            "name": "thumb_01_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "thumb_02_r",
+            "parent": "thumb_01_r"
+          },
+          {
+            "name": "thumb_03_r",
+            "parent": "thumb_02_r"
+          },
+          {
+            "name": "socket_tool_r",
+            "parent": "hand_r"
+          },
+          {
+            "name": "socket_backpack",
+            "parent": "spine_03"
+          },
+          {
+            "name": "thigh_l",
+            "parent": "pelvis"
+          },
+          {
+            "name": "calf_l",
+            "parent": "thigh_l"
+          },
+          {
+            "name": "foot_l",
+            "parent": "calf_l"
+          },
+          {
+            "name": "ball_l",
+            "parent": "foot_l"
+          },
+          {
+            "name": "thigh_r",
+            "parent": "pelvis"
+          },
+          {
+            "name": "calf_r",
+            "parent": "thigh_r"
+          },
+          {
+            "name": "foot_r",
+            "parent": "calf_r"
+          },
+          {
+            "name": "ball_r",
+            "parent": "foot_r"
+          }
+        ],
+        "materials": []
+      },
+      {
+        "name": "SK_Human_Body_Blockout",
+        "type": "MESH",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.7426776885986328,
+          0.44294992089271545,
+          1.7996283769607544
+        ],
+        "collections": [
+          "Collection"
+        ],
+        "bones": [],
+        "materials": [
+          "M_Human_fabric",
+          "M_Human_shell",
+          "M_Human_visor",
+          "M_Human_accent"
+        ]
+      },
+      {
+        "name": "SK_Human_HandsFP_Blockout",
+        "type": "MESH",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "dimensions": [
+          0.7426776885986328,
+          0.15053753554821014,
+          0.45240187644958496
+        ],
+        "collections": [
+          "Collection"
+        ],
+        "bones": [],
+        "materials": [
+          "M_Human_fabric",
+          "M_Human_shell"
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "name": "AN_Human_Grip_Blockout",
+        "frame_range": [
+          1.0,
+          31.0
+        ]
+      },
+      {
+        "name": "AN_Human_Idle_Blockout",
+        "frame_range": [
+          1.0,
+          91.0
+        ]
+      },
+      {
+        "name": "AN_Human_Interact_Blockout",
+        "frame_range": [
+          1.0,
+          37.0
+        ]
+      },
+      {
+        "name": "AN_Human_Jump_Blockout",
+        "frame_range": [
+          1.0,
+          31.0
+        ]
+      },
+      {
+        "name": "AN_Human_Land_Blockout",
+        "frame_range": [
+          1.0,
+          19.0
+        ]
+      },
+      {
+        "name": "AN_Human_Run_Blockout",
+        "frame_range": [
+          1.0,
+          21.0
+        ]
+      },
+      {
+        "name": "AN_Human_Walk_Blockout",
+        "frame_range": [
+          1.0,
+          31.0
+        ]
+      }
+    ]
+  },
+  "new_character_qa": "NOT VERIFIED"
+}

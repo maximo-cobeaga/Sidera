@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "textures": [
+    {
+      "path": "/Game/Astraeon/Art/ItacaTerrain/T_Regolith_BC",
+      "sha256": "a49a96fa15dd69bffd6d2b60d9105c07ec4840bce84b5affb98cbfac43cf91e8"
+    },
+    {
+      "path": "/Game/Astraeon/Art/ItacaTerrain/T_Strata_BC",
+      "sha256": "ab820c2186d7cf36c93c367f02fa087d26babdb913d796e6335b885f1ade4d1e"
+    },
+    {
+      "path": "/Game/Astraeon/Art/ItacaTerrain/T_ItacaPanel_BC",
+      "sha256": "1bbf787001d54d5258e763f41c79173f85a197e2f40f9c6227359ffddee34b08"
+    }
+  ],
+  "materials": [
+    "/Game/Astraeon/Art/ItacaTerrain/M_Itaca_Deck.M_Itaca_Deck",
+    "/Game/Astraeon/Art/ItacaTerrain/M_Itaca_Guide.M_Itaca_Guide",
+    "/Game/Astraeon/Art/ItacaTerrain/M_Itaca_Panel.M_Itaca_Panel",
+    "/Game/Astraeon/Art/ItacaTerrain/M_Itaca_Trim.M_Itaca_Trim",
+    "/Game/Astraeon/Art/ItacaTerrain/M_Terrain_Geology.M_Terrain_Geology",
+    "/Game/Astraeon/Art/ItacaTerrain/T_ItacaPanel_BC.T_ItacaPanel_BC",
+    "/Game/Astraeon/Art/ItacaTerrain/T_Regolith_BC.T_Regolith_BC",
+    "/Game/Astraeon/Art/ItacaTerrain/T_Strata_BC.T_Strata_BC"
+  ]
+}

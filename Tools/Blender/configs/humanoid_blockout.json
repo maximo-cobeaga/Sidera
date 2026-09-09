@@ -1,0 +1,22 @@
+{
+  "generator_version": 1,
+  "height_m": 1.8,
+  "fps": 30,
+  "body_triangle_budget": 35000,
+  "hands_triangle_budget": 12000,
+  "animations": {
+    "Idle": {"frames": 91, "loop": true},
+    "Walk": {"frames": 31, "loop": true},
+    "Run": {"frames": 21, "loop": true},
+    "Jump": {"frames": 31, "loop": false},
+    "Land": {"frames": 19, "loop": false},
+    "Interact": {"frames": 37, "loop": false},
+    "Grip": {"frames": 31, "loop": false}
+  },
+  "palette": {
+    "fabric": [0.055, 0.082, 0.105],
+    "shell": [0.48, 0.58, 0.62],
+    "visor": [0.015, 0.075, 0.095],
+    "accent": [0.04, 0.52, 0.60]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "bones": 75,
+  "twist_bones": [
+    "upperarm_twist_01_l",
+    "lowerarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "lowerarm_twist_01_r"
+  ],
+  "joint_vertices_corrected": 15231,
+  "method": "localized authored weight smoothing + axial twist distribution",
+  "manual_ui_weight_paint": false,
+  "deformation_visual_audit": "passed 2026-09-08: codo 95, hombro 75, cadera 85, rodilla 105; volumen -0.2 a -1.15%; equipo sigue su hueso"
+}

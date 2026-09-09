@@ -1,0 +1,252 @@
+{
+  "passed": true,
+  "generator_version": 1,
+  "blender_version": "5.2.1 LTS",
+  "species_id": "umbra_grazer",
+  "config_sha256": "9323f0db626cb4639571f976392da8baaedf61a42249450835008ec20a2dd7f6",
+  "generator_sha256": "71e123d7f1046c2e4e32fb9a62a545c92f917d0c2d35245428419dfe8fba385b",
+  "validator_sha256": "cc6e3a49d356894b0f531c3af345a233538d5f22f823e3938c6484fde54dada3",
+  "unreal_gameplay_integration": false,
+  "determinism": {
+    "passed": true,
+    "geometry_sha256": "69790328a5a9dc73e6e8d64f9b081259fc17abe6b194b425a4c8e0f3f018683c"
+  },
+  "source": {
+    "bones": 37,
+    "meshes": [
+      {
+        "id": "SK_Creature_UmbraGrazer_Blockout",
+        "vertices": 2590,
+        "triangles": 5080,
+        "materials": 2,
+        "dimensions_m": [
+          0.5094090700149536,
+          1.4108768701553345,
+          0.7138195037841797
+        ],
+        "passed": true
+      },
+      {
+        "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+        "vertices": 2758,
+        "triangles": 5404,
+        "materials": 2,
+        "dimensions_m": [
+          0.5094090700149536,
+          1.4108768701553345,
+          0.7210000157356262
+        ],
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "negative_controls": [
+    {
+      "case": "unapplied_scale",
+      "rejected": true
+    },
+    {
+      "case": "displaced_origin",
+      "rejected": true
+    },
+    {
+      "case": "unnormalized_weights",
+      "rejected": true
+    },
+    {
+      "case": "unweighted_vertex",
+      "rejected": true
+    },
+    {
+      "case": "missing_socket",
+      "rejected": true
+    },
+    {
+      "case": "truncated_tail",
+      "rejected": true
+    }
+  ],
+  "animations": [
+    {
+      "id": "AN_Creature_Graze_Blockout",
+      "frames": 91,
+      "loop": true,
+      "state": "Patrolling",
+      "root_motion": false,
+      "min_z_m": -2.514570951461792e-08,
+      "max_z_m": 0.7206230759620667,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Walk_Blockout",
+      "frames": 41,
+      "loop": true,
+      "state": "Patrolling",
+      "root_motion": false,
+      "min_z_m": -2.6088216031894262e-08,
+      "max_z_m": 0.7692641019821167,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Alert_Blockout",
+      "frames": 61,
+      "loop": true,
+      "state": "Alert",
+      "root_motion": false,
+      "min_z_m": 2.9336661100387573e-08,
+      "max_z_m": 0.8696537017822266,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Threaten_Blockout",
+      "frames": 31,
+      "loop": true,
+      "state": "Threatening",
+      "root_motion": false,
+      "min_z_m": -5.8673322200775146e-08,
+      "max_z_m": 0.7099942564964294,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Flee_Blockout",
+      "frames": 21,
+      "loop": true,
+      "state": "Disengaging",
+      "root_motion": false,
+      "min_z_m": -1.4901161193847656e-08,
+      "max_z_m": 0.9292632341384888,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Hit_Blockout",
+      "frames": 19,
+      "loop": false,
+      "state": "Damaged",
+      "root_motion": false,
+      "min_z_m": -5.075708031654358e-08,
+      "max_z_m": 1.074027419090271,
+      "passed": true
+    },
+    {
+      "id": "AN_Creature_Death_Blockout",
+      "frames": 37,
+      "loop": false,
+      "state": "Dead",
+      "root_motion": false,
+      "min_z_m": -7.82310962677002e-08,
+      "max_z_m": 0.726120114326477,
+      "passed": true,
+      "final_height_m": 0.4988303780555725,
+      "final_peak_m": [
+        0.025317786261439323,
+        0.10550418496131897,
+        0.4988303780555725
+      ]
+    }
+  ],
+  "files": [
+    {
+      "id": "SK_Creature_UmbraGrazer_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/SK_Creature_UmbraGrazer_Blockout.fbx",
+      "sha256": "b8ce64409719771409aac4a0310b829479518ae4c1cce603369440c92c42c404"
+    },
+    {
+      "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/SK_Creature_UmbraGrazer_Plated_Blockout.fbx",
+      "sha256": "d833f52bf759a610db34327b83142b510480624e83c4b74a143771611bcf1b09"
+    },
+    {
+      "id": "AN_Creature_Graze_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Graze_Blockout.fbx",
+      "sha256": "c95d2d2b2f2666ef62bee6dcd1b20541b67c8ef441500df6b6f0d6b08b2a5595"
+    },
+    {
+      "id": "AN_Creature_Walk_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Walk_Blockout.fbx",
+      "sha256": "dddd69a0f9c4acf386824f83c1d23e9b23abaf326aea51d9dcf9b280bed16744"
+    },
+    {
+      "id": "AN_Creature_Alert_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Alert_Blockout.fbx",
+      "sha256": "c2663630eba767d1f6b888c4edbbcd9a330f54c520eb89ebd909b2e1efee70df"
+    },
+    {
+      "id": "AN_Creature_Threaten_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Threaten_Blockout.fbx",
+      "sha256": "cfaec31d50e43bed488f6c1167cfa20d2f5541161a299a74e29df41f51380c17"
+    },
+    {
+      "id": "AN_Creature_Flee_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Flee_Blockout.fbx",
+      "sha256": "f36d159b4fc6c415b483e05045f64687fe6dc98b0a8faf2ddd462da397e3633f"
+    },
+    {
+      "id": "AN_Creature_Hit_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Hit_Blockout.fbx",
+      "sha256": "303b03eabd5cc408b44e3941337a699c7746a26dc949461d0aeaa0bd16de8bfd"
+    },
+    {
+      "id": "AN_Creature_Death_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Death_Blockout.fbx",
+      "sha256": "3d0fc3f60aeab6dadb973301d53532e72124dd8806efc5cf7675a8f2c41978a3"
+    }
+  ],
+  "roundtrip": [
+    {
+      "id": "SK_Creature_UmbraGrazer_Blockout",
+      "passed": true,
+      "bones": 37,
+      "length_m": 1.4108768701553345
+    },
+    {
+      "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+      "passed": true,
+      "bones": 37,
+      "length_m": 1.4108768701553345
+    },
+    {
+      "id": "AN_Creature_Graze_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 91
+    },
+    {
+      "id": "AN_Creature_Walk_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 41
+    },
+    {
+      "id": "AN_Creature_Alert_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 61
+    },
+    {
+      "id": "AN_Creature_Threaten_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 31
+    },
+    {
+      "id": "AN_Creature_Flee_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 21
+    },
+    {
+      "id": "AN_Creature_Hit_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 19
+    },
+    {
+      "id": "AN_Creature_Death_Blockout",
+      "passed": true,
+      "bones": 37,
+      "duration_frames": 37
+    }
+  ],
+  "stage": "source_skin_actions_fbx_preview_complete"
+}

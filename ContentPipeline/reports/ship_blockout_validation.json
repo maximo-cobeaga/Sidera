@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "stage": "source_export_roundtrip_preview_complete",
+  "blender_version": "5.2.1 LTS",
+  "generator_version": 1,
+  "seed": 13579,
+  "unreal_integration": "not_checked_here",
+  "assembly": {
+    "hull_length_m": 13.0,
+    "hull_mount_z_m": 0.45,
+    "engine_mount_y_m": 4.25,
+    "engine_mount_x_m": -3.4,
+    "engine_mount_z_m": 1.15,
+    "gear_mount_x_m": [
+      4.3,
+      -3.6
+    ],
+    "gear_mount_y_m": 2.9,
+    "antenna_mount_x_m": -1.6,
+    "antenna_mount_z_m": 4.32
+  },
+  "config_sha256": "27e8bcaba5abbf87bb0769f01fdfff516e179a298f69ab1d02966c563e961def",
+  "generator_sha256": "7239db8aafbf215d68acac191fde1afdfc0a8909354420bfabf80b98f8343992",
+  "tests": [
+    {
+      "test": "unapplied_scale",
+      "passed": true,
+      "detected": [
+        "applied_scale"
+      ]
+    },
+    {
+      "test": "wrong_name",
+      "passed": true,
+      "detected": [
+        "object_name"
+      ]
+    },
+    {
+      "test": "wrong_pivot",
+      "passed": true,
+      "detected": [
+        "origin"
+      ]
+    },
+    {
+      "test": "missing_uv",
+      "passed": true,
+      "detected": [
+        "missing_debug_uv"
+      ]
+    },
+    {
+      "test": "missing_material",
+      "passed": true,
+      "detected": [
+        "material_slots"
+      ]
+    },
+    {
+      "test": "modifier",
+      "passed": true,
+      "detected": [
+        "unsupported_modifiers"
+      ]
+    },
+    {
+      "test": "unapplied_rotation",
+      "passed": true,
+      "detected": [
+        "applied_rotation"
+      ]
+    },
+    {
+      "test": "wrong_geometry_dimensions",
+      "passed": true,
+      "detected": [
+        "dimensions_m"
+      ]
+    },
+    {
+      "test": "inverted_normals",
+      "passed": true,
+      "detected": [
+        "outward_normals",
+        "outward_normals",
+        "outward_normals"
+      ]
+    },
+    {
+      "test": "open_mesh",
+      "passed": true,
+      "detected": [
+        "manifold_or_winding"
+      ]
+    },
+    {
+      "test": "SM_Itaca_Hull_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_Engine_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_LandingGear_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_Antenna_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_HatchLeaf_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_PilotConsole_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_Fabricator_Blockout_repeat",
+      "passed": true
+    }
+  ],
+  "assets": [
+    {
+      "id": "SM_Itaca_Hull_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        13.0,
+        7.0,
+        4.400000095367432
+      ],
+      "triangles": 28,
+      "shells": 1,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "030cad8cfa0c68a9361aa2c71cda8d45bedfd8a2567b02e524dcb1e0e982b012",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_Hull_Blockout.fbx",
+      "fbx_sha256": "a3f7796375fe923404b400ca7351dbc5f2044a06daec47d37692fe486234cc86",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_Engine_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        3.5999999046325684,
+        1.5,
+        1.5
+      ],
+      "triangles": 36,
+      "shells": 3,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "ac84cb2d4de70ad54f010b42348f00b2ca395859ecef1c6e5326cd68ad1d1520",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_Engine_Blockout.fbx",
+      "fbx_sha256": "a8bf333a057f295abf82e3229ba35f09600005ad90d17c40c72fdf2721748115",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_LandingGear_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.8999999761581421,
+        0.5,
+        0.6000000238418579
+      ],
+      "triangles": 24,
+      "shells": 2,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "3315b8a7bfbc0b46bd0137d645a9ada1b71583b8fbfaa61b368c6d59c7d34e71",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_LandingGear_Blockout.fbx",
+      "fbx_sha256": "88ec948824b38b434425c5e223d98ebccd95ebb3f8d95458d4a66ec56fc4e8c0",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_Antenna_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.699999988079071,
+        0.699999988079071,
+        1.100000023841858
+      ],
+      "triangles": 24,
+      "shells": 2,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "5df43d6a08c5c68d824e2c1922071b08a6fefde55e19a61bc28a5a7051bf5818",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_Antenna_Blockout.fbx",
+      "fbx_sha256": "28974d25585b9c7c235a572ccd4940a8de4765575f79d962b11e1e6ab11c673d",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_HatchLeaf_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.2999999523162842,
+        0.10000000149011612,
+        2.200000047683716
+      ],
+      "triangles": 24,
+      "shells": 2,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "519a39d32ea3cd2d0c49511f7589442c5e9d991a544f28373a4ddfc61481f0ac",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_HatchLeaf_Blockout.fbx",
+      "fbx_sha256": "d5fa540bf91330795379c033d8b37fb0110c9a2ba15e6e04dbb6b8f4a5bc3a5a",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_PilotConsole_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.949999988079071,
+        0.699999988079071,
+        1.25
+      ],
+      "triangles": 48,
+      "shells": 4,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "652e1e18b42dfd239d8615b9fe30ef86d98e2d82c2e8de2f334bc453fb227158",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_PilotConsole_Blockout.fbx",
+      "fbx_sha256": "f6b77399e165b365b25a66b354da19138c1aae549e37a544290397d7aa0f237d",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_Fabricator_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.100000023841858,
+        0.75,
+        1.149999976158142
+      ],
+      "triangles": 60,
+      "shells": 5,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "469f932d4ea75fb1b44415c52ef15049c00df8f901604f852b267b6fedfd7c3a",
+      "fbx": "ContentPipeline/Generated/ShipBlockout/SM_Itaca_Fabricator_Blockout.fbx",
+      "fbx_sha256": "c2093c6a64c86b65f615f6ba870d1ab561109fe9dbf7d85a5fdd7613f4ba606e",
+      "fbx_roundtrip_passed": true
+    }
+  ],
+  "assembled_envelope_m": {
+    "length_m": 13.0,
+    "width_m": 10.0,
+    "height_m": 5.870000000000001
+  }
+}

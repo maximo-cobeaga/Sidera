@@ -1,0 +1,33 @@
+{
+  "generator_version": 1,
+  "fps": 30,
+  "species_id": "umbra_grazer",
+  "length_m": 1.4,
+  "width_m": 0.8,
+  "shoulder_height_m": 0.7,
+  "triangle_budget": 15000,
+  "material_slots_per_mesh": 2,
+  "meshes": [
+    {
+      "id": "SK_Creature_UmbraGrazer_Blockout",
+      "variant": "base",
+      "plated": false,
+      "palette": {"hide": [0.055, 0.045, 0.062], "plate": [0.42, 0.40, 0.36]}
+    },
+    {
+      "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+      "variant": "plated",
+      "plated": true,
+      "palette": {"hide": [0.046, 0.058, 0.052], "plate": [0.30, 0.35, 0.31]}
+    }
+  ],
+  "animations": {
+    "Graze": {"frames": 91, "loop": true, "state": "Patrolling"},
+    "Walk": {"frames": 41, "loop": true, "state": "Patrolling"},
+    "Alert": {"frames": 61, "loop": true, "state": "Alert"},
+    "Threaten": {"frames": 31, "loop": true, "state": "Threatening"},
+    "Flee": {"frames": 21, "loop": true, "state": "Disengaging"},
+    "Hit": {"frames": 19, "loop": false, "state": "Damaged"},
+    "Death": {"frames": 37, "loop": false, "state": "Dead"}
+  }
+}

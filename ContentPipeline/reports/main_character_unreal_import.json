@@ -1,0 +1,445 @@
+{
+  "passed": true,
+  "saved_packages": true,
+  "gameplay_integrated": false,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "destination": "/Game/Astraeon/Characters/Player",
+  "clips": [
+    {
+      "name": "AN_Player_Crouch_Enter",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Enter.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Enter",
+      "duration_s": 0.699999988079071,
+      "bones": 71,
+      "evaluated_motion": 0.6936952054511166,
+      "loop_seam": 0.6936952054511166
+    },
+    {
+      "name": "AN_Player_Crouch_Exit",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Exit.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Exit",
+      "duration_s": 0.699999988079071,
+      "bones": 71,
+      "evaluated_motion": 0.6936952053892883,
+      "loop_seam": 0.6936952053892883
+    },
+    {
+      "name": "AN_Player_Crouch_Idle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Idle",
+      "duration_s": 2.0,
+      "bones": 71,
+      "evaluated_motion": 0.012625447449819985,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Crouch_Walk_B",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_B.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_B",
+      "duration_s": 1.399999976158142,
+      "bones": 71,
+      "evaluated_motion": 0.19741632300218653,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Crouch_Walk_F",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_F.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_F",
+      "duration_s": 1.399999976158142,
+      "bones": 71,
+      "evaluated_motion": 0.19741632300218653,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Crouch_Walk_L",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_L.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_L",
+      "duration_s": 1.399999976158142,
+      "bones": 71,
+      "evaluated_motion": 0.218894287964694,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Crouch_Walk_R",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_R.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_R",
+      "duration_s": 1.399999976158142,
+      "bones": 71,
+      "evaluated_motion": 0.21889428801546673,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Idle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Idle",
+      "duration_s": 3.0,
+      "bones": 71,
+      "evaluated_motion": 1.9995352789823277,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Inspect",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Inspect.AN_Astraeon_Player_All_Armature_AN_Player_Inspect",
+      "duration_s": 3.0,
+      "bones": 71,
+      "evaluated_motion": 0.5240847376740576,
+      "loop_seam": 0.49300715270893514
+    },
+    {
+      "name": "AN_Player_Interact",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Interact.AN_Astraeon_Player_All_Armature_AN_Player_Interact",
+      "duration_s": 1.5,
+      "bones": 71,
+      "evaluated_motion": 0.27746748778996616,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Jump_Land",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land",
+      "duration_s": 0.699999988079071,
+      "bones": 71,
+      "evaluated_motion": 0.41131106913817483,
+      "loop_seam": 0.322113581481202
+    },
+    {
+      "name": "AN_Player_Jump_Loop",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.04822012727102426,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Jump_Start",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Start.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Start",
+      "duration_s": 0.5,
+      "bones": 71,
+      "evaluated_motion": 0.4482764978101334,
+      "loop_seam": 0.350360416369777
+    },
+    {
+      "name": "AN_Player_OneHand_Aim",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Aim.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Aim",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.049954264970408745,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_OneHand_Equip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Equip.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Equip",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.40491865329393156,
+      "loop_seam": 0.40491865329393156
+    },
+    {
+      "name": "AN_Player_OneHand_Idle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Idle.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Idle",
+      "duration_s": 2.0,
+      "bones": 71,
+      "evaluated_motion": 0.008819194330739244,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_OneHand_Lower",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Lower.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Lower",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.3296632568891483,
+      "loop_seam": 0.3296632568891483
+    },
+    {
+      "name": "AN_Player_OneHand_Unequip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Unequip",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.40491865355631984,
+      "loop_seam": 0.40491865355631984
+    },
+    {
+      "name": "AN_Player_Pickup",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Pickup.AN_Astraeon_Player_All_Armature_AN_Player_Pickup",
+      "duration_s": 2.0,
+      "bones": 71,
+      "evaluated_motion": 0.6091752452627549,
+      "loop_seam": 0.2742273667626375
+    },
+    {
+      "name": "AN_Player_Run_B",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Run_B.AN_Astraeon_Player_All_Armature_AN_Player_Run_B",
+      "duration_s": 0.800000011920929,
+      "bones": 71,
+      "evaluated_motion": 0.6233540724975328,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "AN_Player_Run_F",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Run_F.AN_Astraeon_Player_All_Armature_AN_Player_Run_F",
+      "duration_s": 0.800000011920929,
+      "bones": 71,
+      "evaluated_motion": 0.6233540724975328,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "AN_Player_Run_L",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Run_L.AN_Astraeon_Player_All_Armature_AN_Player_Run_L",
+      "duration_s": 0.800000011920929,
+      "bones": 71,
+      "evaluated_motion": 0.2691943333796612,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Run_R",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Run_R.AN_Astraeon_Player_All_Armature_AN_Player_Run_R",
+      "duration_s": 0.800000011920929,
+      "bones": 71,
+      "evaluated_motion": 0.2691943251733063,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "AN_Player_Scan",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Scan.AN_Astraeon_Player_All_Armature_AN_Player_Scan",
+      "duration_s": 2.5,
+      "bones": 71,
+      "evaluated_motion": 0.46639792765947863,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Tool_Equip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Equip.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Equip",
+      "duration_s": 1.5,
+      "bones": 71,
+      "evaluated_motion": 0.35774420084563824,
+      "loop_seam": 0.35774420084563824
+    },
+    {
+      "name": "AN_Player_Tool_Idle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Idle",
+      "duration_s": 2.0,
+      "bones": 71,
+      "evaluated_motion": 0.02998490351570196,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Tool_Unequip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Unequip",
+      "duration_s": 1.5,
+      "bones": 71,
+      "evaluated_motion": 0.3577442010477488,
+      "loop_seam": 0.3577442010477488
+    },
+    {
+      "name": "AN_Player_Tool_Use",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Use.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Use",
+      "duration_s": 1.5,
+      "bones": 71,
+      "evaluated_motion": 0.22526165460842665,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_TwoHand_Aim",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Aim.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Aim",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.07987494279505158,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_TwoHand_Equip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Equip.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Equip",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.5478121073679478,
+      "loop_seam": 0.4279053716630738
+    },
+    {
+      "name": "AN_Player_TwoHand_Idle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Idle.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Idle",
+      "duration_s": 2.0,
+      "bones": 71,
+      "evaluated_motion": 0.0399752155485264,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_TwoHand_Lower",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Lower.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Lower",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.19564709630267552,
+      "loop_seam": 0.195647065754688
+    },
+    {
+      "name": "AN_Player_TwoHand_Unequip",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Unequip",
+      "duration_s": 1.0,
+      "bones": 71,
+      "evaluated_motion": 0.4616835975774607,
+      "loop_seam": 0.427905371899567
+    },
+    {
+      "name": "AN_Player_UseTool",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_UseTool.AN_Astraeon_Player_All_Armature_AN_Player_UseTool",
+      "duration_s": 1.5,
+      "bones": 71,
+      "evaluated_motion": 0.21193771824906882,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Walk_B",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Walk_B.AN_Astraeon_Player_All_Armature_AN_Player_Walk_B",
+      "duration_s": 1.2000000476837158,
+      "bones": 71,
+      "evaluated_motion": 1.8421674833643027,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Walk_F",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Walk_F.AN_Astraeon_Player_All_Armature_AN_Player_Walk_F",
+      "duration_s": 1.2000000476837158,
+      "bones": 71,
+      "evaluated_motion": 1.8421674833643027,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Walk_L",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Walk_L.AN_Astraeon_Player_All_Armature_AN_Player_Walk_L",
+      "duration_s": 1.2000000476837158,
+      "bones": 71,
+      "evaluated_motion": 0.2691943333796612,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "AN_Player_Walk_R",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_AN_Player_Walk_R.AN_Astraeon_Player_All_Armature_AN_Player_Walk_R",
+      "duration_s": 1.2000000476837158,
+      "bones": 71,
+      "evaluated_motion": 0.2691943251733063,
+      "loop_seam": 0.0
+    },
+    {
+      "name": "Grip_Fist",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Fist.AN_Astraeon_Player_All_Armature_Grip_Fist",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_Object",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Object.AN_Astraeon_Player_All_Armature_Grip_Object",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_Open",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Open.AN_Astraeon_Player_All_Armature_Grip_Open",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_Pistol",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Pistol.AN_Astraeon_Player_All_Armature_Grip_Pistol",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_Rifle",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Rifle.AN_Astraeon_Player_All_Armature_Grip_Rifle",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_Tool",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_Tool.AN_Astraeon_Player_All_Armature_Grip_Tool",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    },
+    {
+      "name": "Grip_TwoHand",
+      "asset": "/Game/Astraeon/Characters/Player/AN_Astraeon_Player_All_Armature_Grip_TwoHand.AN_Astraeon_Player_All_Armature_Grip_TwoHand",
+      "duration_s": 0.03333333507180214,
+      "bones": 71,
+      "evaluated_motion": 1.1102230246251565e-16,
+      "loop_seam": 1.1102230246251565e-16
+    }
+  ],
+  "source_hashes": {
+    "AN_Astraeon_Player_All.fbx": "a3454e123117b0457837d812a89759af0fbec60d8a9a0806d77d6ad63ffdb301",
+    "SK_Astraeon_Helmet.fbx": "46f0a20414d27f95071a4c0f821c2074116c7a99cb90e67b8fa38f6962feeaa8",
+    "SK_Astraeon_Player.fbx": "c9387bcb778b1fa837ce42d28b45d9dd631eeaf78edd32e8426634b7e9ec3508",
+    "SK_Astraeon_Player_LOD1.fbx": "edb0a429ef1ee3d8afd134d23e04bb550cb360a7d9e01901346b9f5a3156874d",
+    "SK_Astraeon_Player_LOD2.fbx": "778297ce0738761bb546c42f2d89c5ffe21fd68b16f09edaafa04cac15df9e66",
+    "SK_Astraeon_Player_LOD3.fbx": "43578d74a19433b1d5dca229bb395902b2044120679b12e2c2cec2e0121694dc"
+  },
+  "dimensions_cm": [
+    183.71703338623047,
+    38.15013885498047,
+    183.00176396849565
+  ],
+  "skeletal_editor_api": [
+    "get_lod_build_settings",
+    "get_lod_count",
+    "get_lod_material_slot",
+    "get_section_recompute_tangents_vertex_mask_channel",
+    "import_lod",
+    "regenerate_lod",
+    "reimport_all_custom_lods",
+    "remove_lods",
+    "rename_socket",
+    "set_lod_build_settings",
+    "set_section_recompute_tangents_vertex_mask_channel",
+    "strip_lod_geometry"
+  ],
+  "lod_count": 4,
+  "imported_animation_names": [
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Enter",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Exit",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Idle",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_B",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_F",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_L",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_R",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Idle",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Inspect",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Interact",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Jump_Start",
+    "AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Aim",
+    "AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Equip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Idle",
+    "AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Lower",
+    "AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Unequip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Pickup",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Run_B",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Run_F",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Run_L",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Run_R",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Scan",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Tool_Equip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Tool_Idle",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Tool_Unequip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Tool_Use",
+    "AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Aim",
+    "AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Equip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Idle",
+    "AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Lower",
+    "AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Unequip",
+    "AN_Astraeon_Player_All_Armature_AN_Player_UseTool",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Walk_B",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Walk_F",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Walk_L",
+    "AN_Astraeon_Player_All_Armature_AN_Player_Walk_R",
+    "AN_Astraeon_Player_All_Armature_Grip_Fist",
+    "AN_Astraeon_Player_All_Armature_Grip_Object",
+    "AN_Astraeon_Player_All_Armature_Grip_Open",
+    "AN_Astraeon_Player_All_Armature_Grip_Pistol",
+    "AN_Astraeon_Player_All_Armature_Grip_Rifle",
+    "AN_Astraeon_Player_All_Armature_Grip_Tool",
+    "AN_Astraeon_Player_All_Armature_Grip_TwoHand"
+  ],
+  "bones": 71
+}

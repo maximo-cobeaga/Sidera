@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "assets": [
+    {
+      "id": "SM_Ref_Human_180_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Ref_Human_180_Blockout",
+      "source_sha256": "dcd9fe1773b413a0b7833d4caf2d3ad90197f020b715637aacf80263331172d6",
+      "saved": true
+    },
+    {
+      "id": "SM_Itaca_Floor_200_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_Floor_200_Blockout",
+      "source_sha256": "992e8d1528ba4bdee0c044014af31a135f744f2d7c8f2c8d453ddce169f781ce",
+      "saved": true
+    },
+    {
+      "id": "SM_Itaca_Wall_200_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_Wall_200_Blockout",
+      "source_sha256": "0c7b182cf314c6755b634e3c181a9aaca6e98720089a1d961f369fb7f29a41a1",
+      "saved": true
+    },
+    {
+      "id": "SM_Itaca_HatchFrame_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_HatchFrame_Blockout",
+      "source_sha256": "9eb76db82ec5b0c5c2c69f54fb6b893bba8574fe428d7762d31400ca809a7312",
+      "saved": true
+    },
+    {
+      "id": "SM_Itaca_ARGOSConsole_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Itaca/SM_Itaca_ARGOSConsole_Blockout",
+      "source_sha256": "754083434f8d81bae532292154ea4cc1b1aa61a8bdd3585816a6069711d76077",
+      "saved": true
+    }
+  ]
+}

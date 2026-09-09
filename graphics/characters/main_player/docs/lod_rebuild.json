@@ -1,0 +1,55 @@
+{
+  "status": "LOD_REBUILT",
+  "lod0_triangles": 65284,
+  "materials": [
+    "MAT_Player_Character",
+    "MAT_Player_Suit"
+  ],
+  "levels": [
+    {
+      "name": "SK_Astraeon_Player_LOD1",
+      "ratio": 0.5,
+      "triangles": 32642,
+      "vertices": 16322,
+      "materials": [
+        "MAT_Player_Character",
+        "MAT_Player_Suit"
+      ],
+      "uv_layers": 1,
+      "vertex_groups": 56,
+      "unweighted_vertices": 0
+    },
+    {
+      "name": "SK_Astraeon_Player_LOD2",
+      "ratio": 0.25,
+      "triangles": 16321,
+      "vertices": 8161,
+      "materials": [
+        "MAT_Player_Character",
+        "MAT_Player_Suit"
+      ],
+      "uv_layers": 1,
+      "vertex_groups": 56,
+      "unweighted_vertices": 0
+    },
+    {
+      "name": "SK_Astraeon_Player_LOD3",
+      "ratio": 0.1,
+      "triangles": 6527,
+      "vertices": 3264,
+      "materials": [
+        "MAT_Player_Character",
+        "MAT_Player_Suit"
+      ],
+      "uv_layers": 1,
+      "vertex_groups": 56,
+      "unweighted_vertices": 0
+    }
+  ],
+  "archived": [
+    "ARCHIVE_SK_Astraeon_Player_LOD1_Legacy",
+    "ARCHIVE_SK_Astraeon_Player_LOD2_Legacy",
+    "ARCHIVE_SK_Astraeon_Player_LOD3_Legacy"
+  ],
+  "monotonic": true
+}

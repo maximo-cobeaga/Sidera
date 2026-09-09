@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "generator_version": 1,
+  "provenance": "Original procedural geometry and authored human poses; no external assets",
+  "attachment": {
+    "bone": "socket_tool_r",
+    "matrix_local_blender_m": [
+      [
+        2.0357046537355927e-07,
+        -0.3499177098274231,
+        -0.9367804527282715,
+        0.019245505332946777
+      ],
+      [
+        -1.0,
+        3.574918139293004e-14,
+        -2.173086244283695e-07,
+        0.026000000536441803
+      ],
+      [
+        7.604012353112921e-08,
+        0.9367804527282715,
+        -0.3499177098274231,
+        -0.05152294412255287
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "drill_rotor": {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "offset_m": [
+        0,
+        -0.24,
+        0.14
+      ],
+      "rotation_y_rad_per_second": 12.566370614359172
+    }
+  },
+  "assets": [
+    {
+      "id": "SM_Tool_Scanner_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_Scanner_Blockout.fbx",
+      "sha256": "f5e16dab77f0fd065bd249643cd16c672dfab9e62b58b1c86cb696f6fd072743",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Tool_PulseCutter_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_PulseCutter_Blockout.fbx",
+      "sha256": "36b7eafaaa7e081a075539cb6f8435fa601e27e2adb65fc78d6e04d53a99e85b",
+      "item_id": "weapon_pulse_cutter",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Tool_CoreDrill_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_CoreDrill_Blockout.fbx",
+      "sha256": "5955fa8d99c8cbc508cad3f75af38c7e5362fc17d700c9990f61d598de1e7c0f",
+      "item_id": "tool_core_drill",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Tool_BuildHammer_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_BuildHammer_Blockout.fbx",
+      "sha256": "1ce0bc5da11de2ca96fabcf8d46408db1b1c533cb1f2747c408c44615c27e72d",
+      "item_id": "tool_build_hammer",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Tool_DemolitionMaul_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_DemolitionMaul_Blockout.fbx",
+      "sha256": "20f92c91a700d5d79e1ea8c9b99e46cf9579223e6888e6b38b96c363b5bc2bd4",
+      "item_id": "tool_demolition_maul",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Item_RationPack_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Item_RationPack_Blockout.fbx",
+      "sha256": "1f34dbac3c265e0fb3eda9085da70c6ce286b268d8549213f0c2e661af3cbe4e",
+      "item_id": "ration_pack",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Item_SignalResonator_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Item_SignalResonator_Blockout.fbx",
+      "sha256": "709715ae03fe8c4bb442763070517fcdf38549fe17de4901e7fc68eee8ee94d3",
+      "item_id": "signal_resonator",
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_CoreDrillRotor_Blockout.fbx",
+      "sha256": "ecbd31d262ba78a9bed57c5c71252a34fb93a24003e03b8a68a83da1a4b095be",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Scan_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Scan_Tool_Blockout.fbx",
+      "sha256": "f515ccda46cfed86b62efce40d794a3b9f2d5c495604738945b9cbee728b66c9",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Pulse_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Pulse_Tool_Blockout.fbx",
+      "sha256": "94077f8adc9f1bd1a9e04aea2c4ac8fc50427a32e3e7d346aaa7c11b9eaa3178",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Drill_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Drill_Tool_Blockout.fbx",
+      "sha256": "c2b1a193198df8adb9b8f003518421f38892b81a2a5cd686928ee5a13fb15b16",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Hammer_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Hammer_Tool_Blockout.fbx",
+      "sha256": "ce0fdef58d8f95afb4e6103e28ce5d8c1973c97252b5bd08ea6be5a56afa0e41",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Maul_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Maul_Tool_Blockout.fbx",
+      "sha256": "297ca5d42919b25942ed529d2a2a924d7a81e42c4e023c466db5953c3dd6a026",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Consume_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Consume_Tool_Blockout.fbx",
+      "sha256": "58f407ddfd50a6993c0a6039bed0c7151bc9bba5ef76b2eb24f472485f35d4bf",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Human_Present_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Present_Tool_Blockout.fbx",
+      "sha256": "be0ddf38a7e4349b08f866dbe8ad434c92dac67ad1c65f151b7a690024bd2e6e",
+      "item_id": null,
+      "quality": "Q1",
+      "unreal_transient_import": true,
+      "saved_unreal_package": false,
+      "gameplay_integrated": false
+    }
+  ]
+}

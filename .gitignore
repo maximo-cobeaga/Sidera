@@ -34,3 +34,17 @@ Builds/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Reproducible Blender outputs and local bytecode
+ContentPipeline/Generated/
+Tools/Blender/**/__pycache__/
+Scripts/Editor/__pycache__/
+*.blend1
+*.blend2
+
+# Checkpoints de recuperacion de sesiones Blender: ~100 MB cada uno y .blend va a
+# LFS. Son copias intermedias, no entregables; el archivo canonico se versiona.
+CHK_*.blend
+
+# Transcripciones de sesiones de agentes: no son contenido del proyecto.
+rollout-*.jsonl

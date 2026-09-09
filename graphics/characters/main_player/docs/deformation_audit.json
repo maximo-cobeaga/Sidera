@@ -1,0 +1,58 @@
+{
+  "status": "DEFORMATION_AUDITED",
+  "rest_volume_l": 116.858,
+  "poses": [
+    {
+      "pose": "Elbow",
+      "bones": {
+        "lowerarm_l": [
+          0,
+          0,
+          -95
+        ]
+      },
+      "volume_l": 116.623,
+      "volume_change_pct": -0.2,
+      "render": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\references\\QA_Deform_Elbow.png"
+    },
+    {
+      "pose": "Shoulder",
+      "bones": {
+        "upperarm_l": [
+          0,
+          0,
+          -75
+        ]
+      },
+      "volume_l": 115.51,
+      "volume_change_pct": -1.15,
+      "render": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\references\\QA_Deform_Shoulder.png"
+    },
+    {
+      "pose": "Hip",
+      "bones": {
+        "thigh_l": [
+          0,
+          0,
+          85
+        ]
+      },
+      "volume_l": 116.137,
+      "volume_change_pct": -0.62,
+      "render": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\references\\QA_Deform_Hip.png"
+    },
+    {
+      "pose": "Knee",
+      "bones": {
+        "calf_l": [
+          0,
+          0,
+          -105
+        ]
+      },
+      "volume_l": 115.832,
+      "volume_change_pct": -0.88,
+      "render": "C:\\Users\\MAXIMO\\Desktop\\Astraeon\\graphics\\characters\\main_player\\references\\QA_Deform_Knee.png"
+    }
+  ]
+}

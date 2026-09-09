@@ -8,6 +8,7 @@
 #include "Components/LightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Building/AstraeonBuiltStructure.h"
 #include "Creatures/AstraeonCreatureActor.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/Engine.h"
@@ -19,14 +20,28 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Tests/AstraeonItacaInputSmoke.h"
+#include "Tests/AstraeonRegionArtSmoke.h"
+#include "Environment/AstraeonItacaInterior.h"
 #include "WorldGen/AstraeonRegionMarker.h"
 #include "WorldGen/AstraeonRegionMaterializer.h"
+#include "WorldGen/AstraeonTerrainField.h"
+#include "WorldGen/AstraeonTerrainSurfacePrototype.h"
+#include "WorldGen/AstraeonWorldProfiles.h"
+#include "Materials/MaterialInterface.h"
+#include "UObject/ConstructorHelpers.h"
 
 AAstraeonGameModeBase::AAstraeonGameModeBase()
 {
+	// Tick lento: sólo lo usa el reloj de repoblado de fauna, no hace falta por frame.
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 1.0f;
+
 	DefaultPawnClass = AAstraeonPlayerCharacter::StaticClass();
 	PlayerControllerClass = AAstraeonPlayerController::StaticClass();
 	HUDClass = AAstraeonHUD::StaticClass();
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Geology(TEXT("/Game/Astraeon/Art/ItacaTerrain/M_Terrain_Geology.M_Terrain_Geology"));
+	TerrainGeologyMaterial = Geology.Object;
 }
 
 void AAstraeonGameModeBase::BeginPlay()
@@ -38,7 +53,18 @@ void AAstraeonGameModeBase::BeginPlay()
 		GEngine->Exec(GetWorld(), TEXT("DisableAllScreenMessages"), *GLog);
 	}
 
+	TArray<AActor*> Interiors;
+	UGameplayStatics::GetAllActorsOfClass(this, AAstraeonItacaInterior::StaticClass(), Interiors);
+	if (Interiors.IsEmpty()) GetWorld()->SpawnActor<AAstraeonItacaInterior>();
 	EnsureRuntimeLighting();
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokeRegionArt")))
+	{
+		GetWorld()->SpawnActor<AAstraeonRegionArtSmoke>();
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokeItacaInput")))
+	{
+		GetWorld()->SpawnActor<AAstraeonItacaInputSmoke>();
+	}
 
 	// The MVP starts at a minimal C++ menu. Region materialization happens after
 	// StartSelectedNewGame or ContinueSavedGame in AAstraeonPlayerController.
@@ -112,7 +138,7 @@ bool AAstraeonGameModeBase::RunSurfaceHatchInteractionSmoke()
 	// Stand close enough for the proximity fallback, but aim horizontally above the
 	// short temporary hatch cube. This reproduces the manual failure mode where a
 	// point line trace can miss even though the player is clearly beside the hatch.
-	const FVector InteractionLocationCm(500.0f, 0.0f, 120.0f);
+	const FVector InteractionLocationCm(360.0f, 0.0f, 120.0f);
 	PlayerCharacter->SetActorLocation(InteractionLocationCm, false, nullptr, ETeleportType::TeleportPhysics);
 	PlayerController->SetControlRotation(FRotator::ZeroRotator);
 	PlayerCharacter->Interact();
@@ -201,6 +227,47 @@ void AAstraeonGameModeBase::EnsureRuntimeLighting()
 	}
 }
 
+void AAstraeonGameModeBase::SetItacaInteriorHidden(bool bInteriorHidden)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	TArray<AActor*> Interiors;
+	UGameplayStatics::GetAllActorsOfClass(World, AAstraeonItacaInterior::StaticClass(), Interiors);
+	for (AActor* Interior : Interiors)
+	{
+		Interior->SetActorHiddenInGame(bInteriorHidden);
+		Interior->SetActorEnableCollision(!bInteriorHidden);
+	}
+
+	// Las consolas y la escotilla forman parte de la estancia: si quedaran visibles
+	// flotando en el aire durante el vuelo, la nave parecería haber dejado piezas atrás.
+	TArray<AActor*> Markers;
+	UGameplayStatics::GetAllActorsOfClass(World, AAstraeonRegionMarker::StaticClass(), Markers);
+	for (AActor* MarkerActor : Markers)
+	{
+		const AAstraeonRegionMarker* Marker = Cast<AAstraeonRegionMarker>(MarkerActor);
+		if (!Marker)
+		{
+			continue;
+		}
+
+		// La lista enumeraba tres de las cuatro piezas y se olvidaba de la mesa de
+		// fabricación, que se quedaba en el suelo del mapa mientras la nave volaba.
+		// Preguntar por el conjunto de estaciones evita que la próxima que se añada
+		// vuelva a quedarse afuera por omisión.
+		const FName MarkerId = Marker->GetMarkerId();
+		if (AAstraeonRegionMarker::BelongsToItacaInterior(MarkerId))
+		{
+			MarkerActor->SetActorHiddenInGame(bInteriorHidden);
+			MarkerActor->SetActorEnableCollision(!bInteriorHidden);
+		}
+	}
+}
+
 void AAstraeonGameModeBase::MaterializeCurrentRegion()
 {
 	UWorld* World = GetWorld();
@@ -215,6 +282,15 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 	for (AActor* ExistingMarker : ExistingMarkers)
 	{
 		ExistingMarker->Destroy();
+	}
+
+	// Las obras se vuelven a instanciar desde el SaveGame más abajo; sin este barrido se
+	// duplicarían en cada aterrizaje.
+	TArray<AActor*> ExistingStructures;
+	UGameplayStatics::GetAllActorsOfClass(World, AAstraeonBuiltStructure::StaticClass(), ExistingStructures);
+	for (AActor* ExistingStructure : ExistingStructures)
+	{
+		ExistingStructure->Destroy();
 	}
 
 	TArray<AActor*> ExistingCreatures;
@@ -235,16 +311,19 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 	{
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AStaticMeshActor* RuntimeSurface = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FVector(0.0f, 0.0f, -50.0f), FRotator::ZeroRotator, SpawnParameters);
+		// Region top is -2 cm, below the cabin floor at 0: no coplanar flicker indoors.
+		AStaticMeshActor* RuntimeSurface = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FVector(0.0f, 0.0f, -52.0f), FRotator::ZeroRotator, SpawnParameters);
 		if (RuntimeSurface && RuntimeSurface->GetStaticMeshComponent())
 		{
+			// Created after BeginPlay from the menu: Static components reject SetStaticMesh.
+			RuntimeSurface->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 			RuntimeSurface->Tags.Add(TEXT("AstraeonRuntimeSurface"));
 			RuntimeSurface->SetActorScale3D(FVector(1200.0f, 1200.0f, 1.0f));
 			RuntimeSurface->GetStaticMeshComponent()->SetStaticMesh(CubeMesh);
 			RuntimeSurface->GetStaticMeshComponent()->SetCollisionProfileName(TEXT("BlockAll"));
 			RuntimeSurface->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			// Dark blue-grey alien rock floor.
-			RuntimeSurface->GetStaticMeshComponent()->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.06f, 0.09f, 0.16f));
+			if (TerrainGeologyMaterial) RuntimeSurface->GetStaticMeshComponent()->SetMaterial(0, TerrainGeologyMaterial);
 #if WITH_EDITOR
 			RuntimeSurface->SetActorLabel(TEXT("Runtime_ProceduralRegionSurface"));
 #endif
@@ -254,81 +333,100 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 			UE_LOG(LogTemp, Warning, TEXT("AstraeonRegionMaterialization: Runtime surface actor was not created."));
 		}
 
-		const FVector DeploymentLocationCm = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm();
-		AStaticMeshActor* DeploymentPad = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FVector(DeploymentLocationCm.X, DeploymentLocationCm.Y, 25.0f), FRotator::ZeroRotator, SpawnParameters);
-		if (DeploymentPad && DeploymentPad->GetStaticMeshComponent())
-		{
-			DeploymentPad->Tags.Add(TEXT("AstraeonRuntimeSurface"));
-			DeploymentPad->SetActorScale3D(FVector(8.0f, 8.0f, 0.5f));
-			DeploymentPad->GetStaticMeshComponent()->SetStaticMesh(CubeMesh);
-			DeploymentPad->GetStaticMeshComponent()->SetCollisionProfileName(TEXT("BlockAll"));
-			DeploymentPad->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			// Lighter grey — visually distinct from the ground, reads as a landing platform.
-			DeploymentPad->GetStaticMeshComponent()->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.22f, 0.22f, 0.28f));
-#if WITH_EDITOR
-			DeploymentPad->SetActorLabel(TEXT("Runtime_SurfaceDeploymentPad"));
-#endif
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AstraeonRegionMaterialization: Deployment pad actor was not created."));
-		}
+		// Las 12 rocas procedurales se eliminaron. Databan de antes del campo de relieve y su
+		// anillo se centraba en el ORIGEN DEL MUNDO, no en Ítaca, así que al empezar la partida
+		// rodeaban la nave como un muro de bloques planos a 3,5-14,5 m. Su Z tampoco consultaba
+		// el terreno: se calculaba contra Z=0, de modo que sobre relieve quedaban medio
+		// enterradas. El relieve por baldosas ya aporta el paisaje que ellas intentaban dar.
 
-		// Procedural terrain rocks — scattered around the active play area using the
-		// world seed so the layout is deterministic per expedition. They stay tagged
-		// AstraeonRuntimeSurface so a region re-materialisation always rebuilds them
-		// fresh. Two exclusion zones keep key gameplay points clear:
-		//   • 250 cm around the origin (Ítaca console / hatch cluster)
-		//   • 400 cm around the surface deployment pad
-		{
-			const int32 WorldSeed = AstraeonGameInstance->GetCurrentWorldSeed();
-			int32 TerrainRng = WorldSeed;
-			auto NextFloat = [&TerrainRng]() -> float
-			{
-				TerrainRng = TerrainRng * 1664525 + 1013904223;
-				return static_cast<float>(static_cast<uint16>((TerrainRng >> 8) & 0xFFFF)) / 65535.0f;
-			};
-
-			const FVector2D DeployXY(DeploymentLocationCm.X, DeploymentLocationCm.Y);
-			constexpr int32 NumRocks = 12;
-			for (int32 RockIndex = 0; RockIndex < NumRocks; ++RockIndex)
-			{
-				const float Angle = (static_cast<float>(RockIndex) / NumRocks) * 2.0f * PI + NextFloat() * 0.9f;
-				const float RadiusCm = 350.0f + NextFloat() * 1100.0f; // 3.5 m – 14.5 m
-				const float HeightCm = 25.0f + NextFloat() * 130.0f;   // 0.25 m – 1.55 m
-				const float FootprintM = 0.6f + NextFloat() * 2.4f;    // 0.6 m – 3.0 m
-
-				const FVector2D RockXY(FMath::Cos(Angle) * RadiusCm, FMath::Sin(Angle) * RadiusCm);
-				if (RockXY.Size() < 250.0f || (RockXY - DeployXY).Size() < 400.0f)
-				{
-					continue;
-				}
-
-				const FVector RockLocation(RockXY.X, RockXY.Y, HeightCm * 0.5f);
-				AStaticMeshActor* Rock = World->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), RockLocation, FRotator::ZeroRotator, SpawnParameters);
-				if (Rock && Rock->GetStaticMeshComponent())
-				{
-					Rock->Tags.Add(TEXT("AstraeonRuntimeSurface"));
-					Rock->SetActorScale3D(FVector(FootprintM, FootprintM, HeightCm / 100.0f));
-					Rock->GetStaticMeshComponent()->SetStaticMesh(CubeMesh);
-					Rock->GetStaticMeshComponent()->SetCollisionProfileName(TEXT("BlockAll"));
-					Rock->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-					// Rocks block pawns for walking but must not intercept ECC_Visibility so
-					// interact/scan traces reach resource markers that may sit behind them.
-					Rock->GetStaticMeshComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
-					// Warm ochre — alien oxidised rock, reads differently from the dark floor.
-					Rock->GetStaticMeshComponent()->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.28f, 0.14f, 0.07f));
-				}
-			}
-		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AstraeonRegionMaterialization: Cube mesh unavailable; runtime surface was not created."));
 	}
 
-	TArray<FAstraeonRegionActorSpec> Specs = UAstraeonRegionMaterializer::BuildItacaActorSpecs();
+	// La estancia y sus consolas viajan con la nave: se colocan alrededor del origen actual
+	// de Ítaca, que cambia cada vez que el jugador aterriza en otro punto de la región.
+	const FVector ItacaOrigin = AstraeonGameInstance->GetItacaOriginCm();
+	TArray<AActor*> Interiors;
+	UGameplayStatics::GetAllActorsOfClass(World, AAstraeonItacaInterior::StaticClass(), Interiors);
+	for (AActor* Interior : Interiors)
+	{
+		Interior->SetActorLocation(ItacaOrigin);
+	}
+
+	TArray<FAstraeonRegionActorSpec> Specs = UAstraeonRegionMaterializer::BuildItacaActorSpecs(ItacaOrigin);
 	Specs.Append(UAstraeonRegionMaterializer::BuildActorSpecs(AstraeonGameInstance->GetCurrentRegionLayout()));
+
+	// Relieve del terreno. Se construye después de conocer dónde está todo lo jugable para
+	// dejar esos puntos llanos: las colinas son el paisaje, no un obstáculo que entierre
+	// una veta o encierre a Ítaca.
+	{
+		const FVector DeploymentXY = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm(ItacaOrigin);
+
+		// Sólo Ítaca y su puerta exigen suelo llano: la estancia es rígida y no puede
+		// seguir el relieve. Todo lo demás se apoya sobre el terreno más abajo.
+		const TArray<FVector2D> GroundFlatSpots = {
+			FVector2D(ItacaOrigin.X, ItacaOrigin.Y),
+			FVector2D(DeploymentXY.X, DeploymentXY.Y)
+		};
+
+		// Ninguna montaña puede nacer sobre un punto jugable.
+		TArray<FVector2D> MountainKeepOut = GroundFlatSpots;
+		MountainKeepOut.Reserve(Specs.Num() + 2);
+		for (const FAstraeonRegionActorSpec& Spec : Specs)
+		{
+			MountainKeepOut.Add(FVector2D(Spec.LocationCm.X, Spec.LocationCm.Y));
+		}
+		for (const FAstraeonPointOfInterest& PointOfInterest : AstraeonGameInstance->GetCurrentRegionLayout().PointsOfInterest)
+		{
+			MountainKeepOut.Add(PointOfInterest.LocationMeters * 100.0f);
+		}
+		// Los ejes authored se convierten en exclusiones de montaña. Con radio de 90 m y
+		// waypoints separados menos de 180 m, cada tramo crítico queda cubierto completo.
+		const FAstraeonRegionProfile RegionProfile = UAstraeonWorldProfiles::GetRegionAProfile();
+		for (const FVector2D& WaypointMeters : RegionProfile.DirectRouteWaypointsMeters)
+		{
+			MountainKeepOut.Add(WaypointMeters * 100.0f);
+		}
+		for (const FVector2D& WaypointMeters : RegionProfile.SafeRouteWaypointsMeters)
+		{
+			MountainKeepOut.Add(WaypointMeters * 100.0f);
+		}
+
+		FActorSpawnParameters TerrainSpawnParameters;
+		TerrainSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		FAstraeonTerrainSurfaceContext SurfaceContext;
+		SurfaceContext.WorldSeed = AstraeonGameInstance->GetCurrentTerrainSeed();
+		SurfaceContext.CenterCm = FVector2D(ItacaOrigin.X, ItacaOrigin.Y);
+		SurfaceContext.GroundFlatSpotsCm = GroundFlatSpots;
+		SurfaceContext.MountainKeepOutCm = MountainKeepOut;
+		SurfaceContext.ItacaPadHeightCm = AAstraeonTerrainField::GetItacaPadHeightCm(SurfaceContext.WorldSeed, ItacaOrigin.X, ItacaOrigin.Y);
+		AAstraeonTerrainSurfacePrototype* TerrainSurface = World->SpawnActor<AAstraeonTerrainSurfacePrototype>(
+			AAstraeonTerrainSurfacePrototype::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, TerrainSpawnParameters);
+		if (TerrainSurface)
+		{
+			TerrainSurface->Tags.Add(TEXT("AstraeonRuntimeSurface"));
+			TerrainSurface->BuildPrototype(SurfaceContext);
+#if WITH_EDITOR
+			TerrainSurface->SetActorLabel(TEXT("Runtime_ProceduralTerrainSurface"));
+#endif
+		}
+
+		// Los marcadores de región se posan sobre el relieve. Aplanar el terreno bajo cada
+		// uno producía un borde de acantilado alrededor del claro; consultar la altura y
+		// apoyarlos encima resuelve el mismo problema sin deformar el paisaje.
+		const int32 TerrainSeed = AstraeonGameInstance->GetCurrentTerrainSeed();
+		for (FAstraeonRegionActorSpec& Spec : Specs)
+		{
+			const bool bBelongsToItaca = Spec.ActorId.ToString().StartsWith(TEXT("itaca_"));
+			if (!bBelongsToItaca)
+			{
+				Spec.LocationCm.Z += AAstraeonTerrainField::SampleSurface(SurfaceContext,
+					FVector2D(Spec.LocationCm.X, Spec.LocationCm.Y)).HeightCm;
+			}
+		}
+	}
 	for (const FAstraeonRegionActorSpec& Spec : Specs)
 	{
 		FActorSpawnParameters SpawnParameters;
@@ -341,6 +439,20 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 		}
 	}
 
+	// Lo construido por el jugador se reconstruye desde el SaveGame: la región se rehace
+	// entera cada vez que Ítaca aterriza, así que las obras no pueden vivir sólo como
+	// actores en el mundo.
+	for (const FAstraeonPlacedStructure& Placement : AstraeonGameInstance->GetPlacedStructures())
+	{
+		FActorSpawnParameters StructureSpawnParameters;
+		StructureSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		if (AAstraeonBuiltStructure* Structure = World->SpawnActor<AAstraeonBuiltStructure>(
+			AAstraeonBuiltStructure::StaticClass(), Placement.LocationCm, Placement.Rotation, StructureSpawnParameters))
+		{
+			Structure->ApplyPlacement(Placement);
+		}
+	}
+
 	for (const FAstraeonPointOfInterest& PointOfInterest : AstraeonGameInstance->GetCurrentRegionLayout().PointsOfInterest)
 	{
 		if (PointOfInterest.Type != EAstraeonPointOfInterestType::CreatureSpawn)
@@ -348,15 +460,70 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 			continue;
 		}
 
-		const FVector SpawnLocationCm(PointOfInterest.LocationMeters.X * 100.0f, PointOfInterest.LocationMeters.Y * 100.0f, 70.0f);
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AAstraeonCreatureActor* Creature = World->SpawnActor<AAstraeonCreatureActor>(AAstraeonCreatureActor::StaticClass(), SpawnLocationCm, FRotator::ZeroRotator, SpawnParameters);
-#if WITH_EDITOR
-		if (Creature)
+		// Un nido cazado hace poco queda vacío hasta que vence su reloj de repoblado: antes
+		// bastaba despegar y aterrizar para tener toda la fauna viva otra vez.
+		if (!AstraeonGameInstance->IsCreatureSpawnPopulated(PointOfInterest.PointId))
 		{
-			Creature->SetActorLabel(TEXT("Creature_UmbraGrazer_FirstMob"));
+			continue;
 		}
+
+		SpawnCreatureAtPoint(PointOfInterest.PointId, PointOfInterest.LocationMeters);
+	}
+}
+
+AAstraeonCreatureActor* AAstraeonGameModeBase::SpawnCreatureAtPoint(FName SpawnPointId, const FVector2D& LocationMeters)
+{
+	UWorld* World = GetWorld();
+	UAstraeonGameInstance* AstraeonGameInstance = World ? World->GetGameInstance<UAstraeonGameInstance>() : nullptr;
+	if (!AstraeonGameInstance)
+	{
+		return nullptr;
+	}
+
+	const FVector2D CreatureXY = LocationMeters * 100.0f;
+	const FVector SpawnLocationCm(
+		CreatureXY.X,
+		CreatureXY.Y,
+		70.0f + AAstraeonTerrainField::GetGroundHeightCm(AstraeonGameInstance->GetCurrentTerrainSeed(), CreatureXY.X, CreatureXY.Y));
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AAstraeonCreatureActor* Creature = World->SpawnActor<AAstraeonCreatureActor>(
+		AAstraeonCreatureActor::StaticClass(), SpawnLocationCm, FRotator::ZeroRotator, SpawnParameters);
+	if (Creature)
+	{
+		Creature->SetSpawnPointId(SpawnPointId);
+#if WITH_EDITOR
+		Creature->SetActorLabel(*FString::Printf(TEXT("Creature_UmbraGrazer_%s"), *SpawnPointId.ToString()));
 #endif
+	}
+
+	return Creature;
+}
+
+void AAstraeonGameModeBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UWorld* World = GetWorld();
+	UAstraeonGameInstance* AstraeonGameInstance = World ? World->GetGameInstance<UAstraeonGameInstance>() : nullptr;
+	if (!AstraeonGameInstance || !AstraeonGameInstance->HasStartedGame())
+	{
+		return;
+	}
+
+	const TArray<FName> RepopulatedSpawnPoints = AstraeonGameInstance->AdvanceCreatureRespawns(DeltaSeconds);
+	if (RepopulatedSpawnPoints.IsEmpty())
+	{
+		return;
+	}
+
+	for (const FAstraeonPointOfInterest& PointOfInterest : AstraeonGameInstance->GetCurrentRegionLayout().PointsOfInterest)
+	{
+		if (PointOfInterest.Type == EAstraeonPointOfInterestType::CreatureSpawn
+			&& RepopulatedSpawnPoints.Contains(PointOfInterest.PointId))
+		{
+			SpawnCreatureAtPoint(PointOfInterest.PointId, PointOfInterest.LocationMeters);
+		}
 	}
 }

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "scope": "Seven region blockouts, not complete character/animation delivery",
+  "reports": [
+    "ContentPipeline/reports/region_blockout_validation.json",
+    "ContentPipeline/reports/region_unreal_import.json"
+  ],
+  "assets": [
+    {
+      "id": "SM_Resource_SilicateFiber_Blockout",
+      "family": "Resource_silicate_fiber",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        0.8,
+        0.8,
+        1.0
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_SilicateFiber_Blockout.fbx",
+      "fbx_sha256": "b77e83bbd81da0f404013037e779c85dcfa8350f3ffc166548c8e3128b0cf931",
+      "geometry_sha256": "92436a205636d4a037f2956e1905068e07489a784de2cdde27155ff9980910a9",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_SilicateFiber_Blockout",
+      "triangles": 160,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Resource_FerriteNodule_Blockout",
+      "family": "Resource_ferrite_nodule",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        0.8,
+        0.8,
+        1.0
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_FerriteNodule_Blockout.fbx",
+      "fbx_sha256": "dbb76b20f8f536503c264ddc1ffcc8b8906ed7975fcea5a9aaf5d79340bdef44",
+      "geometry_sha256": "cff32cfb7e0d08b50ec52911962174f72fe8a5dea9b40d021afd088f8f200fdc",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_FerriteNodule_Blockout",
+      "triangles": 120,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Resource_SeedCrystal_Blockout",
+      "family": "Resource_SeedSignature",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        1.1,
+        1.1,
+        1.15
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_SeedCrystal_Blockout.fbx",
+      "fbx_sha256": "1c08369d77400e14af1175705bdcb89eef358af650a4324020526ffd669a35ba",
+      "geometry_sha256": "7c70d9b380a9d115bf3cdd783cb5f22d7c7656d60b8e3cfc9b574aa9d4c1354e",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_SeedCrystal_Blockout",
+      "triangles": 100,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Resource_CryoVein_Blockout",
+      "family": "Resource_DeepVeins",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        1.1,
+        1.1,
+        1.15
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_CryoVein_Blockout.fbx",
+      "fbx_sha256": "fe4dae3dba53d1587e767e97629e3bb60a3a9f5e43b4de4dcc48e8aecadcf4ec",
+      "geometry_sha256": "616cdf28a9ad088635dbcdefeb0e1879c6b03a816606976047c2309984060af3",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_CryoVein_Blockout",
+      "triangles": 252,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Resource_QuartzVein_Blockout",
+      "family": "Resource_DeepVeins",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        1.1,
+        1.1,
+        1.15
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_QuartzVein_Blockout.fbx",
+      "fbx_sha256": "d000558a162de43173296b831883ab0b894cb7c67995bd938607d11c83f42837",
+      "geometry_sha256": "19e216e03f0d242c5e64eb332216572a56e3c3e191d77c207692b835ecd85d04",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Resource_QuartzVein_Blockout",
+      "triangles": 252,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Signal_Source_Blockout",
+      "family": "Signal_Source_Barrier",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        1.6,
+        1.6,
+        2.2
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Signal_Source_Blockout.fbx",
+      "fbx_sha256": "1ed70e8c29f31087b3ca7530267ed8b1aee146f8dd3229e6aadecce1af23b1b5",
+      "geometry_sha256": "5ff2918437a3ea6f5e58aff0ec52a654f31cb4c10e1756a27866b3778e0a2394",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Signal_Source_Blockout",
+      "triangles": 424,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    },
+    {
+      "id": "SM_Anomaly_Strata_Blockout",
+      "family": "Signal_Source_Barrier",
+      "quality": "Q1_Blockout",
+      "status": "imported_runtime_binding_present",
+      "dimensions_m": [
+        1.0,
+        1.0,
+        1.4
+      ],
+      "source": "Tools/Blender/configs/region_blockout.json",
+      "generator": "Tools/Blender/generators/region_blockout.py",
+      "generator_version": 1,
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Anomaly_Strata_Blockout.fbx",
+      "fbx_sha256": "380a62511b5462d84a878fa257168e93aced71bc36ead94e1316f73fa57327a1",
+      "geometry_sha256": "d29fa2ecdc21418d5ef4de1a747dd34565e58fd6e32f381f661f871e2ba51759",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Region/SM_Anomaly_Strata_Blockout",
+      "triangles": 80,
+      "material_slots": 1,
+      "collision": "existing_C++_marker_proxy; art_NoCollision",
+      "license_provenance": "Original repository-authored procedural geometry; no external assets",
+      "acceptance": "See region_Automation/Visual/PackagedVisual reports; Q2 requires human visual review"
+    }
+  ]
+}

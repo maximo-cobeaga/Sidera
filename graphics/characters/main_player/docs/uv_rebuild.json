@@ -1,0 +1,11 @@
+{
+  "status": "UV_REBUILT",
+  "character": {
+    "islands": 1,
+    "uv_coverage": 0.6904
+  },
+  "suit": {
+    "islands": 993,
+    "uv_coverage": 0.4615
+  }
+}

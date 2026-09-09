@@ -1,0 +1,221 @@
+{
+  "passed": true,
+  "generator_version": 1,
+  "blender_version": "5.2.1 LTS",
+  "config_sha256": "d7d623caf8add16cccb3792d122200d6b3f515ad88e81b63e40a4ffcfe9c4d92",
+  "generator_sha256": "72f7509ebe4929ccd7f7618257e5af37b29b9a249ceba38373bb6a8a98f08873",
+  "validator_sha256": "ced193a87d6334cbf91aa7adace59409adc640fa9bbf0b8a16b3700a703d7424",
+  "unreal_gameplay_integration": false,
+  "determinism": {
+    "passed": true,
+    "geometry_sha256": "db04d9a90625e320588c0ef5ebbe2d69b2b5f5603fe3c9169b274abd34d225a1"
+  },
+  "source": {
+    "bones": 57,
+    "height_m": 1.7999999523162842,
+    "meshes": [
+      {
+        "id": "SK_Human_Body_Blockout",
+        "vertices": 4734,
+        "triangles": 9256,
+        "materials": 4,
+        "passed": true
+      },
+      {
+        "id": "SK_Human_HandsFP_Blockout",
+        "vertices": 2224,
+        "triangles": 4336,
+        "materials": 2,
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "negative_controls": [
+    {
+      "case": "unapplied_scale",
+      "rejected": true
+    },
+    {
+      "case": "unnormalized_weights",
+      "rejected": true
+    },
+    {
+      "case": "unweighted_vertex",
+      "rejected": true
+    },
+    {
+      "case": "missing_tool_attachment",
+      "rejected": true
+    }
+  ],
+  "animations": [
+    {
+      "id": "AN_Human_Idle_Blockout",
+      "frames": 91,
+      "loop": true,
+      "root_motion": false,
+      "min_z_m": -1.2107198799071739e-08,
+      "max_z_m": 1.7999999523162842,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Walk_Blockout",
+      "frames": 31,
+      "loop": true,
+      "root_motion": false,
+      "min_z_m": -5.21540641784668e-08,
+      "max_z_m": 1.8238109350204468,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Run_Blockout",
+      "frames": 21,
+      "loop": true,
+      "root_motion": false,
+      "min_z_m": -1.043081283569336e-07,
+      "max_z_m": 1.8187938928604126,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Jump_Blockout",
+      "frames": 31,
+      "loop": false,
+      "root_motion": false,
+      "min_z_m": -0.021546347066760063,
+      "max_z_m": 1.7999999523162842,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Land_Blockout",
+      "frames": 19,
+      "loop": false,
+      "root_motion": false,
+      "min_z_m": -8.17328640323467e-08,
+      "max_z_m": 1.7999999523162842,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Interact_Blockout",
+      "frames": 37,
+      "loop": false,
+      "root_motion": false,
+      "min_z_m": -1.2107198799071739e-08,
+      "max_z_m": 1.7999999523162842,
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Grip_Blockout",
+      "frames": 31,
+      "loop": false,
+      "root_motion": false,
+      "min_z_m": -1.2107198799071739e-08,
+      "max_z_m": 1.7999999523162842,
+      "passed": true
+    }
+  ],
+  "files": [
+    {
+      "id": "SK_Human_Body_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/SK_Human_Body_Blockout.fbx",
+      "sha256": "987de8060dfb3aef6189d7841807dd90015eb8770140626f7cd0559e0f520e5e"
+    },
+    {
+      "id": "SK_Human_HandsFP_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/SK_Human_HandsFP_Blockout.fbx",
+      "sha256": "52a12d46edaff851238dcec446535b3a0db9bc19b9aabd96b1f9e901a1f2c451"
+    },
+    {
+      "id": "AN_Human_Idle_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Idle_Blockout.fbx",
+      "sha256": "541f71ade10c858683d89ea8d771200afffa409239d1dd89b8c063220668c973"
+    },
+    {
+      "id": "AN_Human_Walk_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Walk_Blockout.fbx",
+      "sha256": "8f5605f1044ef7a80b3b681b9c58e90c1a17abac73b9d99912a6cbc23f7992a9"
+    },
+    {
+      "id": "AN_Human_Run_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Run_Blockout.fbx",
+      "sha256": "7c29ca231223daa73cab0474468a91a9063a12dca33ec6e5de61d4ba7f10f634"
+    },
+    {
+      "id": "AN_Human_Jump_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Jump_Blockout.fbx",
+      "sha256": "7c2c67c20f8643f43b4610c1ebda15d049f2e1050eeefaf24088ef3d20820270"
+    },
+    {
+      "id": "AN_Human_Land_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Land_Blockout.fbx",
+      "sha256": "639522569813bde89168868c21d7166dc2d72d16d48ab7b8fa1e24e0df6fd0f2"
+    },
+    {
+      "id": "AN_Human_Interact_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Interact_Blockout.fbx",
+      "sha256": "8dc016c2a0eaa3e65407bd03866c4eae16c230a82f5ef071fe19c0ce78f87d1a"
+    },
+    {
+      "id": "AN_Human_Grip_Blockout",
+      "path": "ContentPipeline/Generated/HumanoidBlockout/AN_Human_Grip_Blockout.fbx",
+      "sha256": "01013a352c78d11059a659a6d991cad846aa5dc267a55986a7001e1f7fccac72"
+    }
+  ],
+  "roundtrip": [
+    {
+      "id": "SK_Human_Body_Blockout",
+      "passed": true,
+      "bones": 57,
+      "height_m": 1.7999999523162822
+    },
+    {
+      "id": "SK_Human_HandsFP_Blockout",
+      "passed": true,
+      "bones": 57,
+      "height_m": 0.4271700382232666
+    },
+    {
+      "id": "AN_Human_Idle_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 91
+    },
+    {
+      "id": "AN_Human_Walk_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 31
+    },
+    {
+      "id": "AN_Human_Run_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 21
+    },
+    {
+      "id": "AN_Human_Jump_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 31
+    },
+    {
+      "id": "AN_Human_Land_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 19
+    },
+    {
+      "id": "AN_Human_Interact_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 37
+    },
+    {
+      "id": "AN_Human_Grip_Blockout",
+      "passed": true,
+      "bones": 57,
+      "duration_frames": 31
+    }
+  ],
+  "stage": "source_skin_actions_fbx_preview_complete"
+}

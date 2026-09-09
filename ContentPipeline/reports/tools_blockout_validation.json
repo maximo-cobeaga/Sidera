@@ -1,0 +1,424 @@
+{
+  "passed": true,
+  "generator_version": 1,
+  "blender_version": "5.2.1 LTS",
+  "config_sha256": "7b4b72df2b9c1b6ae9f6c008099057ddbbb85511915bf0e62cd96862aecc8ee4",
+  "generator_sha256": "059b8b765bf381c723254af0118d1857f84234b32631fe31a1a5106b0ea3d097",
+  "validator_sha256": "d38d7bd56ddaceed5887120e8e21b5aff14e19c058c15d7a44dad119c490ec70",
+  "gameplay_integrated": false,
+  "negative_controls": [
+    {
+      "case": "displaced_grip",
+      "rejected": true
+    },
+    {
+      "case": "unapplied_scale",
+      "rejected": true
+    },
+    {
+      "case": "open_shell",
+      "rejected": true
+    }
+  ],
+  "assets": [
+    {
+      "id": "SM_Tool_Scanner_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.11999999731779099,
+        0.21299999952316284,
+        0.24849998950958252
+      ],
+      "bounds_min_m": [
+        -0.05999999865889549,
+        -0.13650000095367432,
+        -0.07899999618530273
+      ],
+      "bounds_max_m": [
+        0.05999999865889549,
+        0.07649999856948853,
+        0.16949999332427979
+      ],
+      "triangles": 3472,
+      "materials": 4,
+      "geometry_sha256": "97c1b63cd25841af100db13190c4223e224bf00c864dcd3400ac61b519ad601a",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_Scanner_Blockout.fbx",
+      "sha256": "f5e16dab77f0fd065bd249643cd16c672dfab9e62b58b1c86cb696f6fd072743",
+      "item_id": null
+    },
+    {
+      "id": "SM_Tool_PulseCutter_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.09400000050663948,
+        0.3799999952316284,
+        0.2510000020265579
+      ],
+      "bounds_min_m": [
+        -0.04600000008940697,
+        -0.3149999976158142,
+        -0.07899999618530273
+      ],
+      "bounds_max_m": [
+        0.04800000041723251,
+        0.06499999761581421,
+        0.1720000058412552
+      ],
+      "triangles": 3976,
+      "materials": 4,
+      "geometry_sha256": "2f5273f63af1d17279f40b831c6fcd87e2ac1151bb5ad44aa3b6bc0d752895b2",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_PulseCutter_Blockout.fbx",
+      "sha256": "36b7eafaaa7e081a075539cb6f8435fa601e27e2adb65fc78d6e04d53a99e85b",
+      "item_id": "weapon_pulse_cutter"
+    },
+    {
+      "id": "SM_Tool_CoreDrill_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.21800000220537186,
+        0.31299999356269836,
+        0.34549999237060547
+      ],
+      "bounds_min_m": [
+        -0.06300000101327896,
+        -0.23199999332427979,
+        -0.1289999932050705
+      ],
+      "bounds_max_m": [
+        0.1550000011920929,
+        0.08100000023841858,
+        0.21649999916553497
+      ],
+      "triangles": 3820,
+      "materials": 4,
+      "geometry_sha256": "ef04d0aa00115ca96d61afcbb0d0d0cf8b3f0074f67ce36bfddb5de65efd8959",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_CoreDrill_Blockout.fbx",
+      "sha256": "5955fa8d99c8cbc508cad3f75af38c7e5362fc17d700c9990f61d598de1e7c0f",
+      "item_id": "tool_core_drill"
+    },
+    {
+      "id": "SM_Tool_BuildHammer_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.18799999356269836,
+        0.06249999813735485,
+        0.421999990940094
+      ],
+      "bounds_min_m": [
+        -0.09399999678134918,
+        -0.032499998807907104,
+        -0.07899999618530273
+      ],
+      "bounds_max_m": [
+        0.09399999678134918,
+        0.029999999329447746,
+        0.34299999475479126
+      ],
+      "triangles": 3220,
+      "materials": 4,
+      "geometry_sha256": "66c33f3ee6116cc461c4c83ec5ef8b5df20bf3500dc4f4dde516bb11bfea5632",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_BuildHammer_Blockout.fbx",
+      "sha256": "1ce0bc5da11de2ca96fabcf8d46408db1b1c533cb1f2747c408c44615c27e72d",
+      "item_id": "tool_build_hammer"
+    },
+    {
+      "id": "SM_Tool_DemolitionMaul_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.2720000147819519,
+        0.10499999672174454,
+        0.5814999938011169
+      ],
+      "bounds_min_m": [
+        -0.13600000739097595,
+        -0.05249999836087227,
+        -0.07899999618530273
+      ],
+      "bounds_max_m": [
+        0.13600000739097595,
+        0.05249999836087227,
+        0.5024999976158142
+      ],
+      "triangles": 3220,
+      "materials": 4,
+      "geometry_sha256": "2e4acaeed1bbe416b48fc6491e364769f19df0ad7e303154c958cc1a2a828d3b",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_DemolitionMaul_Blockout.fbx",
+      "sha256": "20f92c91a700d5d79e1ea8c9b99e46cf9579223e6888e6b38b96c363b5bc2bd4",
+      "item_id": "tool_demolition_maul"
+    },
+    {
+      "id": "SM_Item_RationPack_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.10400000214576721,
+        0.05250000208616257,
+        0.1889999955892563
+      ],
+      "bounds_min_m": [
+        -0.052000001072883606,
+        -0.039500001817941666,
+        -0.05650000274181366
+      ],
+      "bounds_max_m": [
+        0.052000001072883606,
+        0.013000000268220901,
+        0.13249999284744263
+      ],
+      "triangles": 940,
+      "materials": 3,
+      "geometry_sha256": "3415fc2c8943bd5e38d522d9e584eeddb9a9563ee4e41d43d0a7617298376d3b",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Item_RationPack_Blockout.fbx",
+      "sha256": "1f34dbac3c265e0fb3eda9085da70c6ce286b268d8549213f0c2e661af3cbe4e",
+      "item_id": "ration_pack"
+    },
+    {
+      "id": "SM_Item_SignalResonator_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.1720000058412552,
+        0.08500000089406967,
+        0.33799999579787254
+      ],
+      "bounds_min_m": [
+        -0.0860000029206276,
+        -0.0625,
+        -0.05999999865889549
+      ],
+      "bounds_max_m": [
+        0.0860000029206276,
+        0.02250000089406967,
+        0.27799999713897705
+      ],
+      "triangles": 1248,
+      "materials": 4,
+      "geometry_sha256": "a8c5584f100ca7ecfb79b3dd9c3bc545d0ac0ebe577b03ff16280e7533d16b2e",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Item_SignalResonator_Blockout.fbx",
+      "sha256": "709715ae03fe8c4bb442763070517fcdf38549fe17de4901e7fc68eee8ee94d3",
+      "item_id": "signal_resonator"
+    },
+    {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "passed": true,
+      "dimensions_m": [
+        0.057999998331069946,
+        0.15000000596046448,
+        0.057999998331069946
+      ],
+      "bounds_min_m": [
+        -0.028999999165534973,
+        -0.13500000536441803,
+        -0.028999999165534973
+      ],
+      "bounds_max_m": [
+        0.028999999165534973,
+        0.015000000596046448,
+        0.028999999165534973
+      ],
+      "triangles": 1128,
+      "materials": 2,
+      "geometry_sha256": "2b0b4a18c360e32f0a3db1a95e0f01de17484d69198aa56a5d9808069267e778",
+      "determinism_passed": true,
+      "path": "ContentPipeline/Generated/ToolsBlockout/SM_Tool_CoreDrillRotor_Blockout.fbx",
+      "sha256": "ecbd31d262ba78a9bed57c5c71252a34fb93a24003e03b8a68a83da1a4b095be",
+      "item_id": null
+    }
+  ],
+  "roundtrip": [
+    {
+      "id": "SM_Tool_Scanner_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Tool_PulseCutter_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Tool_CoreDrill_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Tool_BuildHammer_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Tool_DemolitionMaul_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Item_RationPack_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Item_SignalResonator_Blockout",
+      "passed": true
+    },
+    {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "passed": true
+    }
+  ],
+  "humanoid_source_sha256": "87325febd1433ce0d441083eb43c544bb44d6166439fd9dd1f973f5644932ccd",
+  "attachment": {
+    "bone": "socket_tool_r",
+    "matrix_local_blender_m": [
+      [
+        2.0357046537355927e-07,
+        -0.3499177098274231,
+        -0.9367804527282715,
+        0.019245505332946777
+      ],
+      [
+        -1.0,
+        3.574918139293004e-14,
+        -2.173086244283695e-07,
+        0.026000000536441803
+      ],
+      [
+        7.604012353112921e-08,
+        0.9367804527282715,
+        -0.3499177098274231,
+        -0.05152294412255287
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "drill_rotor": {
+      "id": "SM_Tool_CoreDrillRotor_Blockout",
+      "offset_m": [
+        0,
+        -0.24,
+        0.14
+      ],
+      "rotation_y_rad_per_second": 12.566370614359172
+    }
+  },
+  "animations": [
+    {
+      "id": "AN_Human_Scan_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Pulse_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Drill_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Hammer_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Maul_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Consume_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    },
+    {
+      "id": "AN_Human_Present_Tool_Blockout",
+      "passed": true,
+      "frames": 31,
+      "root_motion": false,
+      "target_and_return_validated": true
+    }
+  ],
+  "animation_files": [
+    {
+      "id": "AN_Human_Scan_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Scan_Tool_Blockout.fbx",
+      "sha256": "f515ccda46cfed86b62efce40d794a3b9f2d5c495604738945b9cbee728b66c9"
+    },
+    {
+      "id": "AN_Human_Pulse_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Pulse_Tool_Blockout.fbx",
+      "sha256": "94077f8adc9f1bd1a9e04aea2c4ac8fc50427a32e3e7d346aaa7c11b9eaa3178"
+    },
+    {
+      "id": "AN_Human_Drill_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Drill_Tool_Blockout.fbx",
+      "sha256": "c2b1a193198df8adb9b8f003518421f38892b81a2a5cd686928ee5a13fb15b16"
+    },
+    {
+      "id": "AN_Human_Hammer_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Hammer_Tool_Blockout.fbx",
+      "sha256": "ce0fdef58d8f95afb4e6103e28ce5d8c1973c97252b5bd08ea6be5a56afa0e41"
+    },
+    {
+      "id": "AN_Human_Maul_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Maul_Tool_Blockout.fbx",
+      "sha256": "297ca5d42919b25942ed529d2a2a924d7a81e42c4e023c466db5953c3dd6a026"
+    },
+    {
+      "id": "AN_Human_Consume_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Consume_Tool_Blockout.fbx",
+      "sha256": "58f407ddfd50a6993c0a6039bed0c7151bc9bba5ef76b2eb24f472485f35d4bf"
+    },
+    {
+      "id": "AN_Human_Present_Tool_Blockout",
+      "path": "ContentPipeline/Generated/ToolsBlockout/AN_Human_Present_Tool_Blockout.fbx",
+      "sha256": "be0ddf38a7e4349b08f866dbe8ad434c92dac67ad1c65f151b7a690024bd2e6e"
+    }
+  ],
+  "animation_roundtrip": [
+    {
+      "id": "AN_Human_Scan_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Pulse_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Drill_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Hammer_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Maul_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Consume_Tool_Blockout",
+      "passed": true
+    },
+    {
+      "id": "AN_Human_Present_Tool_Blockout",
+      "passed": true
+    }
+  ]
+}

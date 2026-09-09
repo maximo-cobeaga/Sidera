@@ -1,0 +1,11 @@
+{
+  "status": "PREPARED",
+  "triangles": 65284,
+  "vertices": 32643,
+  "transfer_max_distance_m": 0.015377825126051903,
+  "material_faces": {
+    "MAT_Player_Character": 1535,
+    "MAT_Player_Suit": 31107
+  },
+  "unweighted_vertices": 0
+}

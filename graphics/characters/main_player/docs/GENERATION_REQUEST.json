@@ -1,0 +1,17 @@
+{
+  "status": "NOT_SUBMITTED_ESTIMATE_UNAVAILABLE",
+  "asset": "CHR_Astraeon_Player_Base",
+  "tool": "mcp__higgsfield_bridge__bl_generate_3d",
+  "estimated_credits": null,
+  "output_expected": "Textured GLB base requiring inspection, retopology, modular separation and rig validation",
+  "parameters": {
+    "job_type": "tripo_3d",
+    "geometry_quality": "detailed",
+    "texture": true,
+    "texture_quality": "detailed",
+    "pbr": true,
+    "prompt": "One complete realistic male human science-fiction exploration protagonist, entire body visible, neutral symmetrical A-pose, isolated without floor or pedestal. Age 30, height 1.83 metres, functional athletic anatomy and moderate musculature, believable human proportions, defined face with slight natural asymmetry, intelligent calm eyes, short slightly tousled dark brown hair and close stubble. Premium original ASTRAEON environmental exploration suit: technical off-white lightweight chest, shoulder, forearm, thigh and shin protection; dark navy and graphite flexible undersuit visible at neck, abdomen, armpits, elbows, pelvis and knees; small restrained bronze trim, sparse functional cyan status indicators. Explorer, scientist and field engineer, not a soldier. Flexible gloves with five anatomically correct individually separated fingers on each hand, palms and finger webs accessible for rigging, relaxed straight fingers, no fused fingers. Mobile practical boots, compact scientific chest instrumentation. Unhelmeted head with face fully visible, no helmet anywhere. No backpack or wrist computer: these will be modeled as separate equipment. No weapons, no handheld props, no cape, no oversized armour, no exaggerated muscles. Clean deformable topology around shoulders, elbows, wrists, fingers, hips and knees, PBR materials, no baked dramatic shadows. Preserve natural human face, eyes and ears, functional garment construction and clear body silhouette. This is a full 3D character source for later rigging, not a statue or diorama."
+  },
+  "model_selection": "tripo_3d is present in the live catalog and is the typed tool default; detailed geometry plus PBR correspond to the requested hero asset.",
+  "review_required": ["Scale and orientation", "Face and hands", "Separate islands/materials", "Topology and UV", "No fused equipment", "Rig and skinning not assumed"]
+}

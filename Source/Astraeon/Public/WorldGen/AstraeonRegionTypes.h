@@ -27,6 +27,11 @@ struct ASTRAEON_API FAstraeonResourceNode
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
 	bool bSeedSignature = false;
+
+	// Vetas que la mano no alcanza: sin esta herramienta en el inventario, interactuar
+	// sólo informa qué hace falta. NAME_None significa recolectable a mano.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
+	FName RequiredToolId;
 };
 
 USTRUCT(BlueprintType)
@@ -48,6 +53,18 @@ USTRUCT(BlueprintType)
 struct ASTRAEON_API FAstraeonRegionLayout
 {
 	GENERATED_BODY()
+
+	// Identifican contenido diseñado. Ninguno de los dos se deriva de la seed de contenido.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
+	FName PlanetProfileId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
+	FName RegionProfileId;
+
+	// Seed de variación secundaria (filler, fauna/recursos secundarios, clima). Se conserva
+	// WorldSeed para compatibilidad de saves/consumidores anteriores durante la migración.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
+	int32 ContentSeed = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
 	int32 WorldSeed = 0;

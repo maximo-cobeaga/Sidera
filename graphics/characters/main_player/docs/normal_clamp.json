@@ -1,0 +1,13 @@
+{
+  "z_floor": 0.4,
+  "regions": {
+    "Character": {
+      "texels_clamped": 47575,
+      "pct": 1.13
+    },
+    "Suit": {
+      "texels_clamped": 111707,
+      "pct": 2.66
+    }
+  }
+}

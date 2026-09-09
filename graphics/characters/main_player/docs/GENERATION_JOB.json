@@ -1,0 +1,28 @@
+{
+  "status": "queued",
+  "job_id": "8a550175-48f6-4785-939c-f45ebb02501c",
+  "job_type": "tripo_3d",
+  "credits": 10,
+  "authorized_successful_generations": 1,
+  "parameters": {
+    "prompt": "Realistic full-body male explorer, age 30, 1.83m, moderate athletic human proportions. Neutral symmetric A-pose, arms clear of torso, five separated straight fingers per hand, feet apart. Recognizable believable face, defined features, intelligent calm eyes, short tousled dark brown hair, short stubble. Original ASTRAEON scientific environmental suit: technical off-white lightweight chest, shoulders, forearms, thighs and shins; flexible navy/graphite undersuit at neck, abdomen, armpits, elbows, pelvis and knees. Restrained bronze trim and sparse functional cyan indicators. Practical mobile boots and flexible gloves. Explorer and field engineer, never a soldier. Bare head, visible face; NO helmet, backpack, wrist device, weapon, handheld object, cape, pedestal or floor. Clean articulated human anatomy and clear finger webs for later rigging. Premium PBR textures; no baked dramatic shadows. Complete character, no cropped limbs, no fused fingers, no bulky armour.",
+    "texture": true,
+    "pbr": true,
+    "texture_quality": "standard",
+    "geometry_quality": "detailed"
+  },
+  "prior_rejected_requests": [
+    {
+      "status": 422,
+      "job_id": null,
+      "cause_inferred": "Prompt exceeded live schema maxLength 1024"
+    },
+    {
+      "status": 403,
+      "job_id": null,
+      "cause_inferred": "Requested configuration estimate 12.5 exceeds available 10 credits"
+    }
+  ],
+  "estimate_source": "Installed Higgsfield addon get_sdk_client(active_workspace).jobs.estimate_cost, through bl_execute; read-only",
+  "do_not_resubmit": true
+}

@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "blender_version": "5.2.1 LTS",
+  "generator_version": 1,
+  "seed": 13579,
+  "config_sha256": "4eb23ba73616682da6597b47580239db335a87825ef623fdaf983dcbeb833c86",
+  "generator_sha256": "fa152c7cc4b318874df8364a1acd6e0b838105fc682491f5784a57863b053331",
+  "assets": [
+    {
+      "id": "SM_Resource_SilicateFiber_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "triangles": 160,
+      "shells": 8,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "92436a205636d4a037f2956e1905068e07489a784de2cdde27155ff9980910a9",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_SilicateFiber_Blockout.fbx",
+      "fbx_sha256": "b77e83bbd81da0f404013037e779c85dcfa8350f3ffc166548c8e3128b0cf931",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Resource_FerriteNodule_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "triangles": 120,
+      "shells": 6,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "cff32cfb7e0d08b50ec52911962174f72fe8a5dea9b40d021afd088f8f200fdc",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_FerriteNodule_Blockout.fbx",
+      "fbx_sha256": "dbb76b20f8f536503c264ddc1ffcc8b8906ed7975fcea5a9aaf5d79340bdef44",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Resource_SeedCrystal_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.100000023841858,
+        1.100000023841858,
+        1.149999976158142
+      ],
+      "triangles": 100,
+      "shells": 5,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "7c70d9b380a9d115bf3cdd783cb5f22d7c7656d60b8e3cfc9b574aa9d4c1354e",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_SeedCrystal_Blockout.fbx",
+      "fbx_sha256": "1c08369d77400e14af1175705bdcb89eef358af650a4324020526ffd669a35ba",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Resource_CryoVein_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.100000023841858,
+        1.100000023841858,
+        1.149999976158142
+      ],
+      "triangles": 252,
+      "shells": 4,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "616cdf28a9ad088635dbcdefeb0e1879c6b03a816606976047c2309984060af3",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_CryoVein_Blockout.fbx",
+      "fbx_sha256": "fe4dae3dba53d1587e767e97629e3bb60a3a9f5e43b4de4dcc48e8aecadcf4ec",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Resource_QuartzVein_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.100000023841858,
+        1.100000023841858,
+        1.149999976158142
+      ],
+      "triangles": 252,
+      "shells": 4,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "19e216e03f0d242c5e64eb332216572a56e3c3e191d77c207692b835ecd85d04",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Resource_QuartzVein_Blockout.fbx",
+      "fbx_sha256": "d000558a162de43173296b831883ab0b894cb7c67995bd938607d11c83f42837",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Signal_Source_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.600000023841858,
+        1.600000023841858,
+        2.200000047683716
+      ],
+      "triangles": 424,
+      "shells": 4,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "5ff2918437a3ea6f5e58aff0ec52a654f31cb4c10e1756a27866b3778e0a2394",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Signal_Source_Blockout.fbx",
+      "fbx_sha256": "1ed70e8c29f31087b3ca7530267ed8b1aee146f8dd3229e6aadecce1af23b1b5",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Anomaly_Strata_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.0,
+        1.0,
+        1.399999976158142
+      ],
+      "triangles": 80,
+      "shells": 4,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "d29fa2ecdc21418d5ef4de1a747dd34565e58fd6e32f381f661f871e2ba51759",
+      "fbx": "ContentPipeline/Generated/RegionBlockout/SM_Anomaly_Strata_Blockout.fbx",
+      "fbx_sha256": "380a62511b5462d84a878fa257168e93aced71bc36ead94e1316f73fa57327a1",
+      "fbx_roundtrip_passed": true
+    }
+  ],
+  "tests": [
+    {
+      "test": "SM_Resource_SilicateFiber_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_SilicateFiber_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_FerriteNodule_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_FerriteNodule_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_SeedCrystal_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_SeedCrystal_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_CryoVein_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_CryoVein_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_QuartzVein_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Resource_QuartzVein_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Signal_Source_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Signal_Source_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "SM_Anomaly_Strata_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Anomaly_Strata_Blockout_reject_scale",
+      "passed": true
+    },
+    {
+      "test": "distinct_geometry_for_all_seven_silhouettes",
+      "passed": true
+    }
+  ]
+}

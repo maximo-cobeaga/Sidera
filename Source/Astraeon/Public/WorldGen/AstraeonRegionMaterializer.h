@@ -26,6 +26,11 @@ struct ASTRAEON_API FAstraeonRegionActorSpec
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
 	FVector LocationCm = FVector::ZeroVector;
 
+	// Se propaga desde FAstraeonResourceNode para que el marcador sepa que hace falta una
+	// herramienta antes de tocarlo.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
+	FName RequiredToolId;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldGen")
 	FVector Scale = FVector(1.0f, 1.0f, 1.0f);
 };
@@ -40,8 +45,12 @@ public:
 	static TArray<FAstraeonRegionActorSpec> BuildActorSpecs(const FAstraeonRegionLayout& Layout);
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
-	static TArray<FAstraeonRegionActorSpec> BuildItacaActorSpecs();
+	// OriginCm reubica la estancia completa: Ítaca es la nave y cambia de sitio al aterrizar.
+	static TArray<FAstraeonRegionActorSpec> BuildItacaActorSpecs(const FVector& OriginCm = FVector::ZeroVector);
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|WorldGen")
-	static FVector GetSurfaceDeploymentLocationCm();
+	// El punto al que baja la ESCOTILLA cuelga de la nave, no del origen del mundo: si
+	// Ítaca aterriza en otro lado, desplegar debe dejarte junto a la nave y no a un
+	// kilómetro de distancia.
+	static FVector GetSurfaceDeploymentLocationCm(const FVector& ItacaOriginCm = FVector::ZeroVector);
 };

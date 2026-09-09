@@ -1,0 +1,18 @@
+{
+  "body_mesh": "/Game/Astraeon/Characters/Player/Optimized/SK_Astraeon_Player.SK_Astraeon_Player",
+  "skeleton": "/Game/Astraeon/Characters/Player/Optimized/SK_Astraeon_Player_Skeleton.SK_Astraeon_Player_Skeleton",
+  "height_cm": 183.0,
+  "lods": 4,
+  "morph_targets": [
+    "jaw_open",
+    "brow_raise",
+    "brow_furrow"
+  ],
+  "material_slots": [
+    "MAT_Player_Character",
+    "MAT_Player_Suit"
+  ],
+  "relative_z": -96.0,
+  "relative_yaw": -89.99999999999999,
+  "owner_no_see": true
+}

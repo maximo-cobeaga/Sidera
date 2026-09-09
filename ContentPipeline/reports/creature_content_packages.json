@@ -1,0 +1,107 @@
+{
+  "passed": true,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "destination": "/Game/Astraeon/Art/Blockouts/Creatures",
+  "saved_packages": true,
+  "gameplay_integrated": false,
+  "meshes": [
+    {
+      "id": "SK_Creature_UmbraGrazer_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Blockout",
+      "variant": "base",
+      "bounds_cm": [
+        50.940908432006836,
+        141.0876922607422,
+        71.38195037841797
+      ],
+      "material_slots": [
+        "M_Creature_Hide",
+        "M_Creature_Plate"
+      ],
+      "sha256": "b8ce64409719771409aac4a0310b829479518ae4c1cce603369440c92c42c404"
+    },
+    {
+      "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Plated_Blockout",
+      "variant": "plated",
+      "bounds_cm": [
+        50.940908432006836,
+        141.0876922607422,
+        72.0999984741211
+      ],
+      "material_slots": [
+        "M_Creature_Hide_Plated",
+        "M_Creature_Plate_Plated"
+      ],
+      "sha256": "d833f52bf759a610db34327b83142b510480624e83c4b74a143771611bcf1b09"
+    }
+  ],
+  "animations": [
+    {
+      "id": "AN_Creature_Graze_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Graze_Blockout",
+      "duration_seconds": 3.0,
+      "loop": true,
+      "state": "Patrolling",
+      "sha256": "c95d2d2b2f2666ef62bee6dcd1b20541b67c8ef441500df6b6f0d6b08b2a5595"
+    },
+    {
+      "id": "AN_Creature_Walk_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Walk_Blockout",
+      "duration_seconds": 1.3333333730697632,
+      "loop": true,
+      "state": "Patrolling",
+      "sha256": "dddd69a0f9c4acf386824f83c1d23e9b23abaf326aea51d9dcf9b280bed16744"
+    },
+    {
+      "id": "AN_Creature_Alert_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Alert_Blockout",
+      "duration_seconds": 2.0,
+      "loop": true,
+      "state": "Alert",
+      "sha256": "c2663630eba767d1f6b888c4edbbcd9a330f54c520eb89ebd909b2e1efee70df"
+    },
+    {
+      "id": "AN_Creature_Threaten_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Threaten_Blockout",
+      "duration_seconds": 1.0,
+      "loop": true,
+      "state": "Threatening",
+      "sha256": "cfaec31d50e43bed488f6c1167cfa20d2f5541161a299a74e29df41f51380c17"
+    },
+    {
+      "id": "AN_Creature_Flee_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Flee_Blockout",
+      "duration_seconds": 0.6666666865348816,
+      "loop": true,
+      "state": "Disengaging",
+      "sha256": "f36d159b4fc6c415b483e05045f64687fe6dc98b0a8faf2ddd462da397e3633f"
+    },
+    {
+      "id": "AN_Creature_Hit_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Hit_Blockout",
+      "duration_seconds": 0.6000000238418579,
+      "loop": false,
+      "state": "Damaged",
+      "sha256": "303b03eabd5cc408b44e3941337a699c7746a26dc949461d0aeaa0bd16de8bfd"
+    },
+    {
+      "id": "AN_Creature_Death_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Death_Blockout",
+      "duration_seconds": 1.2000000476837158,
+      "loop": false,
+      "state": "Dead",
+      "sha256": "3d0fc3f60aeab6dadb973301d53532e72124dd8806efc5cf7675a8f2c41978a3"
+    }
+  ],
+  "materials": [
+    "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide",
+    "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Hide_Plated",
+    "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate",
+    "/Game/Astraeon/Art/Blockouts/Creatures/M_Creature_Plate_Plated"
+  ],
+  "skeleton": {
+    "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SKEL_Quadruped_A",
+    "bones": 37
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "status": "MORPHS_BUILT",
+  "mesh": "SK_Astraeon_Player",
+  "morphs": [
+    {
+      "name": "jaw_open",
+      "moved_vertices": 679,
+      "max_offset_mm": 18.98
+    },
+    {
+      "name": "brow_raise",
+      "moved_vertices": 122,
+      "max_offset_mm": 7.0
+    },
+    {
+      "name": "brow_furrow",
+      "moved_vertices": 121,
+      "max_offset_mm": 4.72
+    }
+  ],
+  "blink": "no viable con esta topologia (~18 vertices por ojo); limitacion conocida hasta retopologia densa de cabeza",
+  "key_blocks": [
+    "Basis",
+    "jaw_open",
+    "brow_raise",
+    "brow_furrow"
+  ]
+}

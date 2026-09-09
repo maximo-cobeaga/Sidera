@@ -1,0 +1,127 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "AstraeonFirstPersonRigComponent.generated.h"
+
+class UAnimSequence;
+class UStaticMesh;
+class UStaticMeshComponent;
+
+// Gesto puntual: interrumpe la locomoción durante la duración del clip y vuelve solo.
+UENUM()
+enum class EAstraeonHandGesture : uint8
+{
+	None,
+	Scan,
+	Pulse,
+	Drill,
+	Hammer,
+	Maul,
+	Consume,
+	Present,
+	Interact,
+	Grip
+};
+
+/**
+ * Manos en primera persona más la herramienta que el jugador lleva en la mano.
+ *
+ * El componente ES la malla de manos (`SK_Human_HandsFP_Blockout`) y cuelga de la cámara,
+ * así que sigue el cabeceo de la vista. La herramienta cuelga del hueso `socket_tool_r`,
+ * de modo que la sujeción viene de la animación y no de una posición fija en pantalla.
+ *
+ * La selección de clip es un pequeño estado en C++ sobre `PlayAnimation`, no un
+ * AnimBlueprint: es Q1 y evita depender de un asset de Blueprint que ningún generador
+ * reproduce. Sin BlendSpace ni transiciones: los clips cortan.
+ */
+UCLASS(ClassGroup = (Astraeon), meta = (BlueprintSpawnableComponent))
+class ASTRAEON_API UAstraeonFirstPersonRigComponent : public USkeletalMeshComponent
+{
+	GENERATED_BODY()
+
+public:
+	UAstraeonFirstPersonRigComponent();
+
+	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaSeconds, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// Dispara un gesto. Si ya hay uno corriendo se reemplaza: el jugador que repite la
+	// acción espera ver el gesto otra vez, no que se ignore.
+	void PlayGesture(EAstraeonHandGesture Gesture);
+
+	// La malla de cuerpo completo se anima con el mismo clip de locomoción para que la
+	// sombra propia coincida con lo que hacen las manos.
+	void SetShadowBodyMesh(USkeletalMeshComponent* BodyMesh) { ShadowBody = BodyMesh; }
+
+	UAnimSequence* GetGestureSequence(EAstraeonHandGesture Gesture) const;
+
+private:
+	// La herramienta llevada en la mano. Con las manos vacías se muestra el escáner, que
+	// según el diseño está disponible desde el primer minuto y no es un ítem de inventario.
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Rig")
+	TObjectPtr<UStaticMeshComponent> ToolMesh;
+
+	// Broca del taladro: gira solo mientras el taladro está en la mano.
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Rig")
+	TObjectPtr<UStaticMeshComponent> ToolRotorMesh;
+
+	// Ajuste de encuadre pendiente de revisión visual: coloca el ojo del rig (1,60 m sobre
+	// la raíz) en la cámara, y gira el frente del rig (+Y tras la importación) hacia +X.
+	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
+	FVector HandsOffsetCm = FVector(0.0f, 0.0f, -160.0f);
+
+	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
+	FRotator HandsRotation = FRotator(0.0f, -90.0f, 0.0f);
+
+	// Transform de agarre medido en Blender y convertido al marco de Unreal; ver el .cpp.
+	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
+	FTransform ToolGripTransform;
+
+	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
+	float RotorDegreesPerSecond = 720.0f;
+
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> ShadowBody;
+
+	UPROPERTY()
+	TMap<FName, TObjectPtr<UStaticMesh>> ToolMeshesByItemId;
+
+	UPROPERTY()
+	TObjectPtr<UStaticMesh> ScannerMesh;
+
+	UPROPERTY()
+	TObjectPtr<UStaticMesh> RotorMesh;
+
+	UPROPERTY()
+	TMap<uint8, TObjectPtr<UAnimSequence>> GestureSequences;
+
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> IdleSequence;
+
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> WalkSequence;
+
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> RunSequence;
+
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> JumpSequence;
+
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> LandSequence;
+
+	// Clip que se está reproduciendo, para no reiniciarlo en cada frame.
+	UPROPERTY()
+	TObjectPtr<UAnimSequence> ActiveSequence;
+
+	FName CurrentHandItemId;
+	float GestureSecondsRemaining = 0.0f;
+	bool bWasFallingLastFrame = false;
+	float LandingSecondsRemaining = 0.0f;
+	float RotorAngleDegrees = 0.0f;
+
+	void RefreshHeldTool();
+	UAnimSequence* SelectLocomotionSequence() const;
+	void PlaySequence(UAnimSequence* Sequence, bool bLoop);
+};

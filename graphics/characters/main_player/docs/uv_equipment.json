@@ -1,0 +1,26 @@
+{
+  "status": "EQUIPMENT_UV_REBUILT",
+  "pieces": [
+    {
+      "name": "SK_Astraeon_Helmet",
+      "uv_layers": 1,
+      "islands": 54,
+      "uv_coverage": 0.5646,
+      "faces": 451
+    },
+    {
+      "name": "SK_Astraeon_Backpack",
+      "uv_layers": 1,
+      "islands": 72,
+      "uv_coverage": 0.5618,
+      "faces": 344
+    },
+    {
+      "name": "SK_Astraeon_WristComputer",
+      "uv_layers": 1,
+      "islands": 54,
+      "uv_coverage": 0.6118,
+      "faces": 234
+    }
+  ]
+}

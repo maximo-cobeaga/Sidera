@@ -1,0 +1,278 @@
+{
+  "date": "2026-09-07T22:03:17.500197",
+  "stage": "PROXY_ONLY_NOT_GAME_READY",
+  "bridge_connected": true,
+  "version": "5.2.1 LTS",
+  "scene": "CHR_Astraeon_Player_Work",
+  "height_m": 1.830000281392131,
+  "min_z": -5.820766091346741e-11,
+  "fps": 30,
+  "geometry": [
+    {
+      "object": "PROXY_Player_Torso",
+      "vertices": 168,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.033072596119123575,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Neck",
+      "vertices": 32,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.0014677898910499532,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Head",
+      "vertices": 168,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.004109103199753261,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_UpperArm_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.003286071625543445,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Forearm_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.001735289509550045,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Palm_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.00034858972857536655,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_index_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850698206265759e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_middle_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850697134388768e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_ring_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850701135722066e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_pinky_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850698241700852e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_thumb_l",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.4211588918593467e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Leg_l",
+      "vertices": 96,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.013246165244205766,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Boot_l",
+      "vertices": 80,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.003893969441166767,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_UpperArm_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.0032860716255434432,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Forearm_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.0017352895008739971,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Palm_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.00034858972756856226,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_index_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850697461694222e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_middle_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.085069657659601e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_ring_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850700607875572e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_pinky_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.0850697713854038e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_thumb_r",
+      "vertices": 64,
+      "nonmanifold_edges": 0,
+      "volume_m3": 1.4211589141330335e-05,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Leg_r",
+      "vertices": 96,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.013246162366808615,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "object": "PROXY_Player_Boot_r",
+      "vertices": 80,
+      "nonmanifold_edges": 0,
+      "volume_m3": 0.0038939694415184778,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "non_destructive_bridge_test": {
+    "vertices_created": 4,
+    "modified_z": 0.2,
+    "keys_created": 6,
+    "inventory_restored": true
+  },
+  "protected_scene_objects": [
+    "Camera",
+    "Cube",
+    "Light"
+  ],
+  "visual_status": "Primary silhouette and corrected sole plane reviewed; anatomy, face, suit, rig and production quality NOT VERIFIED",
+  "generation_submitted": false
+}

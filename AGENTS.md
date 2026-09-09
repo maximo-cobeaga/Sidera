@@ -18,10 +18,11 @@ Antes de actuar, leer en este orden:
 
 1. `AGENTS.md`
 2. `Docs/MVP_LA_PRIMERA_SENAL.md`
-3. `Docs/DEVELOPMENT_STATE.md`, si existe
-4. `Docs/BACKLOG.md`, si existe
-5. `Docs/GAME_DESIGN_MASTER.md`
-6. ADR relevantes dentro de `Docs/ADR/`
+3. `Docs/MVP_WORLD_ARCHITECTURE.md`, si existe
+4. `Docs/DEVELOPMENT_STATE.md`, si existe
+5. `Docs/BACKLOG.md`, si existe
+6. `Docs/GAME_DESIGN_MASTER.md`
+7. ADR relevantes dentro de `Docs/ADR/`
 
 En caso de conflicto:
 
@@ -228,4 +229,3 @@ El agente no puede declarar terminado el MVP hasta que:
 - El alcance excluido continúe excluido.
 
 Al finalizar, detener la expansión y solicitar una única sesión de prueba humana.
-

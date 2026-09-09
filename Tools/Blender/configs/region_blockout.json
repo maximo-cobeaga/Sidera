@@ -1,0 +1,14 @@
+{
+  "generator_version": 1,
+  "seed": 13579,
+  "notes": "Original fixed silhouettes; gameplay seed chooses the node, never random artistic geometry. Metres, ground-centred pivot, one flat material per asset.",
+  "assets": [
+    {"id":"SM_Resource_SilicateFiber_Blockout","shape":"fiber","dimensions_m":[0.8,0.8,1.0],"triangle_budget":1200,"expected_shells":8,"material":"M_Region_Fiber","color":[0.32,0.56,0.43],"family":"Resource_silicate_fiber"},
+    {"id":"SM_Resource_FerriteNodule_Blockout","shape":"nodule","dimensions_m":[0.8,0.8,1.0],"triangle_budget":1200,"expected_shells":6,"material":"M_Region_Ferrite","color":[0.32,0.20,0.12],"family":"Resource_ferrite_nodule"},
+    {"id":"SM_Resource_SeedCrystal_Blockout","shape":"crystal","dimensions_m":[1.1,1.1,1.15],"triangle_budget":1200,"expected_shells":5,"material":"M_Region_Crystal","color":[0.39,0.53,0.60],"family":"Resource_SeedSignature"},
+    {"id":"SM_Resource_CryoVein_Blockout","shape":"cryo_vein","dimensions_m":[1.1,1.1,1.15],"triangle_budget":1200,"expected_shells":4,"material":"M_Region_Cryo","color":[0.22,0.39,0.46],"family":"Resource_DeepVeins"},
+    {"id":"SM_Resource_QuartzVein_Blockout","shape":"quartz_vein","dimensions_m":[1.1,1.1,1.15],"triangle_budget":1200,"expected_shells":4,"material":"M_Region_Quartz","color":[0.46,0.38,0.56],"family":"Resource_DeepVeins"},
+    {"id":"SM_Signal_Source_Blockout","shape":"signal","dimensions_m":[1.6,1.6,2.2],"triangle_budget":1200,"expected_shells":4,"material":"M_Region_Signal","color":[0.40,0.19,0.39],"family":"Signal_Source_Barrier"},
+    {"id":"SM_Anomaly_Strata_Blockout","shape":"anomaly","dimensions_m":[1.0,1.0,1.4],"triangle_budget":1200,"expected_shells":4,"material":"M_Region_Anomaly","color":[0.57,0.35,0.15],"family":"Signal_Source_Barrier"}
+  ]
+}

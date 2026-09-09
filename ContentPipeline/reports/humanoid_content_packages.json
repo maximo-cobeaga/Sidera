@@ -1,0 +1,100 @@
+{
+  "passed": true,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "destination": "/Game/Astraeon/Art/Blockouts/Human",
+  "saved_packages": true,
+  "gameplay_integrated": false,
+  "meshes": [
+    {
+      "id": "SK_Human_Body_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_Body_Blockout",
+      "bounds_cm": [
+        118.25491333007812,
+        44.35000228881836,
+        180.0
+      ],
+      "material_slots": [
+        "M_Human_fabric",
+        "M_Human_shell",
+        "M_Human_visor",
+        "M_Human_accent"
+      ],
+      "sha256": "987de8060dfb3aef6189d7841807dd90015eb8770140626f7cd0559e0f520e5e"
+    },
+    {
+      "id": "SK_Human_HandsFP_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/SK_Human_HandsFP_Blockout",
+      "bounds_cm": [
+        118.25491333007812,
+        12.000006675720215,
+        42.717002868652344
+      ],
+      "material_slots": [
+        "M_Human_fabric",
+        "M_Human_shell"
+      ],
+      "sha256": "52a12d46edaff851238dcec446535b3a0db9bc19b9aabd96b1f9e901a1f2c451"
+    }
+  ],
+  "animations": [
+    {
+      "id": "AN_Human_Idle_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Idle_Blockout",
+      "duration_seconds": 3.0,
+      "loop": true,
+      "sha256": "541f71ade10c858683d89ea8d771200afffa409239d1dd89b8c063220668c973"
+    },
+    {
+      "id": "AN_Human_Walk_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Walk_Blockout",
+      "duration_seconds": 1.0,
+      "loop": true,
+      "sha256": "8f5605f1044ef7a80b3b681b9c58e90c1a17abac73b9d99912a6cbc23f7992a9"
+    },
+    {
+      "id": "AN_Human_Run_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Run_Blockout",
+      "duration_seconds": 0.6666666865348816,
+      "loop": true,
+      "sha256": "7c29ca231223daa73cab0474468a91a9063a12dca33ec6e5de61d4ba7f10f634"
+    },
+    {
+      "id": "AN_Human_Jump_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Jump_Blockout",
+      "duration_seconds": 1.0,
+      "loop": false,
+      "sha256": "7c2c67c20f8643f43b4610c1ebda15d049f2e1050eeefaf24088ef3d20820270"
+    },
+    {
+      "id": "AN_Human_Land_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Land_Blockout",
+      "duration_seconds": 0.6000000238418579,
+      "loop": false,
+      "sha256": "639522569813bde89168868c21d7166dc2d72d16d48ab7b8fa1e24e0df6fd0f2"
+    },
+    {
+      "id": "AN_Human_Interact_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Interact_Blockout",
+      "duration_seconds": 1.2000000476837158,
+      "loop": false,
+      "sha256": "8dc016c2a0eaa3e65407bd03866c4eae16c230a82f5ef071fe19c0ce78f87d1a"
+    },
+    {
+      "id": "AN_Human_Grip_Blockout",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Grip_Blockout",
+      "duration_seconds": 1.0,
+      "loop": false,
+      "sha256": "01013a352c78d11059a659a6d991cad846aa5dc267a55986a7001e1f7fccac72"
+    }
+  ],
+  "materials": [
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_accent",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_visor"
+  ],
+  "skeleton": {
+    "asset": "/Game/Astraeon/Art/Blockouts/Human/SKEL_Humanoid_A",
+    "bones": 57
+  }
+}

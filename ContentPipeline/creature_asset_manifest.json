@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "generator_version": 1,
+  "species_id": "umbra_grazer",
+  "provenance": "Original procedural geometry and authored poses; no external assets",
+  "skeleton": {
+    "asset": "/Game/Astraeon/Art/Blockouts/Creatures/SKEL_Quadruped_A",
+    "bones": 37
+  },
+  "assets": [
+    {
+      "id": "SK_Creature_UmbraGrazer_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/SK_Creature_UmbraGrazer_Blockout.fbx",
+      "sha256": "b8ce64409719771409aac4a0310b829479518ae4c1cce603369440c92c42c404",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "SK_Creature_UmbraGrazer_Plated_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/SK_Creature_UmbraGrazer_Plated_Blockout.fbx",
+      "sha256": "d833f52bf759a610db34327b83142b510480624e83c4b74a143771611bcf1b09",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/SK_Creature_UmbraGrazer_Plated_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Graze_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Graze_Blockout.fbx",
+      "sha256": "c95d2d2b2f2666ef62bee6dcd1b20541b67c8ef441500df6b6f0d6b08b2a5595",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Graze_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Walk_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Walk_Blockout.fbx",
+      "sha256": "dddd69a0f9c4acf386824f83c1d23e9b23abaf326aea51d9dcf9b280bed16744",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Walk_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Alert_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Alert_Blockout.fbx",
+      "sha256": "c2663630eba767d1f6b888c4edbbcd9a330f54c520eb89ebd909b2e1efee70df",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Alert_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Threaten_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Threaten_Blockout.fbx",
+      "sha256": "cfaec31d50e43bed488f6c1167cfa20d2f5541161a299a74e29df41f51380c17",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Threaten_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Flee_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Flee_Blockout.fbx",
+      "sha256": "f36d159b4fc6c415b483e05045f64687fe6dc98b0a8faf2ddd462da397e3633f",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Flee_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Hit_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Hit_Blockout.fbx",
+      "sha256": "303b03eabd5cc408b44e3941337a699c7746a26dc949461d0aeaa0bd16de8bfd",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Hit_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    },
+    {
+      "id": "AN_Creature_Death_Blockout",
+      "path": "ContentPipeline/Generated/CreatureBlockout/AN_Creature_Death_Blockout.fbx",
+      "sha256": "3d0fc3f60aeab6dadb973301d53532e72124dd8806efc5cf7675a8f2c41978a3",
+      "unreal_asset": "/Game/Astraeon/Art/Blockouts/Creatures/AN_Creature_Death_Blockout",
+      "quality": "Q1",
+      "saved_unreal_package": true,
+      "gameplay_integrated": false
+    }
+  ]
+}

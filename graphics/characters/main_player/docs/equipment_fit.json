@@ -1,0 +1,16 @@
+{
+  "vertices_inside_body": 8,
+  "deepest_penetration_mm": 7.4,
+  "closest_mm": 0.2,
+  "median_mm": 116.0,
+  "farthest_mm": 174.7,
+  "status": "BACKPACK_REBUILT",
+  "archived": "ARCHIVE_Backpack_PreFit (ya existia; se descarto la copia intermedia)",
+  "vertices": 416,
+  "triangles": 784,
+  "dimensions": [
+    0.3,
+    0.2246,
+    0.415
+  ]
+}

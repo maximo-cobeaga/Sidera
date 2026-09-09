@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "stage": "source_export_roundtrip_preview_complete",
+  "blender_version": "5.2.1 LTS",
+  "generator_version": 1,
+  "seed": 13579,
+  "unreal_integration": "not_checked_here",
+  "config_sha256": "f8bc62ec0def9d575c4f7b18f63b9b7e4f1a893e36a48b1890a644e9cedf3001",
+  "tests": [
+    {
+      "test": "unapplied_scale",
+      "passed": true,
+      "detected": [
+        "applied_scale"
+      ]
+    },
+    {
+      "test": "wrong_name",
+      "passed": true,
+      "detected": [
+        "object_name"
+      ]
+    },
+    {
+      "test": "wrong_pivot",
+      "passed": true,
+      "detected": [
+        "origin"
+      ]
+    },
+    {
+      "test": "missing_uv",
+      "passed": true,
+      "detected": [
+        "missing_debug_uv"
+      ]
+    },
+    {
+      "test": "missing_material",
+      "passed": true,
+      "detected": [
+        "material_slots"
+      ]
+    },
+    {
+      "test": "modifier",
+      "passed": true,
+      "detected": [
+        "unsupported_modifiers"
+      ]
+    },
+    {
+      "test": "unapplied_rotation",
+      "passed": true,
+      "detected": [
+        "applied_rotation"
+      ]
+    },
+    {
+      "test": "wrong_geometry_dimensions",
+      "passed": true,
+      "detected": [
+        "dimensions_m"
+      ]
+    },
+    {
+      "test": "inverted_normals",
+      "passed": true,
+      "detected": [
+        "outward_normals"
+      ]
+    },
+    {
+      "test": "open_mesh",
+      "passed": true,
+      "detected": [
+        "manifold_or_winding"
+      ]
+    },
+    {
+      "test": "SM_Ref_Human_180_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_Floor_200_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_Wall_200_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_HatchFrame_Blockout_repeat",
+      "passed": true
+    },
+    {
+      "test": "SM_Itaca_ARGOSConsole_Blockout_repeat",
+      "passed": true
+    }
+  ],
+  "assets": [
+    {
+      "id": "SM_Ref_Human_180_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.699999988079071,
+        0.30000001192092896,
+        1.7999999523162842
+      ],
+      "triangles": 96,
+      "shells": 8,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "5d016e833c65df452096e17554b8ebe37ff039876ad946e2aebc6b80ecb5edff",
+      "fbx": "ContentPipeline/Generated/ItacaBlockout/SM_Ref_Human_180_Blockout.fbx",
+      "fbx_sha256": "dcd9fe1773b413a0b7833d4caf2d3ad90197f020b715637aacf80263331172d6",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_Floor_200_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        2.0,
+        2.0,
+        0.11999999731779099
+      ],
+      "triangles": 12,
+      "shells": 1,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "65a2df3e1830e62672248ea6f3a7e5fad27fe116288a22b34dc639c80cbec0e1",
+      "fbx": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_Floor_200_Blockout.fbx",
+      "fbx_sha256": "992e8d1528ba4bdee0c044014af31a135f744f2d7c8f2c8d453ddce169f781ce",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_Wall_200_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        2.0,
+        0.11999999731779099,
+        2.799999952316284
+      ],
+      "triangles": 12,
+      "shells": 1,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "759c5bc3c0efada1c65d256004b0cac6d4589702f1243bafee9ec76e40636c61",
+      "fbx": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_Wall_200_Blockout.fbx",
+      "fbx_sha256": "0c7b182cf314c6755b634e3c181a9aaca6e98720089a1d961f369fb7f29a41a1",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_HatchFrame_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        1.7999999523162842,
+        0.23999999463558197,
+        2.5
+      ],
+      "triangles": 28,
+      "shells": 1,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "5a331721d3573e0496523f5a00694514345e88c721104a2b27ed73360c12afaa",
+      "fbx": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_HatchFrame_Blockout.fbx",
+      "fbx_sha256": "9eb76db82ec5b0c5c2c69f54fb6b893bba8574fe428d7762d31400ca809a7312",
+      "fbx_roundtrip_passed": true
+    },
+    {
+      "id": "SM_Itaca_ARGOSConsole_Blockout",
+      "passed": true,
+      "errors": [],
+      "dimensions_m": [
+        0.800000011920929,
+        0.6000000238418579,
+        1.2000000476837158
+      ],
+      "triangles": 24,
+      "shells": 2,
+      "uv": "debug_overlap_not_lightmap",
+      "rig": "not_applicable_static_blockout",
+      "destruction": "not_certified",
+      "geometry_sha256": "f7e4c505f606d759ed9ceed7057aee01edfa283d4d60da8f7c7f7fb9002d12fe",
+      "fbx": "ContentPipeline/Generated/ItacaBlockout/SM_Itaca_ARGOSConsole_Blockout.fbx",
+      "fbx_sha256": "754083434f8d81bae532292154ea4cc1b1aa61a8bdd3585816a6069711d76077",
+      "fbx_roundtrip_passed": true
+    }
+  ]
+}

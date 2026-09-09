@@ -1,5 +1,99 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-07 — Escena proxy aislada y generación pendiente
+
+Con Bridge conectado, crear `CHR_Astraeon_Player_Work` preservando Scene, sus objetos
+y fuentes Q1. Prefix PROXY y propiedad `PROXY_ONLY_NOT_GAME_READY` evitan promover
+andamiaje a personaje final. Altura 1.83 m y 30 FPS confirmadas en instancia viva.
+La solicitud Tripo detallada/PBR queda revisable en `GENERATION_REQUEST.json`, sin enviar:
+el estimador obligatorio de la skill del Bridge no está expuesto. No sustituir el asset
+esquelético por video. Continuar cuando se resuelva esa ruta o el modelado nativo.
+
+## 2026-09-07 — Lote de protagonista independiente y QA explícito
+
+El pedido explícito actual autoriza un personaje detallado sin convertir el blockout Q1
+previo en arte final. Destino `graphics/characters/main_player/`; preservar generadores,
+fuentes y paquetes anteriores. Contrato pendiente: altura 1,83 m, 30 FPS, Blender métrico,
+FBX con escala 1 e importación aislada UE 5.7.4. No actualizar dependencias.
+La API Higgsfield remota no demuestra acceso al Blender abierto. La reinspección expone
+ahora el Bridge, pero el host Blender sigue desconectado. Construcción pendiente hasta
+conectar el panel y comprobar acceso, como exige el pedido. No sustituirlo por un worker
+remoto ni declarar una generación de video como animación esquelética validada.
+
+## 2026-09-06 — Terreno procedural coherente con validación previa
+
+Por corrección explícita del propietario, el terreno del MVP vuelve a generarse por seed. La
+seed no autoriza resultados incoherentes: el generador debe garantizar plataforma de Ítaca,
+salida, rutas, POIs y conectividad antes de materializar una región. La malla de cuenca A03 se
+retira del runtime porque enterró la nave y el jugador; queda sólo como experimento técnico.
+El contrato y orden de implementación están en `PROCEDURAL_TERRAIN_CONTRACT.md`.
+
+## 2026-09-06 — Region A fija: Khepri, Cuenca de la Primera Señal
+
+Para materializar la arquitectura de mundo fija sin crear más cuerpos, se definió un único
+planeta MVP `planet_khepri` y su Region A `region_first_signal_basin`. Khepri combina gravedad
+baja, atmósfera no respirable y desierto rocoso; la región mide 500 × 500 m y tiene landing
+zone, señal, anomalía, nidos y recursos con coordenadas estables. Las seeds `100`–`500` quedan
+reservadas para contenido secundario. El nombre y los datos son C++ textual para iteración y
+tests; A02 decidirá cómo persistirlos y cargarlo sin romper saves existentes.
+
+## 2026-09-06 — Seed de contenido separada de geografía y migración de saves
+
+Las nuevas expediciones siempre inician en `planet_khepri` / `region_first_signal_basin`.
+`ContentSeed` conserva la elección del jugador para población secundaria futura y se persiste
+por separado de los IDs de perfil. Hasta A03, la topografía heredada queda fijada a la seed
+ambiental 100: evita que una elección de variación cambie rutas, POIs o el punto de aterrizaje.
+SaveGame v2 guarda ambos IDs y `ContentSeed`; cargar SaveGame v1 conserva datos y coordenadas,
+los etiqueta `legacy_generated_*` y los vuelve a guardar como v2. La migración tiene prueba
+automática.
+
+## 2026-09-06 — Terreno propio sin compras, planificación previa
+
+Por instrucción del propietario, presupuesto de assets cero. El próximo bloque será terreno
+regional continuo, integración, rutas y materiales/rocas propios. Se documenta en
+[PLAN_TERRENO_REGIONAL.md](PLAN_TERRENO_REGIONAL.md) y queda pendiente de ejecución.
+La malla continua es la alternativa preferida a probar, no una arquitectura ya validada.
+No se añaden dependencias ni se inicia implementación en esta entrega.
+
+## 2026-09-06 — Primer lote humano con animaciones simples
+
+Pedido del propietario: avanzar en el diseño Blender e incluir caminar y animaciones
+básicas. Se amplía el primer lote de manos a una base corporal Q1 para revisar
+locomoción sobre `SKEL_Humanoid_A`; no se produce todavía un catálogo modular de ropa.
+Siete acciones en el sitio a 30 FPS; el Character conserva la responsabilidad del
+desplazamiento y del salto. No cambiar controles, colisión ni gameplay para demostrar arte.
+
+La fuente usa metros, frente -Y y raíz al suelo. FBX nombra temporalmente el objeto
+contenedor `Armature`, siguiendo el tratamiento explícito del importador UE 5.7,
+para conservar exactamente 57 huesos y evitar una raíz artificial. Skeleton propio,
+sin promesa de retarget Manny/Quinn. Validación Unreal transitoria antes de conectar
+el Character. Evidencias y deuda: `HUMANOID_ART.md`.
+
+## 2026-09-06 — Siluetas regionales como bloque completo de presentación
+
+- Elegido §3.4 del inventario actual: independiente del rig humano, mejora objetos ya
+  jugables dentro del MVP. No amplía reglas de combate, vuelo ni generación planetaria.
+- Siete meshes originales por bpy, un material plano cada uno, pivote inferior y dimensiones
+  explícitas. Reutilizan validador estático y exportador FBX existentes.
+- C++ mantiene proxy de interacción/colisión y transform persistente. Un componente hijo
+  sin colisión presenta el arte con escala métrica absoluta; referencias desde el CDO
+  incluyen assets en cook. Se conserva fallback para ids futuros.
+- Los cuatro recursos de seed comparten proxy cristalino Q1, sin afirmar que resina,
+  vidrio, sal y filamentos tengan la misma estructura científica. Diferenciarlos queda pendiente.
+- Se conservan rótulos hasta diseñar UI. Q2 requiere revisión humana de lectura y colisión.
+- Manifiesto complementario enlazado desde el catálogo principal; build aislada
+  `WindowsRegionArt` conserva las entregas anteriores.
+- Sin commit que mezcle cambios ajenos: esta integración depende de archivos modificados
+  y no rastreados presentes al comenzar. Checkout limpio no validado en esta entrega.
+
+## 2026-09-05 — Primer slice de arte: escala e Ítaca
+
+**Decisión:** comenzar por un kit Q1 blockout con referencia humana de 1,80 m, suelo, pared, marco y consola; especificar familias futuras sin producirlas. Conservar cápsula de 1,92 m y cámara actual ~1,60 m. Marco con hueco de 1,30 × 2,20 m; grilla interior de 2 m. Dimensiones y paleta son propuestas reversibles de arte.
+
+**Motivo:** el código ya tiene región acotada, marcadores y criatura proxy, pero no un interior de nave ni skeletons. El kit sirve al AC-03 sin introducir vuelo o planetas completos. La guía de planetas mantiene valor para preparación futura; no evidencia implementación runtime.
+
+**Consecuencia:** herramientas y assets estáticos validados en Blender y mediante importación transitoria UE. Geometría generada se conserva localmente, fuentes/config/reportes son versionables. LFS añadido para futuras fuentes manuales `.blend`. Materiales de producción, colisión, mapa ensamblado, rig y prueba manual son pasos separados pendientes. `Docs/MODULAR_ASSET_GENERATION.md` se crea porque no existía. La entrega no modifica ni certifica parches ajenos de ESCOTILLA.
+
 ## 2026-09-05 — Normalizar documentos bajo `Docs/`
 
 **Decisión:** copiar los documentos maestros existentes de la raíz a `Docs/` y mantener los originales por compatibilidad inicial.
@@ -79,3 +173,54 @@
 **Motivo:** otro agente había cambiado/normalizado la presentación del HUD a español, pero varias pruebas seguían esperando textos en inglés. Eso rompía la suite sin indicar un bug de gameplay.
 
 **Consecuencia:** las pruebas vuelven a validar el contrato visible real del build actual. Si más adelante se decide localizar formalmente el juego, hay que separar IDs/semántica de tests de las cadenas localizadas.
+
+## 2026-09-05 — ESCOTILLA con interacción amplia y blanco temporal más alto
+
+**Decisión:** ampliar el fallback de interacción de marcadores a 450 cm, elegir primero el marcador más cercano a la mira dentro de una tolerancia de 160 cm, conservar fallback de marcador muy cercano a 220 cm, y aumentar la escala Z temporal de la ESCOTILLA de `0.35` a `1.2`.
+
+**Motivo:** el usuario confirmó que la ESCOTILLA seguía sin funcionar en juego real. El fix anterior de 180 cm pasaba el smoke, pero era insuficiente para una posición manual real y para un cubo demasiado bajo. Además se detectó que un intento de repackage no pudo sobrescribir el ejecutable porque el juego estaba abierto, lo que podía dejar al usuario probando un build viejo.
+
+**Consecuencia:** la interacción obligatoria ya no depende de apuntado perfecto ni de estar exactamente pegado al centro del cubo. El smoke crítico ahora se ejecuta desde más lejos y mirando horizontalmente por encima de la ESCOTILLA, y el packaged smoke pasa después de cerrar el ejecutable viejo y reempaquetar correctamente.
+
+## 2026-09-05 — Detener parches a ciegas sobre ESCOTILLA y dejar handoff
+
+**Decisión:** no seguir ampliando tolerancias ni reestructurando input sin diagnóstico. Documentar el bloqueo manual en `Docs/HANDOFF_ESCOTILLA_INTERACCION.md` y dejar que el próximo agente lo aborde con instrumentación visible primero.
+
+**Motivo:** el usuario confirmó que, aun parado frente a la ESCOTILLA en Rebuild6, `E` no produce ninguna acción visible. El smoke automático llama `Interact()` directamente y puede pasar aunque el input manual, el marker runtime o la sesión real fallen.
+
+**Consecuencia:** el próximo agente debe diferenciar input no recibido, marker no encontrado y condición de despliegue fallida antes de implementar el fix definitivo.
+
+## 2026-09-08 — Convivir con dos esqueletos en el personaje
+
+**Decisión:** el cuerpo de sombra usa el esqueleto del protagonista (75 huesos) y las manos de
+primera persona siguen sobre `SKEL_Humanoid_A` (57). No se unifican.
+
+**Motivo:** medido sobre el rig, el eje que lleva el brazo al frente es **Z**, y los 45 clips
+existentes lo usan entre 0,13 y 0,46 — casi nada. En `TwoHand_Idle` las manos quedan a
+x = ±0,48 m del cuerpo, e `Inspect` sube la mano al pecho igual de abierta. Migrar el rig de
+manos al esqueleto nuevo habría exigido re-autorizar las poses de brazo de los 45 clips para
+que las manos cayeran delante de la cámara: una reescritura de la animación, con riesgo de
+regresar clips ya auditados y sin beneficio adicional para el jugador. Separar brazos de
+primera persona y cuerpo de tercera es además la arquitectura habitual del género, y aquí el
+cuerpo sólo existe para proyectar la silueta.
+
+**Consecuencia:** `Astraeon.Art.Character.FirstPersonRigIsWired` dejó de exigir que ambos
+compartan esqueleto. Esa igualdad no era el requisito: era una comprobación indirecta. Se
+sustituyó por las directas —cada gesto resuelve sobre el esqueleto de las manos, el cuerpo
+está skinneado a un esqueleto con raíz `root`, la silueta mide entre 170 y 195 cm y la raíz
+se apoya en el suelo de la cápsula—. Si algún día hay cámara en tercera persona sobre el
+personaje, habrá que revisar esta decisión.
+
+## 2026-09-08 — Tres morph targets faciales en lugar de siete
+
+**Decisión:** autorizar `jaw_open`, `brow_raise` y `brow_furrow`, y bajar de 7 a 3 el umbral
+que `Scripts/Editor/MainCharacterAppearance.py` exige al importar.
+
+**Motivo:** la cara tiene 249 vértices con arista media de 8,9 mm y ~18 por ojo. Un parpadeo
+necesita bucles de párpado que esa topología no tiene; con esa densidad el resultado sería
+peor que no tenerlo. El umbral de 7 lo había escrito una sesión anterior por adelantado, sin
+llegar a ejecutarlo nunca, y no era alcanzable sin rehacer la cabeza.
+
+**Consecuencia:** queda registrado como limitación conocida que `jaw_open` baja la mandíbula
+pero no separa los labios —la boca es geometría sellada, sin interior— y que no hay parpadeo.
+La retopología densa de cabeza queda como trabajo futuro acordado.
