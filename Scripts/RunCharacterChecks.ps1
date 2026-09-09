@@ -43,7 +43,7 @@ if ($Check -ne 'Package') {
     if ($content -match 'LogPython: Error:|Result=\{Fail|Fatal error:') { throw "Failure in log: $log" }
     if ($Check -like '*Visual*' -and ([regex]::Matches($content, 'AstraeonCharacterViewSmoke: Passed=true').Count -ne 2)) { throw "Both camera input transitions must pass: $log" }
     if ($Check -like '*Critical' -and $content -notmatch 'Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true') { throw "Critical path did not pass: $log" }
-    if ($Check -eq 'Automation' -and ([regex]::Matches($content, 'Test Completed. Result=\{Success\}').Count -lt 57)) { throw "Automation queue incomplete: $log" }
+    if ($Check -eq 'Automation' -and ([regex]::Matches($content, 'Test Completed. Result=\{Success\}').Count -lt 58)) { throw "Automation queue incomplete: $log" }
 } else {
     if ((Get-Content -Raw -LiteralPath $stdout) -notmatch 'BUILD SUCCESSFUL') { throw "Package did not succeed: $stdout" }
 }

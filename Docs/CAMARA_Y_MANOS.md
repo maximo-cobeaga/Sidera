@@ -114,3 +114,42 @@ Evidencia: `Docs/evidencia/QA_Personaje_TerceraPersona_Integrado.png` y
 `QA_Personaje_PrimeraPersona_Integrado.png`; smoke con la tecla V real, en editor y sobre el
 ejecutable, con `HeadHeightCm=163.9`. Investigación completa en
 `INVESTIGACION_PERSONAJE_INVISIBLE.md`.
+
+## El cuerpo usa su set de animación, no cinco clips
+
+2026-09-09. El protagonista trae **45 clips** y el runtime reproducía **cinco**: `Idle`,
+`Walk_F`, `Run_F`, `Jump_Loop` y `Jump_Land`. De ahí venía buena parte de lo que se veía
+raro: caminar de lado usaba el clip de caminar de frente, el salto era un único bucle de
+caída sin despegue ni aterrizaje, y escanear, interactuar o recoger no tenían gesto de
+cuerpo aunque las manos sí lo hicieran.
+
+`FAstraeonBodyAnimation::Choose` elige el clip a partir de un estado plano —velocidad,
+dirección en el espacio del actor, caída, fases de salto y acción en curso—. Es una función
+pura sin dependencias de motor, así que la elección se prueba sin mundo, sin actor y sin
+assets (`Astraeon.Art.Character.BodyAnimationSelection`).
+
+| Situación | Clip |
+|---|---|
+| Quieto | `Idle` |
+| Caminar / correr | `Walk_*` / `Run_*` con la dirección real: `F`, `B`, `L`, `R` |
+| Despegue, vuelo, aterrizaje | `Jump_Start` → `Jump_Loop` → `Jump_Land` |
+| Escanear, interactuar, recoger | `Scan`, `Interact`, `Pickup` |
+| Taladro, cortadora, martillo, maza | `Tool_Use` |
+| Comer una ración / presentar el resonador | `UseTool` / `Inspect` |
+
+Dos reglas que salieron de probarlo:
+
+- **En diagonal gana el avance.** Es lo que el jugador siente que está haciendo al pulsar
+  dos teclas.
+- **Caer manda sobre el gesto.** Escanear mientras se cae tiene que verse como caer, o el
+  personaje flota en pose de escaneo.
+
+El gesto de manos y el del cuerpo son assets distintos y no duran lo mismo, así que cada uno
+lleva su propio temporizador. Al terminar el del cuerpo vuelve la locomoción: un gesto que no
+devuelve el control deja al personaje deslizándose en pose de escaneo.
+
+**Lo que sigue sin engancharse**, y por qué: los clips de agachado (`Crouch_*`) no tienen
+mecánica que los dispare —no hay agacharse en el juego—, y las poses de porte
+(`OneHand_*`, `TwoHand_*`, `Grip_*`) necesitan mezcla por capas sobre la locomoción, que la
+reproducción de un solo nodo no da. Ninguna de las dos es un id mal escrito: son trabajo
+pendiente con nombre.

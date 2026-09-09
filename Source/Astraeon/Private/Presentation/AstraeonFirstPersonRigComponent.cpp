@@ -111,12 +111,17 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 		}
 	}
 
-	// Clips del protagonista, sobre su propio esqueleto, para el cuerpo de sombra.
-	BodyIdleSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Idle")));
-	BodyWalkSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Walk_F")));
-	BodyRunSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Run_F")));
-	BodyJumpSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop")));
-	BodyLandSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land")));
+	// Clips del protagonista, sobre su propio esqueleto, para el cuerpo de sombra. Se carga
+	// el juego entero que el selector puede pedir: antes se cargaban cinco y el resto del set
+	// importado no lo reproducía nadie.
+	for (const FName& ClipId : FAstraeonBodyAnimation::GetAllClipIds())
+	{
+		const FString AssetName = FString::Printf(TEXT("AN_Astraeon_Player_All_Armature_AN_Player_%s"), *ClipId.ToString());
+		if (UAnimSequence* Sequence = Load<UAnimSequence>(MeshRef(PlayerPath, *AssetName)))
+		{
+			BodyClips.Add(ClipId, Sequence);
+		}
+	}
 
 	IdleSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Idle")));
 	WalkSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Walk")));
@@ -188,6 +193,12 @@ void UAstraeonFirstPersonRigComponent::PlayGesture(EAstraeonHandGesture Gesture)
 	}
 
 	GestureSecondsRemaining = Sequence->GetPlayLength();
+
+	// El cuerpo acompaña con SU clip y SU duración: el gesto de manos y el del cuerpo son
+	// assets distintos y no duran lo mismo.
+	BodyAction = BodyActionForGesture(Gesture);
+	const UAnimSequence* BodySequence = GetBodyClip(FAstraeonBodyAnimation::GetClipIdForAction(BodyAction));
+	BodyActionSecondsRemaining = BodySequence ? BodySequence->GetPlayLength() : 0.0f;
 	// Forzar el reinicio: repetir la acción tiene que volver a verse.
 	ActiveSequence = nullptr;
 	PlaySequence(Sequence, false);
@@ -218,6 +229,15 @@ void UAstraeonFirstPersonRigComponent::TickComponent(float DeltaSeconds, ELevelT
 	{
 		LandingSecondsRemaining = AstraeonFirstPersonRig::LandingSeconds;
 	}
+	if (!bWasFallingLastFrame && bFalling)
+	{
+		// El despegue dura lo que dura su clip: pasado eso manda la caída, o el personaje
+		// subiría eternamente en pose de impulso.
+		const UAnimSequence* Takeoff = GetBodyClip(FName(TEXT("Jump_Start")));
+		TakeoffSecondsRemaining = Takeoff ? Takeoff->GetPlayLength() : 0.0f;
+	}
+	TakeoffSecondsRemaining = FMath::Max(0.0f, TakeoffSecondsRemaining - DeltaSeconds);
+	BodyActionSecondsRemaining = FMath::Max(0.0f, BodyActionSecondsRemaining - DeltaSeconds);
 	bWasFallingLastFrame = bFalling;
 	LandingSecondsRemaining = FMath::Max(0.0f, LandingSecondsRemaining - DeltaSeconds);
 	UpdateBodyLocomotion();
@@ -285,20 +305,27 @@ void UAstraeonFirstPersonRigComponent::UpdateBodyLocomotion()
 	{
 		return;
 	}
-	UAnimSequence* BodySequence = BodyCounterpart(SelectLocomotionSequence());
-	if (!BodySequence)
+
+	const ACharacter* OwningCharacter = Cast<ACharacter>(GetOwner());
+	const UCharacterMovementComponent* Movement = OwningCharacter ? OwningCharacter->GetCharacterMovement() : nullptr;
+
+	FAstraeonBodyAnimationState State;
+	if (Movement)
 	{
-		return;
+		const FVector Velocity = Movement->Velocity;
+		State.SpeedCms = Velocity.Size2D();
+		// La velocidad al espacio del actor: X hacia donde mira, Y a su derecha. Sin esto,
+		// caminar de lado se veía con el clip de caminar de frente.
+		const FVector Local = OwningCharacter->GetActorRotation().UnrotateVector(Velocity);
+		State.LocalDirection = FVector2D(Local.X, Local.Y).GetSafeNormal();
+		State.bFalling = Movement->IsFalling();
 	}
-	const USkeletalMesh* BodyMesh = ShadowBody->GetSkeletalMeshAsset();
-	if (BodyMesh && BodyMesh->GetSkeleton() == BodySequence->GetSkeleton())
-	{
-		const UAnimSingleNodeInstance* Instance = ShadowBody->GetSingleNodeInstance();
-		if (!Instance || Instance->GetAnimationAsset() != BodySequence)
-		{
-			ShadowBody->PlayAnimation(BodySequence, BodySequence != BodyLandSequence);
-		}
-	}
+	State.TakeoffSecondsRemaining = TakeoffSecondsRemaining;
+	State.LandingSecondsRemaining = LandingSecondsRemaining;
+	State.Action = BodyAction;
+	State.ActionSecondsRemaining = BodyActionSecondsRemaining;
+
+	PlayBodyClip(FAstraeonBodyAnimation::Choose(State));
 }
 
 void UAstraeonFirstPersonRigComponent::SetShadowBodyMesh(USkeletalMeshComponent* BodyMesh)
@@ -307,28 +334,12 @@ void UAstraeonFirstPersonRigComponent::SetShadowBodyMesh(USkeletalMeshComponent*
 	// El cuerpo se asigna desde el BeginPlay del personaje, que puede correr después del de
 	// este componente. Sin este arranque quedaría en pose de referencia hasta el primer
 	// cambio de locomoción.
-	UAnimSequence* BodySequence = BodyCounterpart(ActiveSequence ? ActiveSequence : IdleSequence);
-	if (!ShadowBody || !BodySequence)
-	{
-		return;
-	}
-	const USkeletalMesh* Mesh = ShadowBody->GetSkeletalMeshAsset();
-	if (Mesh && Mesh->GetSkeleton() == BodySequence->GetSkeleton())
-	{
-		ShadowBody->PlayAnimation(BodySequence, true);
-	}
+	FAstraeonBodyClip Initial;
+	Initial.ClipId = FName(TEXT("Idle"));
+	Initial.bLoop = true;
+	PlayBodyClip(Initial);
 }
 
-UAnimSequence* UAstraeonFirstPersonRigComponent::BodyCounterpart(UAnimSequence* HandSequence) const
-{
-	if (HandSequence == IdleSequence) return BodyIdleSequence;
-	if (HandSequence == WalkSequence) return BodyWalkSequence;
-	if (HandSequence == RunSequence) return BodyRunSequence;
-	if (HandSequence == JumpSequence) return BodyJumpSequence;
-	if (HandSequence == LandSequence) return BodyLandSequence;
-	// Los gestos son de manos: el cuerpo mantiene su locomoción en lugar de congelarse.
-	return nullptr;
-}
 
 void UAstraeonFirstPersonRigComponent::RefreshHeldTool()
 {
@@ -348,4 +359,53 @@ void UAstraeonFirstPersonRigComponent::RefreshHeldTool()
 	// disponible desde el primer minuto y no ocupa una ranura de inventario.
 	ToolMesh->SetStaticMesh(Found ? Found->Get() : ScannerMesh.Get());
 	ToolRotorMesh->SetVisibility(bFirstPersonVisible && HeldItemId == TEXT("tool_core_drill"));
+}
+
+UAnimSequence* UAstraeonFirstPersonRigComponent::GetBodyClip(FName ClipId) const
+{
+	const TObjectPtr<UAnimSequence>* Found = BodyClips.Find(ClipId);
+	return Found ? Found->Get() : nullptr;
+}
+
+EAstraeonBodyAction UAstraeonFirstPersonRigComponent::BodyActionForGesture(EAstraeonHandGesture Gesture)
+{
+	switch (Gesture)
+	{
+	case EAstraeonHandGesture::Scan: return EAstraeonBodyAction::Scan;
+	case EAstraeonHandGesture::Interact: return EAstraeonBodyAction::Interact;
+	// Taladro, cortadora, martillo y maza son la misma acción para el cuerpo: llevar la
+	// herramienta al frente. Lo que las distingue es el gesto de la mano y el objeto.
+	case EAstraeonHandGesture::Drill:
+	case EAstraeonHandGesture::Pulse:
+	case EAstraeonHandGesture::Hammer:
+	case EAstraeonHandGesture::Maul: return EAstraeonBodyAction::ToolUse;
+	case EAstraeonHandGesture::Consume: return EAstraeonBodyAction::Consume;
+	case EAstraeonHandGesture::Present: return EAstraeonBodyAction::Present;
+	case EAstraeonHandGesture::Grip: return EAstraeonBodyAction::Pickup;
+	default: return EAstraeonBodyAction::None;
+	}
+}
+
+void UAstraeonFirstPersonRigComponent::PlayBodyClip(const FAstraeonBodyClip& Clip)
+{
+	if (!ShadowBody)
+	{
+		return;
+	}
+	UAnimSequence* Sequence = GetBodyClip(Clip.ClipId);
+	if (!Sequence)
+	{
+		return;
+	}
+	const USkeletalMesh* BodyMesh = ShadowBody->GetSkeletalMeshAsset();
+	if (!BodyMesh || BodyMesh->GetSkeleton() != Sequence->GetSkeleton())
+	{
+		return;
+	}
+	const UAnimSingleNodeInstance* Instance = ShadowBody->GetSingleNodeInstance();
+	if (Instance && Instance->GetAnimationAsset() == Sequence)
+	{
+		return;
+	}
+	ShadowBody->PlayAnimation(Sequence, Clip.bLoop);
 }

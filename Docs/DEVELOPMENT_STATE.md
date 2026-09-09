@@ -461,3 +461,21 @@ Lo que existe y el juego no usa, ya decidido: 47 assets del import crudo (duplic
 
 Siguiente: **Bloque B** —perfiles a datos, segundo bioma y capa explícita de estado mutable—
 y, dentro de él o antes, enganchar los clips del cuerpo que hoy no se reproducen.
+
+## 2026-09-09 — El cuerpo reproduce su set de animación, no cinco clips
+
+El protagonista traía 45 clips y el runtime usaba 5. `FAstraeonBodyAnimation::Choose`
+—función pura, probada sin mundo ni assets— elige entre 18 según velocidad, dirección en el
+espacio del actor, fase de salto y acción en curso.
+
+Qué cambia jugando: caminar y correr de lado y hacia atrás usan su propio clip en vez del de
+avanzar; el salto tiene despegue, vuelo y aterrizaje encadenados; y escanear, interactuar,
+recoger, usar la herramienta, comer y presentar el resonador tienen gesto de cuerpo, no sólo
+de manos. El paquete lo confirma: se cocinan **18 clips del cuerpo donde antes había 5**.
+
+Sigue pendiente con nombre: agachado (no hay mecánica que lo dispare) y poses de porte
+(`OneHand_*`, `TwoHand_*`, `Grip_*`), que necesitan mezcla por capas y no reproducción de un
+solo nodo. Y sin medir, el patinaje de pies contra la velocidad real de movimiento.
+
+Estado de pruebas: 58 automáticas, smoke de cámara, recorrido crítico, `BUILD SUCCESSFUL` y
+ambos smokes sobre el ejecutable, todo en verde.

@@ -1,20 +1,19 @@
 # Problemas conocidos — ASTRAEON
 
-## 2026-09-08 — Pendiente: 40 de los 45 clips del cuerpo no se reproducen
+## 2026-09-09 — Resuelto en su mayor parte: los clips del cuerpo que no se reproducían
 
-Levantado por la auditoría de arte comparando `Content/` con lo cocinado en el paquete.
+Levantado el 2026-09-08 por la auditoría de arte: el runtime reproducía **5 de los 45**
+clips del protagonista.
 
-- **Motivo**: el runtime sólo reproduce cinco clips del protagonista —`Idle`, `Walk_F`,
-  `Run_F`, `Jump_Loop` y `Jump_Land`—. Crouch, las variantes lateral y trasera de caminar y
-  correr, `Scan`, `Interact`, `Pickup`, `UseTool`, los gestos de agarre y todo el juego
-  `OneHand`/`TwoHand` están importados, a escala correcta y **sin enganchar a nada**.
-- **Impacto**: el personaje camina de lado con la animación de caminar de frente, no tiene
-  gesto al escanear, interactuar ni recoger, y agacharse no existe como animación. Se suma a
-  la ficha de calidad de locomoción de más arriba.
-- **Evidencia**: `Docs/AUDITORIA_ARTE.md`; los clips no cocinados son exactamente los que
-  ningún sistema referencia.
-- **Cierre esperado**: una máquina de estados de animación que consuma el set —dirección de
-  movimiento, agachado, gesto por acción— en vez de las cinco llamadas sueltas actuales.
+- **Resuelto**: `FAstraeonBodyAnimation::Choose` engancha 18 clips —direcciones de caminar
+  y correr, las tres fases del salto y los gestos de escanear, interactuar, recoger, usar
+  herramienta, comer y presentar—. Caminar de lado ya no usa el clip de caminar de frente.
+  Cubierto por `Astraeon.Art.Character.BodyAnimationSelection` y por la prueba del rig.
+- **Sigue pendiente, con nombre**: los clips de agachado (`Crouch_*`) no tienen mecánica que
+  los dispare —agacharse no existe en el juego—, y las poses de porte (`OneHand_*`,
+  `TwoHand_*`, `Grip_*`) necesitan mezcla por capas sobre la locomoción, que la reproducción
+  de un solo nodo no da.
+- **Detalle**: `Docs/CAMARA_Y_MANOS.md` → "El cuerpo usa su set de animación".
 
 ## 2026-09-08 — Duplicado: el import crudo del protagonista
 
@@ -40,9 +39,9 @@ se ve, se mueve y el recorrido crítico pasa— sino calidad de animación.
 - **En primera persona**, además, `AN_HandsFP_*` congela la pose de brazos del agarre de
   escáner sobre todo el clip. Fue lo que metió las manos en el encuadre, pero implica que
   los brazos **no se mueven** al caminar o correr.
-- **Sin medir todavía**: patinaje de pies en el ciclo de caminata (velocidad del clip contra
-  velocidad del `CharacterMovement`) y el arco del salto, que hoy es un clip suelto sin
-  fases de despegue, vuelo y aterrizaje encadenadas.
+- **El salto ya no es un clip suelto** (2026-09-09): despegue, vuelo y aterrizaje están
+  encadenados. Sigue **sin medir** el patinaje de pies en el ciclo de caminata: velocidad del
+  clip contra velocidad del `CharacterMovement`.
 - **Impacto**: estético y constante — se ve en cada partida, en tercera persona sobre todo.
 - **Cierre esperado**: re-autorizar en Blender las poses de brazo del set de locomoción,
   revisar contacto de pies contra la velocidad real de movimiento, y separar el salto en

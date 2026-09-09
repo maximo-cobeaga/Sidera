@@ -807,3 +807,29 @@ structs que devuelve `get_editor_property('materials')` opera sobre copias. Es l
 causa por la que los scripts de preparación creían haber asignado los materiales. Corregido
 en la reparación y en los scripts de origen, y ahora ambos **releen el asset después de
 guardar** antes de declarar éxito.
+
+## 2026-09-09 — El cuerpo usa su set de animación
+
+| Prueba | Resultado |
+|---|---|
+| `AstraeonEditor Win64 Development` | Succeeded |
+| `Automation RunTests Astraeon` | **58 éxitos, 0 fallos** (nueva: `Art.Character.BodyAnimationSelection`) |
+| Smoke de cámara en editor | `Passed=true` en ambos sentidos, `HeadHeightCm=163.90` |
+| Recorrido crítico en editor | En verde |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL` |
+| Smoke de cámara y recorrido crítico sobre el **ejecutable** | Ambos en verde |
+
+`Astraeon.Art.Character.BodyAnimationSelection` prueba la elección de clip como función
+pura —sin mundo, sin actor y sin assets— y después exige que **cada id que el selector puede
+devolver exista como asset** y pertenezca al esqueleto del protagonista: un id mal escrito
+dejaría al cuerpo congelado sin avisar de nada.
+
+### Una aserción reemplazada, no debilitada
+
+`Astraeon.Art.Character.FirstPersonRigIsWired` exigía *"Body runs while hands scan"*: que un
+gesto de manos **no** tocara el cuerpo. Esa regla existía porque el cuerpo no tenía clips de
+acción. Lo que protegía era que el cuerpo no se **congelara**, y eso es lo que se comprueba
+ahora: el cuerpo reproduce su propio `Scan` y **vuelve a `Run_F` al terminar el clip**.
+La prueba cubre además que correr de lado use `Run_L` y no `Run_F`, que es el defecto que
+motivó el trabajo. AGENTS.md §7 pide exactamente esto: explicar el cambio y sustituir por una
+verificación equivalente.

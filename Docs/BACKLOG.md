@@ -188,12 +188,12 @@ Este bloque no sustituye la prioridad del fallo manual de ESCOTILLA ni certifica
 > publicarse y una sola consulta de altura. Sigue el **Bloque B**: perfiles de mundo a
 > datos, segundo bioma y capa explícita de estado mutable sobre la seed.
 
-1. **Animación del protagonista — calidad de locomoción (reportado por el propietario, 2026-09-08)**
-   - Camina raro, salta raro y los brazos se ven mal. El personaje ya es visible y funcional; esto es pulido de animación, no un fallo.
-   - Los 45 clips del cuerpo posan los brazos en cruz (medido: eje Z de brazo al frente usado entre 0,13 y 0,46; manos a x = ±0,48 m). Nunca tuvieron pasada de pulido.
-   - En primera persona los brazos están congelados en la pose de agarre por `AN_HandsFP_*`.
-   - Sin medir: patinaje de pies contra la velocidad real de `CharacterMovement`, y el salto como clip suelto sin despegue/vuelo/aterrizaje.
-   - Detalle en `Docs/KNOWN_ISSUES.md` → "la animación del protagonista se ve rara".
+1. **Animación del protagonista — lo que queda tras enganchar el set (2026-09-09)**
+   - Hecho: 18 clips enganchados —direcciones de caminar y correr, salto en tres fases y gestos de acción—. Caminar de lado ya no usa el clip de avanzar.
+   - Queda: las poses de brazo del set siguen en cruz (medido: eje Z de brazo al frente usado entre 0,13 y 0,46; manos a x = ±0,48 m), lo que exige re-autorizarlas en Blender.
+   - Queda: patinaje de pies sin medir contra la velocidad real de `CharacterMovement`.
+   - Queda, con nombre: agachado sin mecánica que lo dispare, y poses de porte que necesitan mezcla por capas.
+   - Detalle en `Docs/CAMARA_Y_MANOS.md` y `Docs/KNOWN_ISSUES.md`.
 
 2. **H5.2 restante — Ítaca/narrativa visual (en pausa, a cargo de otra sesión de trabajo)**
    - Piso de Ítaca superpuesto con la nueva geometría de `AAstraeonItacaInterior` (paredes/caja). Ver `Docs/ART_ASSET_MASTER_PLAN.md` → "Hallazgo de smoke manual post-integración".

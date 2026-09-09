@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Presentation/AstraeonBodyAnimation.h"
 #include "AstraeonFirstPersonRigComponent.generated.h"
 
 class UAnimSequence;
@@ -116,21 +117,12 @@ private:
 	// Los clips de arriba viven sobre SKEL_Humanoid_A, el esqueleto de las manos. El cuerpo
 	// de sombra es el protagonista, con esqueleto propio de 75 huesos: empujarle una
 	// secuencia ajena no produce una pose válida y la malla deja de dibujarse. Por eso el
-	// cuerpo tiene su propio juego de clips, y se busca el equivalente al reproducir.
+	// cuerpo tiene su propio juego de clips, indexado por el id que devuelve el selector.
+	//
+	// Son 15 y no 5: el set importado trae direcciones de caminar y correr, fases de salto y
+	// gestos de acción que hasta ahora no reproducía nadie.
 	UPROPERTY()
-	TObjectPtr<UAnimSequence> BodyIdleSequence;
-
-	UPROPERTY()
-	TObjectPtr<UAnimSequence> BodyWalkSequence;
-
-	UPROPERTY()
-	TObjectPtr<UAnimSequence> BodyRunSequence;
-
-	UPROPERTY()
-	TObjectPtr<UAnimSequence> BodyJumpSequence;
-
-	UPROPERTY()
-	TObjectPtr<UAnimSequence> BodyLandSequence;
+	TMap<FName, TObjectPtr<UAnimSequence>> BodyClips;
 
 	// Clip que se está reproduciendo, para no reiniciarlo en cada frame.
 	UPROPERTY()
@@ -140,6 +132,11 @@ private:
 	bool bHeldToolInitialized = false;
 	bool bFirstPersonVisible = true;
 	float GestureSecondsRemaining = 0.0f;
+	// Acción de cuerpo en curso. Nace del mismo gesto de gameplay que mueve las manos, pero
+	// dura lo que dura el clip del cuerpo, que no es el mismo asset.
+	EAstraeonBodyAction BodyAction = EAstraeonBodyAction::None;
+	float BodyActionSecondsRemaining = 0.0f;
+	float TakeoffSecondsRemaining = 0.0f;
 	bool bWasFallingLastFrame = false;
 	float LandingSecondsRemaining = 0.0f;
 	float RotorAngleDegrees = 0.0f;
@@ -148,9 +145,10 @@ private:
 	void UpdateBodyLocomotion();
 	UAnimSequence* SelectLocomotionSequence() const;
 
-	// Equivalente del clip de manos en el juego de clips del cuerpo. Devuelve nullptr si no
-	// hay correspondencia: entonces el cuerpo se queda en su pose anterior, que es preferible
-	// a evaluarlo con una secuencia de otro esqueleto.
-	UAnimSequence* BodyCounterpart(UAnimSequence* HandSequence) const;
+	// Clip del cuerpo por id de selector. Devuelve nullptr si falta: entonces el cuerpo
+	// conserva su pose, que es preferible a evaluarlo con una secuencia de otro esqueleto.
+	UAnimSequence* GetBodyClip(FName ClipId) const;
+	void PlayBodyClip(const FAstraeonBodyClip& Clip);
+	static EAstraeonBodyAction BodyActionForGesture(EAstraeonHandGesture Gesture);
 	void PlaySequence(UAnimSequence* Sequence, bool bLoop);
 };

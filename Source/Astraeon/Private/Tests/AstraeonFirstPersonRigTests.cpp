@@ -257,14 +257,40 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		Character->ToggleCameraView();
 	}
 	TestEqual(TEXT("Helmet, backpack and wrist computer mounted"), EquipmentCount, 3);
-	// A hand gesture must not freeze body locomotion or expose a drill rotor in FP.
+	// El cuerpo acompaña el gesto con SU clip y vuelve solo a la locomoción. La aserción
+	// anterior exigía que un gesto de manos no tocara el cuerpo, porque el cuerpo no tenía
+	// clips de acción: reproducía cinco de sus cuarenta y cinco. Lo que aquella aserción
+	// protegía era que el cuerpo no se CONGELARA, y eso es lo que se comprueba ahora.
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	Character->GetCharacterMovement()->Velocity = FVector(800, 0, 0);
+	Rig->TickComponent(0.016f, LEVELTICK_All, nullptr);
+	if (UAnimSingleNodeInstance* Instance = Body->GetSingleNodeInstance())
+	{
+		TestTrue(TEXT("Body runs forward with the forward run clip"),
+			Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Run_F")));
+	}
+	Character->GetCharacterMovement()->Velocity = FVector(0, -800, 0);
+	Rig->TickComponent(0.016f, LEVELTICK_All, nullptr);
+	if (UAnimSingleNodeInstance* Instance = Body->GetSingleNodeInstance())
+	{
+		TestTrue(TEXT("Strafing left uses the left run clip, not the forward one"),
+			Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Run_L")));
+	}
 	Character->GetCharacterMovement()->Velocity = FVector(800, 0, 0);
 	Rig->PlayGesture(EAstraeonHandGesture::Scan);
 	Rig->TickComponent(0.016f, LEVELTICK_All, nullptr);
 	if (UAnimSingleNodeInstance* Instance = Body->GetSingleNodeInstance())
 	{
-		TestTrue(TEXT("Body runs while hands scan"), Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Run_F")));
+		TestTrue(TEXT("Body plays its own scan gesture"),
+			Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Scan")));
+	}
+	// Pasado el clip vuelve a correr: un gesto que no devuelve el control deja al personaje
+	// deslizándose en pose de escaneo.
+	Rig->TickComponent(5.0f, LEVELTICK_All, nullptr);
+	if (UAnimSingleNodeInstance* Instance = Body->GetSingleNodeInstance())
+	{
+		TestTrue(TEXT("Body returns to locomotion after the gesture"),
+			Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Run_F")));
 	}
 	for (USceneComponent* Child : Tool->GetAttachChildren())
 	{
