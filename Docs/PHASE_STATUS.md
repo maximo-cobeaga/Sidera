@@ -19,7 +19,7 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 - [x] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
 - [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
 - [x] La calibración Blender → Unreal respeta escala y ejes (`evidencia/CALIBRACION_BLENDER_UNREAL.md`).
-- [ ] El personaje se sostiene de pie en el polo opuesto del harness **sin que la cámara ruede**,
+- [~] El personaje se sostiene de pie: **medido**, vuelta completa a la esfera con 0,0% de frames desalineados (`-AstraeonSmokePlanetWalk`). Falta sólo el juicio humano sobre **cómo se siente la cámara**,
       probado a mano.
 
 ### Rama documental

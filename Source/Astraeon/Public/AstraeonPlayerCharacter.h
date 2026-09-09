@@ -120,6 +120,13 @@ private:
 	// lógica de juego, que no necesita esa frecuencia, se sigue evaluando cada 0,2 s.
 	float GameplayTickAccumulatorSeconds = 0.0f;
 
+	// La mirada se enruta segun el marco activo: con gravedad radial va al componente
+	// planetario, que gira alrededor del arriba local; sin ella, al control de mando de
+	// siempre. El recorrido plano no cambia de comportamiento.
+	void LookYaw(float Value);
+	void LookPitch(float Value);
+	void ApplyPlanetaryView();
+
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void StartJump();

@@ -232,4 +232,88 @@ bool FAstraeonPlanetFrameInterpolationTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetFrameTransportTest,
+	"Astraeon.Planet.Frame.TransportKeepsHeading",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetFrameTransportTest::RunTest(const FString& Parameters)
+{
+	// Caminar media vuelta sin tocar el raton no puede girar el rumbo. Es el defecto que se vio
+	// a mano: el personaje seguia caminando de frente y terminaba boca abajo.
+	const FVector Center = FVector::ZeroVector;
+	const double Radius = 20000.0;
+
+	FVector Position = Center + FVector(0, 0, Radius);          // polo norte
+	FVector Forward = FVector(1, 0, 0);                          // tangente ahi
+
+	// 360 pasos de medio grado: media vuelta completa por un meridiano.
+	for (int32 Step = 0; Step < 360; ++Step)
+	{
+		const FQuat StepRotation(FVector(0, 1, 0), FMath::DegreesToRadians(0.5));
+		Position = StepRotation.RotateVector(Position);
+
+		const FVector Up = FAstraeonPlanetFrame::UpAt(Center, Position);
+		const FVector Right = FVector::CrossProduct(Up, Forward).GetSafeNormal();
+		Forward = FAstraeonPlanetFrame::TransportTangent(Forward, Up, Right);
+
+		const FQuat Frame = FAstraeonPlanetFrame::MakeFrame(Up, Forward);
+		if (!FAstraeonPlanetFrame::IsFrameAligned(Frame, Up))
+		{
+			AddError(FString::Printf(TEXT("Marco degenerado en el paso %d"), Step));
+			return false;
+		}
+		// El frente tiene que seguir siendo tangente en cada paso, no solo al final.
+		if (FMath::Abs(FVector::DotProduct(Forward, Up)) > 1.0e-3)
+		{
+			AddError(FString::Printf(TEXT("El frente dejo de ser tangente en el paso %d"), Step));
+			return false;
+		}
+	}
+
+	// Tras media vuelta por el meridiano, el arriba local es el opuesto al de partida.
+	const FVector FinalUp = FAstraeonPlanetFrame::UpAt(Center, Position);
+	TestTrue(TEXT("Media vuelta deja el arriba invertido"),
+		FinalUp.Equals(-FVector::UpVector, 1.0e-2));
+
+	// Y el rumbo transportado sigue apuntando al mismo lado del mundo: caminar de frente no
+	// hizo girar al personaje sobre si mismo.
+	TestTrue(TEXT("El rumbo se conserva tras media vuelta"),
+		FMath::Abs(FVector::DotProduct(Forward.GetSafeNormal(), FVector(-1, 0, 0))) > 0.99);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetFrameYawTest,
+	"Astraeon.Planet.Frame.YawIsAroundLocalUp",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetFrameYawTest::RunTest(const FString& Parameters)
+{
+	// En el antipoda, girar 90 grados tiene que girar 90 grados respecto al suelo del jugador.
+	// Si el yaw se aplicara alrededor del Z global, aqui giraria al reves.
+	const FVector Up = -FVector::UpVector;
+	const FVector Forward(1, 0, 0);
+
+	const FVector Yawed = FAstraeonPlanetFrame::YawTangent(Forward, Up, 90.0);
+
+	TestTrue(TEXT("Sigue siendo tangente"), FMath::Abs(FVector::DotProduct(Yawed, Up)) < 1.0e-4);
+	TestTrue(TEXT("Giro 90 grados"),
+		FMath::Abs(FVector::DotProduct(Yawed, Forward)) < 1.0e-3);
+
+	// Cuatro giros de 90 vuelven al punto de partida: el giro no acumula deriva.
+	FVector Cycled = Forward;
+	for (int32 Turn = 0; Turn < 4; ++Turn)
+	{
+		Cycled = FAstraeonPlanetFrame::YawTangent(Cycled, Up, 90.0);
+	}
+	TestTrue(TEXT("Cuatro cuartos de vuelta vuelven al origen"), Cycled.Equals(Forward, 1.0e-3));
+
+	// El sentido del giro tiene que ser opuesto al del polo norte, porque el arriba es opuesto.
+	const FVector AtNorth = FAstraeonPlanetFrame::YawTangent(Forward, FVector::UpVector, 90.0);
+	TestTrue(TEXT("El sentido depende del arriba local"), AtNorth.Equals(-Yawed, 1.0e-3));
+
+	return true;
+}
+
 #endif

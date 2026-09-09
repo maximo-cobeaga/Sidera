@@ -74,6 +74,18 @@ def spawn_marker(label, direction, color_scale):
     # jugador que llegue caminando, o no sirve como referencia de orientación.
     up = unreal.Vector(direction.x, direction.y, direction.z)
     marker.set_actor_rotation(unreal.MathLibrary.make_rot_from_z(up), False)
+
+    # Sin colisión: son referencias de navegación, no obstáculos. La de +X cae exactamente sobre
+    # el meridiano que recorre quien camina de frente desde el polo, y con colisión detenía la
+    # caminata en el ecuador —lo detectó el smoke automático, que se paró a los 89,7 grados, y lo
+    # confirmó el diagnóstico del propio juego con `blockingOverlaps=1`—.
+    #
+    # Se cambia el PERFIL y no `set_collision_enabled`: esa llamada altera el estado en memoria
+    # pero no la `BodyInstance` que se serializa, así que el mapa guardado seguía bloqueando.
+    for component in marker.get_components_by_class(unreal.StaticMeshComponent):
+        component.set_collision_profile_name("NoCollision")
+        component.set_editor_property("generate_overlap_events", False)
+
     return marker
 
 
@@ -134,7 +146,24 @@ def main():
 
     unreal.EditorLoadingAndSavingUtils.save_current_level()
     unreal.EditorAssetLibrary.save_asset(MAP_PACKAGE, only_if_is_dirty=False)
-    unreal.log("TL_10_RadialGravity generado en {} (radio {:.0f} cm)".format(MAP_PACKAGE, HARNESS_RADIUS_CM))
+
+    # Releer después de guardar antes de declarar éxito. Es la lección registrada en
+    # HANDOFF_SESION_20260909: la primera reparación de materiales dijo "10 reparados" y no
+    # persistió ninguno, porque nadie comprobó el asset guardado.
+    blocking = []
+    for actor in unreal.EditorLevelLibrary.get_all_level_actors():
+        if not actor.get_actor_label().startswith("Marker_"):
+            continue
+        for component in actor.get_components_by_class(unreal.StaticMeshComponent):
+            if component.get_collision_enabled() != unreal.CollisionEnabled.NO_COLLISION:
+                blocking.append("{}: {}".format(actor.get_actor_label(), component.get_collision_enabled()))
+
+    if blocking:
+        raise RuntimeError(
+            "Balizas que siguen bloqueando tras guardar: {}. Detendrian la caminata.".format(blocking))
+
+    unreal.log("TL_10_RadialGravity generado en {} (radio {:.0f} cm); balizas sin colision verificadas"
+               .format(MAP_PACKAGE, HARNESS_RADIUS_CM))
 
 
 if __name__ == "__main__":

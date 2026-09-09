@@ -114,3 +114,56 @@ bool FAstraeonPlanetFrame::IsFrameAligned(const FQuat& Rotation, const FVector& 
 		&& FMath::Abs(FVector::DotProduct(FrameRight, FrameUp)) <= OrthogonalTolerance
 		&& FMath::Abs(FVector::DotProduct(FrameForward, FrameRight)) <= OrthogonalTolerance;
 }
+
+FVector FAstraeonPlanetFrame::TransportTangent(const FVector& PreviousTangent, const FVector& UpUnit,
+	const FVector& FallbackRight)
+{
+	const FVector Up = UpUnit.GetSafeNormal();
+	if (Up.IsNearlyZero())
+	{
+		return PreviousTangent.GetSafeNormal();
+	}
+
+	const FVector Projected = ProjectToTangent(PreviousTangent, Up);
+	if (Projected.Size() >= AstraeonPlanetFrameLocal::MinTangentLength)
+	{
+		return Projected.GetSafeNormal();
+	}
+
+	// El frente anterior quedó paralelo al nuevo arriba: pasó por encima del polo. El costado
+	// conserva la orientación y evita el giro brusco que daría reconstruir desde un eje fijo.
+	const FVector ProjectedRight = ProjectToTangent(FallbackRight, Up);
+	if (ProjectedRight.Size() >= AstraeonPlanetFrameLocal::MinTangentLength)
+	{
+		return FVector::CrossProduct(ProjectedRight.GetSafeNormal(), Up).GetSafeNormal();
+	}
+
+	return ProjectToTangent(FVector::ForwardVector, Up).GetSafeNormal();
+}
+
+FQuat FAstraeonPlanetFrame::MakeFrame(const FVector& UpUnit, const FVector& TangentForwardUnit)
+{
+	const FVector Up = UpUnit.GetSafeNormal();
+	const FVector Forward = ProjectToTangent(TangentForwardUnit, Up);
+
+	if (Up.IsNearlyZero() || Forward.Size() < AstraeonPlanetFrameLocal::MinTangentLength)
+	{
+		return FQuat::Identity;
+	}
+
+	return FRotationMatrix::MakeFromZX(Up, Forward.GetSafeNormal()).ToQuat();
+}
+
+FVector FAstraeonPlanetFrame::YawTangent(const FVector& TangentUnit, const FVector& UpUnit, double DegreesDelta)
+{
+	const FVector Up = UpUnit.GetSafeNormal();
+	if (Up.IsNearlyZero())
+	{
+		return TangentUnit;
+	}
+
+	// Gira alrededor del arriba LOCAL. Hacerlo alrededor del Z global es exactamente el defecto
+	// que hace que la cámara se invierta al alejarse del polo.
+	const FQuat Rotation(Up, FMath::DegreesToRadians(DegreesDelta));
+	return ProjectToTangent(Rotation.RotateVector(TangentUnit), Up).GetSafeNormal();
+}

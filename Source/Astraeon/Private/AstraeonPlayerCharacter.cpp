@@ -189,8 +189,10 @@ void AAstraeonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AAstraeonPlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AAstraeonPlayerCharacter::MoveRight);
-	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
+	// La mirada pasa por el personaje y no directo a APawn: con gravedad radial hay que girar
+	// alrededor del arriba LOCAL, y la rotación de mando del motor es una FRotator de mundo.
+	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AAstraeonPlayerCharacter::LookYaw);
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &AAstraeonPlayerCharacter::LookPitch);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &AAstraeonPlayerCharacter::StartJump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &AAstraeonPlayerCharacter::StopJump);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &AAstraeonPlayerCharacter::StartSprint);
@@ -319,6 +321,9 @@ void AAstraeonPlayerCharacter::BeginPlay()
 void AAstraeonPlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	// La cámara sí necesita cada frame: a 0,2 s la vista iría a trompicones detrás del ratón.
+	ApplyPlanetaryView();
 
 	// El rig se anima por frame (lo hace su propio componente); esta lógica no lo necesita
 	// y mantiene la cadencia de 0,2 s que tenía cuando el Tick del actor iba a esa tasa.
@@ -749,6 +754,56 @@ void AAstraeonPlayerCharacter::RecoverFromShipFlight(const FVector& LandingLocat
 
 	// Sin esto, el ancla de rescate seguiría apuntando al punto anterior al despegue.
 	MarkLocationAsSafeGround(LandingLocationCm);
+}
+
+void AAstraeonPlayerCharacter::LookYaw(float Value)
+{
+	if (PlanetGravity && PlanetGravity->IsPlanetGravityActive())
+	{
+		// Grados por unidad de entrada. El mismo factor que aplica el motor a la rotación de
+		// mando, para que la sensibilidad del ratón no cambie al pisar un planeta.
+		PlanetGravity->AddYawInput(Value);
+		return;
+	}
+
+	AddControllerYawInput(Value);
+}
+
+void AAstraeonPlayerCharacter::LookPitch(float Value)
+{
+	if (PlanetGravity && PlanetGravity->IsPlanetGravityActive())
+	{
+		// El eje LookUp entra invertido desde la configuración de entrada; el marco planetario
+		// define el pitch positivo hacia arriba, así que se deshace aquí y no en el componente.
+		PlanetGravity->AddPitchInput(-Value);
+		return;
+	}
+
+	AddControllerPitchInput(Value);
+}
+
+void AAstraeonPlayerCharacter::ApplyPlanetaryView()
+{
+	if (!PlanetGravity || !PlanetGravity->IsPlanetGravityActive())
+	{
+		return;
+	}
+
+	// Con gravedad radial las cámaras dejan de seguir la rotación de mando: el yaw ya lo lleva
+	// la cápsula —alineada al arriba local— y aquí sólo queda inclinar. Es lo que impide que la
+	// vista se invierta al pasar cierta latitud.
+	const FRotator ViewPitch(PlanetGravity->GetViewPitchDegrees(), 0.0f, 0.0f);
+
+	if (FirstPersonCamera)
+	{
+		FirstPersonCamera->bUsePawnControlRotation = false;
+		FirstPersonCamera->SetRelativeRotation(ViewPitch);
+	}
+	if (ThirdPersonBoom)
+	{
+		ThirdPersonBoom->bUsePawnControlRotation = false;
+		ThirdPersonBoom->SetRelativeRotation(ViewPitch);
+	}
 }
 
 void AAstraeonPlayerCharacter::MoveForward(float Value)

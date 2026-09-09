@@ -1,5 +1,50 @@
 # Informe de pruebas — ASTRAEON
 
+## 2026-09-09 — Vuelta completa a la esfera tras la primera prueba manual
+
+```powershell
+.\Scripts\RunCharacterChecks.ps1 -Check Automation   # 69 verdes, 0 fallos
+.\Scripts\RunCharacterChecks.ps1 -Check Critical     # recorrido plano completo, en verde
+
+# Caminata planetaria automática (la prueba nueva)
+UnrealEditor-Cmd.exe Astraeon.uproject /Game/Maps/TL_10_RadialGravity -game `
+    -unattended -nosplash -RenderOffscreen -AstraeonSmokePlanetWalk -AstraeonWalkSeconds=180
+```
+
+**`-AstraeonSmokePlanetWalk`** existe porque los tres defectos que encontró la prueba manual son
+de comportamiento sostenido, y ninguna prueba unitaria de matemática los veía: el marco estaba
+bien y el personaje terminaba boca abajo igual, porque quien lo rotaba era otro sistema.
+
+Camina de frente sin tocar la mirada, salta a mitad de camino, y cuenta frames en vez de abortar
+al primero malo — distinguir "una vez" de "todo el rato" es exactamente lo que hacía falta.
+
+| Progreso | Arco desde el polo |
+|---|---:|
+| t=15 s | 58,2° |
+| t=45 s | 99,2° |
+| t=90 s | **170,1°** (antípoda cruzado) |
+| t=135 s | 119,0° (volviendo por el otro lado) |
+| t=165 s | 71,7° |
+
+| Métrica | Resultado | Umbral |
+|---|---:|---:|
+| Recorrido | **1.004 m** de 1.257 m de circunferencia | > 100 m |
+| Frames desalineados | **0,0 %** (peor cos 0,994 ≈ 6°) | < 5 % |
+| Frames en caída | **2,0 %** — el salto | < 25 % |
+| Frames fuera de altitud | **0,0 %** | < 5 % |
+| Altitud | 98,2–98,4 cm toda la vuelta | −50 a 400 cm |
+| Velocidad | 553 constante, sin frenadas | — |
+
+Dos pruebas nuevas del marco, además de las siete anteriores:
+
+| Prueba | Qué fija |
+|---|---|
+| `Astraeon.Planet.Frame.TransportKeepsHeading` | 360 pasos de medio grado por un meridiano: el rumbo se conserva y el frente sigue tangente **en cada paso**, no sólo al final |
+| `Astraeon.Planet.Frame.YawIsAroundLocalUp` | En el antípoda, girar 90° gira respecto al suelo del jugador y no al Z global; cuatro cuartos de vuelta no acumulan deriva |
+
+**Sin cubrir por automatización**: si la cámara se *siente* bien. Que no ruede ni se invierta está
+medido; que acompañe al jugador sin marearlo sigue necesitando una partida.
+
 ## 2026-09-09 — Spike de gravedad radial: 65 verdes, 0 fallos
 
 ```powershell

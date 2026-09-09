@@ -62,6 +62,36 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Planet")
 	void ClearPlanetBody();
 
+	// --- Marco de mirada local ---
+	//
+	// Con gravedad radial la rotación de mando del motor no sirve: es una FRotator de MUNDO, y
+	// al alejarse del polo su "arriba" deja de ser el del jugador. El resultado medido a mano
+	// fue el personaje volcándose boca abajo y la cámara invirtiéndose a cierta inclinación.
+	//
+	// Aquí el yaw es un giro alrededor del arriba LOCAL y el pitch es una inclinación relativa
+	// de la cámara. Ninguno de los dos pasa por una FRotator de mundo, así que no hay gimbal ni
+	// roll involuntario, y el polo deja de ser un caso especial.
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Planet")
+	void AddYawInput(float DeltaDegrees);
+
+	UFUNCTION(BlueprintCallable, Category = "Astraeon|Planet")
+	void AddPitchInput(float DeltaDegrees);
+
+	// Inclinación de la vista, para que el dueño la aplique a su cámara.
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Planet")
+	float GetViewPitchDegrees() const { return ViewPitchDegrees; }
+
+	// Dirección de mirada en el mundo: frente tangente inclinado por el pitch. La usan las
+	// trazas de escáner, interacción y disparo, que hoy consultan GetControlRotation().
+	UFUNCTION(BlueprintPure, Category = "Astraeon|Planet")
+	FVector GetViewDirection() const;
+
+	// Límite de inclinación. Mirar más allá de la vertical daría la vuelta a la vista, que es
+	// otra forma del mismo defecto que se está corrigiendo.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Astraeon|Planet")
+	float MaxViewPitchDegrees = 85.0f;
+
 private:
 	// Busca el harness del mundo y se activa si lo encuentra. Sin harness el componente no toca
 	// nada: es lo que permite que el personaje lo lleve siempre montado.
@@ -88,4 +118,24 @@ private:
 	// SetGravityDirection cada frame con el mismo valor recalcula cuaterniones cacheados del
 	// movimiento sin necesidad.
 	FVector LastAppliedGravityDirection = FVector::ZeroVector;
+
+	// Frente tangente arrastrado de frame a frame. No se recalcula desde un eje fijo: se
+	// transporta, que es lo que impide que el mundo gire bajo los pies al cruzar latitudes.
+	FVector TransportedForward = FVector::ForwardVector;
+
+	float ViewPitchDegrees = 0.0f;
+
+	// Cómo estaban las banderas de rotación antes de activar, para devolverlas al soltar el
+	// cuerpo. Sin esto, salir de un mapa planetario dejaría al personaje sin control de yaw.
+	bool bSavedUseControllerRotationYaw = false;
+	bool bSavedUseControllerRotationPitch = false;
+	bool bSavedUseControllerRotationRoll = false;
+	bool bHasSavedRotationFlags = false;
+
+	// El motor escribe la rotación del actor desde la rotación de mando (una FRotator de mundo)
+	// cada frame cuando bUseControllerRotationYaw está activo, que es el valor por defecto de
+	// APawn. Eso pelea contra el marco local y produce el vuelco. Se apagan mientras dure la
+	// gravedad planetaria y se restauran al salir.
+	void TakeOverPawnRotation();
+	void RestorePawnRotation();
 };

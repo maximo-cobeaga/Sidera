@@ -22,6 +22,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Tests/AstraeonItacaInputSmoke.h"
+#include "Tests/AstraeonPlanetWalkSmoke.h"
 #include "Tests/AstraeonRegionArtSmoke.h"
 #include "Environment/AstraeonItacaInterior.h"
 #include "WorldGen/AstraeonRegionMarker.h"
@@ -64,8 +65,13 @@ void AAstraeonGameModeBase::BeginPlay()
 		TArray<AActor*> Interiors;
 		UGameplayStatics::GetAllActorsOfClass(this, AAstraeonItacaInterior::StaticClass(), Interiors);
 		if (Interiors.IsEmpty()) GetWorld()->SpawnActor<AAstraeonItacaInterior>();
-		EnsureRuntimeLighting();
 	}
+
+	// La luz se enciende SIEMPRE, también en los mapas planetarios. Saltársela allí dejó la
+	// esfera completamente negra en la primera prueba manual: las luces colocadas por script son
+	// estáticas y sin lightmap horneado no iluminan nada, mientras que las que crea esto son
+	// movibles y funcionan sin hornear.
+	EnsureRuntimeLighting();
 	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokeRegionArt")))
 	{
 		GetWorld()->SpawnActor<AAstraeonRegionArtSmoke>();
@@ -73,6 +79,10 @@ void AAstraeonGameModeBase::BeginPlay()
 	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokeItacaInput")))
 	{
 		GetWorld()->SpawnActor<AAstraeonItacaInputSmoke>();
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokePlanetWalk")))
+	{
+		GetWorld()->SpawnActor<AAstraeonPlanetWalkSmoke>();
 	}
 
 	// The MVP starts at a minimal C++ menu. Region materialization happens after

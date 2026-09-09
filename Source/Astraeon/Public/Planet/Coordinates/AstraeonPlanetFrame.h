@@ -48,4 +48,22 @@ struct ASTRAEON_API FAstraeonPlanetFrame
 	// Comprobación de que un marco es utilizable: ortonormal y con Z sobre el arriba pedido.
 	// La usan las pruebas y las validaciones; no es un `check` de runtime.
 	static bool IsFrameAligned(const FQuat& Rotation, const FVector& UpUnit, double ToleranceDeg = 0.5);
+
+	// Transporta una dirección tangente al nuevo plano tangente conservando su orientación
+	// relativa. Es lo que permite caminar por la esfera sin que el mundo gire bajo los pies:
+	// el frente no se recalcula desde cero cada frame, se arrastra.
+	//
+	// Devuelve un vector unitario tangente a UpUnit. Si la dirección previa quedó paralela al
+	// nuevo arriba —sólo ocurre cruzando exactamente un polo— se reconstruye desde el costado
+	// dado, que sigue siendo información válida.
+	static FVector TransportTangent(const FVector& PreviousTangent, const FVector& UpUnit,
+		const FVector& FallbackRight);
+
+	// Marco completo a partir de arriba y un frente ya tangente. Separado de AlignToUp porque
+	// aquí el frente es un dato propio y no se deduce de la rotación actual del actor.
+	static FQuat MakeFrame(const FVector& UpUnit, const FVector& TangentForwardUnit);
+
+	// Gira una dirección tangente alrededor del arriba local. Es el yaw del jugador expresado
+	// en el marco de la gravedad, no en el del mundo.
+	static FVector YawTangent(const FVector& TangentUnit, const FVector& UpUnit, double DegreesDelta);
 };

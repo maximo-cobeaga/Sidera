@@ -1,5 +1,52 @@
 # Problemas conocidos — ASTRAEON
 
+## 2026-09-09 — Resuelto: los cuatro defectos de la primera prueba manual del harness
+
+El propietario probó `TL_10_RadialGravity` a mano y reportó cuatro cosas. Las cuatro tenían
+causa distinta.
+
+**1 y 2 — El personaje se volcaba boca abajo al caminar; la cámara se invertía a cierta
+inclinación.** Misma causa: `bUseControllerRotationYaw` está en `true` por defecto en `APawn` y
+las cámaras usaban `bUsePawnControlRotation`. El motor escribía la rotación del actor desde una
+**`FRotator` de mundo** cada frame y el componente planetario la sobrescribía con el marco local:
+dos sistemas peleándose por la misma rotación. Cerca del polo coinciden; al alejarse, el "arriba"
+del mundo deja de ser el del jugador.
+
+- **Corregido**: el marco de mirada pasa a vivir en la gravedad local. El yaw es un giro alrededor
+  del arriba local, el frente se **transporta** al nuevo plano tangente en vez de recalcularse
+  desde un eje fijo, el pitch es una inclinación relativa de la cámara con tope a 85°, y el
+  componente apaga las banderas de rotación de mando mientras dure la gravedad planetaria.
+- **Cubierto por**: `Astraeon.Planet.Frame.TransportKeepsHeading`,
+  `Astraeon.Planet.Frame.YawIsAroundLocalUp` y el smoke `-AstraeonSmokePlanetWalk`, que da una
+  vuelta completa a la esfera con **0,0 % de frames desalineados**.
+
+**3 — Pantalla negra al empezar partida.** Regresión introducida el mismo día: el guardián que
+evita materializar la región plana en un mapa planetario se llevó por delante
+`EnsureRuntimeLighting()`. Las luces que coloca el script del mapa son **estáticas** y sin
+lightmap horneado no iluminan; las que crea el runtime son movibles y funcionan sin hornear.
+
+- **Corregido**: la luz se enciende siempre. Sólo se saltan la región plana y la estancia de Ítaca.
+
+**4 — Deslizamiento sin control tras saltar.** El componente tickeaba en `TG_PostPhysics`, con el
+razonamiento de que alinear después del movimiento usa la posición final del frame. Está al
+revés: dejaba que `CharacterMovement` resolviera el suelo con la orientación y la gravedad del
+frame **anterior**. El desfase de un frame en la posición es invisible; el desfase en la
+orientación con la que se busca el suelo, sobre una superficie curva, se siente como resbalar.
+
+- **Corregido**: `TG_PrePhysics` más una dependencia explícita de tick, para que
+  `CharacterMovement` no corra hasta que la gravedad y la orientación del frame estén puestas.
+- **Medido**: 2,0 % de frames en caída en una vuelta completa, y son el salto.
+
+**Hallazgo de paso, ya corregido.** El smoke se detenía siempre a los 89,7° de arco. No era un
+defecto del movimiento: era la baliza del ecuador, que caía exactamente sobre el meridiano que
+recorre quien camina de frente desde el polo. Y el primer intento de quitarle la colisión no
+persistió, porque `set_collision_enabled` altera el estado en memoria y no la `BodyInstance` que
+se serializa — hay que cambiar el **perfil**. El generador del mapa ahora relee tras guardar y
+falla si alguna baliza sigue bloqueando.
+
+**Sigue abierto, y sólo lo cierra una partida**: si la cámara *se siente* bien. Que no ruede y no
+se invierta está medido; que acompañe al jugador sin marearlo, no.
+
 ## 2026-09-09 — Abierto: `-nullrhi` mata al editor al spawnear un actor propio con malla
 
 Encontrado generando `TL_10_RadialGravity` (Fase 0). Cualquier script Python que llame a
