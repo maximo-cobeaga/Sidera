@@ -11,15 +11,18 @@ Estado vivo con las casillas en [PHASE_STATUS.md](PHASE_STATUS.md).
 - [x] Módulo `Planet/` con marco de referencia, componente de gravedad y harness.
 - [x] `TL_10_RadialGravity` generado por script y verificado.
 - [x] 7 pruebas del marco planetario; 65 verdes en total.
-- [ ] Baseline de rendimiento en `Docs/evidencia/`.
-- [ ] Calibración Blender → Unreal: plantilla, preset `UE57_AST_V1`, `TL_00_AssetCalibration`,
-      y validación de static mesh, skeletal mesh, una Action y un shape key.
+- [x] Baseline de rendimiento en `Docs/evidencia/BASELINE_RENDIMIENTO.md`, con herramienta
+      reproducible (`-AstraeonPerfBaseline`).
+- [x] Calibración Blender → Unreal: preset `UE57_AST_V1` congelado, `TL_00_AssetCalibration`,
+      y static mesh, skeletal mesh, una Action y un shape key validados con números.
 - [ ] **Prueba humana**: caminar del polo al antípoda en `TL_10_RadialGravity` y confirmar que el
-      personaje se mantiene de pie sin que la cámara ruede. *Es el criterio que ningún script
-      puede cerrar, y decide si la Fase 1 arranca o si primero hay que rehacer el marco de cámara.*
+      personaje se mantiene de pie sin que la cámara ruede. *Único punto abierto de la Fase 0.
+      Ningún script puede cerrarlo, y decide si la Fase 1 arranca o si primero hay que rehacer el
+      marco de cámara.*
 
-Siguiente tarea al reanudar: el baseline, o la prueba humana si hay una partida a mano. La Fase 1
-no empieza hasta que esta puerta pase entera.
+**La Fase 0 está completa salvo esa prueba.** Todo lo automatizable pasó: 67 pruebas verdes,
+compilación limpia, calibración en verde y baseline registrado. La Fase 1 no empieza hasta que
+la partida humana cierre el criterio de orientación.
 
 ## 2026-09-07 — Protagonista completo solicitado mediante Bridge
 

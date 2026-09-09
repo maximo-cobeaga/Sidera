@@ -26,9 +26,15 @@ gravedad radial, harness de pruebas y `TL_10_RadialGravity`. **65 pruebas verdes
   (Lab 10 km, Target 500 km) miden escala y precisión; este mapa mide orientación, y a 10 km la
   media vuelta son 31 km.
 
-**Lo que falta para cerrar la Fase 0:** el baseline de rendimiento, la calibración Blender→Unreal
-y la prueba humana del criterio de orientación —el personaje de pie en el antípoda sin que la
-cámara ruede—. Esa última no la puede cerrar ningún script.
+**Baseline y calibración — cerrados.** `-AstraeonPerfBaseline` mide por percentiles y hitches y
+escribe un JSON con su línea de comandos, para que la comparación de la Fase 2 sea contra cifras
+exactas y no contra un recuerdo: mundo plano 289,8 FPS medios y p99 de 5,19 ms; harness 299,0 y
+4,50 ms; cero hitches en ambos. La calibración Blender→Unreal pasa con números redondos —cubo
+100,000 cm, ejes 50/35/20 sin permutar, mannequin 183,000 cm, morph presente, animación 1,000 s—
+y de paso el preset de exportación dejó de estar duplicado en dos archivos.
+
+**Lo único que falta para cerrar la Fase 0** es la prueba humana del criterio de orientación: el
+personaje de pie en el antípoda sin que la cámara ruede. Ningún script puede cerrarla.
 
 **Verificado a mano que sigue pendiente de verificar:** la cámara. El motor da
 `SetGravityDirection` pero **no** alinea cápsula, malla ni cámara, y el control de rotación sigue
