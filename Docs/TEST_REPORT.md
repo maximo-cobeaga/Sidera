@@ -1,5 +1,50 @@
 # Informe de pruebas — ASTRAEON
 
+## 2026-09-09 — Spike de gravedad radial: 65 verdes, 0 fallos
+
+```powershell
+# Compilar
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' `
+    AstraeonEditor Win64 Development -Project="...\Astraeon.uproject" -WaitMutex
+# → Result: Succeeded
+
+.\Scripts\RunCharacterChecks.ps1 -Check Automation
+# → Exit=0 · Success=65 Fail=0
+```
+
+| | |
+|---|---|
+| Pruebas | **65** (58 previas + 7 nuevas), todas en verde |
+| Ninguna prueba previa tocada | Las 58 pasan sin modificación: el spike no alteró el mundo plano |
+| Cuarentena | Vacía en ejercicio: el mapa plano sigue en el repositorio |
+
+Pruebas nuevas, todas de `FAstraeonPlanetFrame` y sin dependencia de mundo:
+
+| Prueba | Qué fija |
+|---|---|
+| `Astraeon.Planet.Frame.UpIsRadial` | Arriba es la dirección radial en siete direcciones, no el Z global |
+| `Astraeon.Planet.Frame.AntipodeIsInverted` | Dos antípodas tienen arribas opuestos y ambos marcos son válidos |
+| `Astraeon.Planet.Frame.AlignmentIsOrthonormal` | Barrido de 437 puntos sobre la esfera (19 polares × 23 azimutales, primos entre sí para no repetir meridianos) sin un solo marco degenerado |
+| `Astraeon.Planet.Frame.PoleDegeneracyIsHandled` | Frente paralelo al arriba —el caso que rompe una alineación ingenua— produce marco válido y sin NaN |
+| `Astraeon.Planet.Frame.TangentProjection` | Lo proyectado es perpendicular al arriba; un vector vertical se anula |
+| `Astraeon.Planet.Frame.AltitudeAtTargetScale` | 180 cm sigue siendo medible sobre un radio de 500 km (con float de 32 bits no lo sería) |
+| `Astraeon.Planet.Frame.AlignmentIsProgressive` | Un giro de 180° no se resuelve en un frame, y converge en dos segundos |
+
+**Generación del test level**, verificada cargando el mapa y listando sus actores:
+
+```powershell
+UnrealEditor-Cmd.exe Astraeon.uproject -unattended -nosplash -RenderOffscreen `
+    -ExecutePythonScript=Scripts\Editor\CreateRadialGravityTestMap.py
+# → Mundo activo verificado: /Game/Maps/TL_10_RadialGravity
+# → 8 actores · harness radio=20000 centro=(0,0,0) · PlayerStart a 20120 cm del centro
+```
+
+**No usar `-nullrhi` con ese script** — ver `KNOWN_ISSUES.md`. Las pruebas sí lo usan y pasan: el
+fallo está en la ruta de spawn del editor, no en la del juego.
+
+**Sin cubrir por automatización, y sigue abierto:** la cámara en el antípoda. Requiere partida
+humana; es el criterio que falta de la puerta de la Fase 0.
+
 ## 2026-09-07 — Bridge en vivo y proxy del protagonista
 
 - `get_host_status`: `blr:true`; `bl_get_scene_summary` y `bl_execute` inspeccionan

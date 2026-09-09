@@ -1,5 +1,26 @@
 # Backlog — ASTRAEON
 
+## Fase 0 — Transición controlada, 2026-09-09
+
+Orden y criterios en [PLAN_TRANSICION_EJECUCION.md](PLAN_TRANSICION_EJECUCION.md) §4.
+Estado vivo con las casillas en [PHASE_STATUS.md](PHASE_STATUS.md).
+
+- [x] ADR 0004 y sincronización de los seis rectores.
+- [x] `Docs/INDICE.md`: qué es cada documento y cuánta autoridad tiene.
+- [x] Etiqueta `pre-transicion-plana` sobre `503e3a1`.
+- [x] Módulo `Planet/` con marco de referencia, componente de gravedad y harness.
+- [x] `TL_10_RadialGravity` generado por script y verificado.
+- [x] 7 pruebas del marco planetario; 65 verdes en total.
+- [ ] Baseline de rendimiento en `Docs/evidencia/`.
+- [ ] Calibración Blender → Unreal: plantilla, preset `UE57_AST_V1`, `TL_00_AssetCalibration`,
+      y validación de static mesh, skeletal mesh, una Action y un shape key.
+- [ ] **Prueba humana**: caminar del polo al antípoda en `TL_10_RadialGravity` y confirmar que el
+      personaje se mantiene de pie sin que la cámara ruede. *Es el criterio que ningún script
+      puede cerrar, y decide si la Fase 1 arranca o si primero hay que rehacer el marco de cámara.*
+
+Siguiente tarea al reanudar: el baseline, o la prueba humana si hay una partida a mano. La Fase 1
+no empieza hasta que esta puerta pase entera.
+
 ## 2026-09-07 — Protagonista completo solicitado mediante Bridge
 
 - [x] Auditar fuentes humanas previas, pipeline local y herramientas expuestas.

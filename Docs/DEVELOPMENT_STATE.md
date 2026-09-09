@@ -1,5 +1,39 @@
 # Estado de desarrollo — ASTRAEON
 
+## 2026-09-09 — Fase 0 abierta: el proyecto pasa a planetas esféricos
+
+Cambio de dirección aprobado ([ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md)): la esfera
+grande y la gravedad radial dejan de ser expansión tardía y pasan a ser fundacionales. Orden de
+trabajo en `PLAN_TRANSICION_EJECUCION.md`; fase activa y puerta en `PHASE_STATUS.md`.
+
+**Rama documental — cerrada.** Seis rectores sincronizados. El bloqueo real era `AGENTS.md` §5,
+que prohibía literalmente "planetas esféricos totalmente transitables": cualquier sesión que
+empezara leyendo los rectores encontraba la instrucción contraria a lo que iba a construir.
+Ninguno se reescribió; cada uno declara qué conserva y qué quedó superado.
+
+**Rama técnica — spike en verde.** Módulo `Planet/` con marco de referencia, componente de
+gravedad radial, harness de pruebas y `TL_10_RadialGravity`. **65 pruebas verdes, 0 fallos**
+(58 previas intactas + 7 nuevas del marco planetario).
+
+- `FAstraeonPlanetFrame`: arriba radial, gravedad, altitud, tangente y alineación progresiva.
+  Funciones puras, sin mundo ni tick.
+- `UAstraeonPlanetGravityComponent`: montado en el protagonista pero **dormido** si el mapa no
+  tiene harness, así que el recorrido plano no cambia.
+- `AAstraeonPlanetGravityHarness`: la esfera de pruebas. En C++ y no como Blueprint, porque no
+  existía ninguna esfera previa que renombrar —el documento de transición asumía una que este
+  repositorio nunca tuvo— y `AGENTS.md` §4 reserva los Blueprints para presentación.
+- `TL_10_RadialGravity`: radio de 200 m para poder caminar hasta el antípoda. Los tiers del plan
+  (Lab 10 km, Target 500 km) miden escala y precisión; este mapa mide orientación, y a 10 km la
+  media vuelta son 31 km.
+
+**Lo que falta para cerrar la Fase 0:** el baseline de rendimiento, la calibración Blender→Unreal
+y la prueba humana del criterio de orientación —el personaje de pie en el antípoda sin que la
+cámara ruede—. Esa última no la puede cerrar ningún script.
+
+**Verificado a mano que sigue pendiente de verificar:** la cámara. El motor da
+`SetGravityDirection` pero **no** alinea cápsula, malla ni cámara, y el control de rotación sigue
+siendo world-space. Es el riesgo nombrado de la Fase 1 y el spike no lo resuelve.
+
 ## 2026-09-07 — Bridge conectado; protagonista en proxy de proporciones
 
 - Conexión e inspección de Blender 5.2.1 LTS verificadas; test reversible de geometría
