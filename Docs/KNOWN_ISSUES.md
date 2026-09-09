@@ -1,5 +1,38 @@
 # Problemas conocidos — ASTRAEON
 
+## 2026-09-09 — Abierto: `-nullrhi` mata al editor al spawnear un actor propio con malla
+
+Encontrado generando `TL_10_RadialGravity` (Fase 0). Cualquier script Python que llame a
+`EditorLevelLibrary.spawn_actor_from_class` con **una clase propia que tenga componente de malla**
+mata el editor con `EXCEPTION_INT_DIVIDE_BY_ZERO` si se arrancó con `-nullrhi`.
+
+- **No es específico del código nuevo.** Se comprobó con un control: `AAstraeonRegionMarker`, que
+  lleva meses en el juego, crashea exactamente igual. `PlayerStart` no. La primera hipótesis —el
+  constructor del harness— era falsa y costó cuatro iteraciones descartarla; el control debió ser
+  el primer experimento, no el quinto.
+- **Por qué no había aparecido antes.** `CreateBootstrapMap.py` y `CreateItacaArtTestMap.py` sólo
+  spawnean clases del motor (`PlayerStart`, `DirectionalLight`, `SkyLight`) y usan
+  `spawn_actor_from_object` para las mallas. Nunca spawnean una clase de Astraeon.
+- **No afecta a las pruebas.** `RunCharacterChecks.ps1 -Check Automation` usa `-nullrhi` y sus 65
+  pruebas pasan: el fallo está en la ruta de spawn *del editor*, no en la del juego.
+- **Solución aplicada**: los scripts que spawnean clases propias usan `-RenderOffscreen`. Queda
+  documentado en la cabecera de `CreateRadialGravityTestMap.py`.
+- **Sin diagnosticar**: la causa raíz dentro del motor. El callstack no tiene ni un frame de
+  Astraeon —es `EditorScriptingUtilities` → `UnrealEd` → `Engine`— y los símbolos no resuelven.
+  No se investiga más porque el workaround es de una palabra y no bloquea ninguna fase.
+
+## 2026-09-09 — Trampa: `new_level` crea el nivel pero el mundo activo puede no cambiar
+
+Misma sesión. `EditorLevelLibrary.new_level(ruta)` crea y guarda el `.umap`, pero bajo
+`-RenderOffscreen` el mundo activo del editor puede seguir siendo el mapa por defecto. Los
+`spawn_actor_from_class` posteriores caen entonces en **`L_AstraeonBootstrap`**, y un
+`save_current_level()` detrás lo sobrescribiría.
+
+Se detectó en una sonda que no guardaba, así que no hubo daño: `L_AstraeonBootstrap.umap` quedó
+verificado sin cambios contra HEAD. `CreateRadialGravityTestMap.py` ahora llama a
+`require_current_level()` justo después de `new_level` y aborta si el mundo activo no es el
+esperado. Todo script nuevo que cree un mapa debe hacer lo mismo.
+
 ## 2026-09-09 — Resuelto en su mayor parte: los clips del cuerpo que no se reproducían
 
 Levantado el 2026-09-08 por la auditoría de arte: el runtime reproducía **5 de los 45**

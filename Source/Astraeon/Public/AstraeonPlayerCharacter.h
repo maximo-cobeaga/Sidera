@@ -11,6 +11,7 @@ class AAstraeonRegionMarker;
 class UAstraeonGameInstance;
 class UAstraeonSuitComponent;
 class UAstraeonFirstPersonRigComponent;
+class UAstraeonPlanetGravityComponent;
 class UCameraComponent;
 class USpringArmComponent;
 struct FHitResult;
@@ -78,6 +79,11 @@ private:
 	// no mezclar presentación con la lógica de juego del Character.
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Presentation")
 	TObjectPtr<UAstraeonFirstPersonRigComponent> FirstPersonRig;
+
+	// Gravedad radial. Inactivo salvo que el mapa tenga un harness planetario, asi que puede
+	// viajar montado sin alterar el recorrido plano actual (ADR 0004, spike de la Fase 0).
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Planet")
+	TObjectPtr<UAstraeonPlanetGravityComponent> PlanetGravity;
 
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Presentation")
 	TArray<TObjectPtr<USkeletalMeshComponent>> BodyEquipment;

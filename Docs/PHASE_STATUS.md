@@ -15,8 +15,8 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 ### Puerta de salida
 
 - [x] No queda documento rector que prohíba la esfera ni que mande Landscape plano.
-- [ ] El proyecto compila y las ~43 pruebas sin dependencia geométrica siguen verdes.
-- [ ] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
+- [x] El proyecto compila y **las 65 pruebas pasan** (58 previas + 7 nuevas del marco planetario).
+- [x] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
 - [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
 - [ ] La calibración Blender → Unreal respeta escala y ejes.
 - [ ] El personaje se sostiene de pie en el polo opuesto del harness **sin que la cámara ruede**,
@@ -37,11 +37,11 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 
 ### Rama técnica
 
-- [ ] Etiqueta `pre-transicion-plana` sobre `503e3a1` y build recuperable documentada.
-- [ ] Módulo `Source/Astraeon/Public/Planet/` y `Private/Planet/` con su estructura de carpetas.
-- [ ] Esfera escalada aislada como `BP_PlanetGravityHarness`.
-- [ ] `UAstraeonPlanetGravityComponent` mínimo: `SetGravityDirection` + orientación de cápsula.
-- [ ] Mapa `TL_10_RadialGravity`.
+- [x] Etiqueta `pre-transicion-plana` sobre `503e3a1` y build recuperable documentada.
+- [x] Módulo `Planet/Coordinates/` y `Planet/Gravity/` creados con su estructura.
+- [x] Harness aislado como `AAstraeonPlanetGravityHarness` (C++, no BP: no existía esfera previa que renombrar y `AGENTS.md` §4 reserva los BP para presentación).
+- [x] `UAstraeonPlanetGravityComponent` mínimo: `SetGravityDirection` + orientación de cápsula.
+- [x] Mapa `TL_10_RadialGravity` (radio 200 m, 4 balizas, generado por script).
 - [ ] Baseline de rendimiento registrado en `Docs/evidencia/`.
 
 ### Calibración Blender

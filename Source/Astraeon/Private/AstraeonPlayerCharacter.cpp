@@ -10,6 +10,7 @@
 #include "Building/AstraeonBuiltStructure.h"
 #include "Environment/AstraeonItacaInterior.h"
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
+#include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -115,6 +116,11 @@ AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 
 	FirstPersonRig = CreateDefaultSubobject<UAstraeonFirstPersonRigComponent>(TEXT("FirstPersonRig"));
 	FirstPersonRig->SetupAttachment(FirstPersonCamera);
+
+	// Se queda dormido si el mapa no tiene harness planetario, que es el caso de todo el
+	// recorrido actual. Montarlo aquí y no en un personaje aparte evita mantener dos
+	// protagonistas divergentes durante la transición.
+	PlanetGravity = CreateDefaultSubobject<UAstraeonPlanetGravityComponent>(TEXT("PlanetGravity"));
 
 	// Cuerpo visible en tercera persona y sombra propia en primera persona.
 	// La raíz del rig está en los pies, de ahí el -96 (media altura de la cápsula); el
