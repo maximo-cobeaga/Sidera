@@ -3,6 +3,9 @@ import hashlib
 import json
 from pathlib import Path
 import unreal
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from CharacterAnimationScale import normalize_root_scale, validate_pose_scale
 
 ROOT=Path(unreal.Paths.project_dir()).resolve()
 DEST='/Game/Astraeon/ArtValidation/ToolsBlockout'
@@ -38,6 +41,9 @@ def import_asset(path,name,kind,skeleton=None):
     expected={'static':unreal.StaticMesh,'skeletal':unreal.SkeletalMesh,'animation':unreal.AnimSequence}[kind]
     found=[a for a in task.get_objects() if isinstance(a,expected)]
     assert len(found)==1,'Expected exactly one '+kind+' '+name
+    if kind == 'animation':
+        normalize_root_scale(found[0])
+        validate_pose_scale(found[0])
     return found[0]
 
 

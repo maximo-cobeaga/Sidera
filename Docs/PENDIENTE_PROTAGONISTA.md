@@ -286,3 +286,28 @@ Ambos puntos se evaluaron, se decidieron y se aplazaron a conciencia el 2026-09-
 - `jaw_open` desciende la mandíbula pero no separa los labios: la boca no tiene interior.
 - Sin `blink`: densidad insuficiente alrededor del ojo.
 - 8 vértices de las almohadillas de la mochila entran ≤ 7,4 mm en el traje; queda oculto.
+
+---
+
+## 5. Cierre del 2026-09-08 — visible en juego y equipo montado
+
+El personaje **se ve en juego**, en editor y en el ejecutable empaquetado. Lo que lo impedía
+no era ninguno de los pendientes de arte de este documento, sino que la importación FBX de
+animaciones sueltas perdía la conversión metros→centímetros del Armature: al evaluar
+cualquier clip la pose colapsaba a 1/100 (cabeza a 1,64 cm de los pies). Detalle y
+verificación en `INVESTIGACION_PERSONAJE_INVISIBLE.md`.
+
+Queda desactualizada la nota de la sección 2 sobre el equipo: **casco, mochila y computadora
+de muñeca ya están montados** como componentes de malla esquelética con
+`SetLeaderPoseComponent(GetMesh())`, así que siguen la pose del cuerpo sin duplicar
+animación ni multiplicar la escala de un socket. Se ven en
+`Docs/evidencia/QA_Personaje_TerceraPersona_Integrado.png`.
+
+También quedó atrás la limitación de las manos fuera del encuadre: `AN_HandsFP_*` copian la
+pose de brazos del agarre de escáner ya autorizado sobre los clips de locomoción, sin tocar
+la locomoción de torso y piernas ni re-autorizar los 45 clips del cuerpo. La decisión de
+convivir con dos esqueletos sigue vigente y sin coste añadido.
+
+Sigue pendiente lo de la sección 3 —retopología de la cabeza y rediseño del casco— más la
+exportación de los seis gestos nuevos ya autorizados en Blender (`Pulse`, `Drill`, `Hammer`,
+`Maul`, `Consume`, `Present`).

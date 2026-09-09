@@ -365,3 +365,35 @@ arquitectura habitual en primera persona.
 
 Quedan seis gestos nuevos autorizados en Blender (`Pulse`, `Drill`, `Hammer`, `Maul`,
 `Consume`, `Present`, total 51 acciones) **sin exportar**: no hacían falta para esta ruta.
+
+## 2026-09-08 — Protagonista visible en juego, en editor y en el ejecutable
+
+El personaje se ve: cuerpo con casco, mochila y computadora de muñeca en tercera persona
+(tecla V), y mano con escáner en primera. Verificado con captura dentro de partida en el
+editor y repetido sobre el ejecutable empaquetado.
+
+La causa del "personaje invisible" era de **escala de animación**, no de render: la
+importación FBX de clips sueltos perdía la conversión metros→centímetros del Armature, así
+que al evaluar cualquier animación la pose colapsaba a 1/100 —cabeza a 1,64 cm de los pies—
+mientras todos los indicadores de visibilidad seguían diciendo que la malla estaba ahí.
+`Scripts/Editor/CharacterAnimationScale.py` la normaliza y la valida, los 59 clips existentes
+quedaron reparados y todos los scripts de importación la aplican de entrada. En el mismo lote
+se declararon las banderas `MATUSAGE_SKELETAL_MESH` de los materiales generados por script,
+que el editor parchea al vuelo pero el cocinado no.
+
+Cerrado también en este lote:
+
+- **Equipo montado**: casco, mochila y computadora de muñeca siguen la pose del cuerpo con
+  `SetLeaderPoseComponent`, sin duplicar animación.
+- **Manos en el encuadre**: `AN_HandsFP_*` copian la pose de brazos del agarre de escáner
+  sobre los clips de locomoción.
+- **Smoke de cámara con la tecla real**: `PlayerController::InputKey` con V en ambos
+  sentidos, comprobando cámara, banderas de visibilidad y altura de cabeza, en editor y en
+  ejecutable.
+
+Estado de pruebas: build editor, 55 Automation Tests, `BUILD SUCCESSFUL` y recorrido crítico
+sobre el ejecutable, todo en verde. Detalle en `INVESTIGACION_PERSONAJE_INVISIBLE.md` y
+`TEST_REPORT.md`.
+
+Siguen pendientes, sin bloquear: retopología densa de la cabeza (parpadeo y apertura de
+boca), rediseño del casco y exportación de los seis gestos nuevos autorizados en Blender.

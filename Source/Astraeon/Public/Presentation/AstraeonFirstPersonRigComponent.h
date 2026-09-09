@@ -54,6 +54,7 @@ public:
 	// vive sobre otro esqueleto. Asignarla arranca su animación, porque puede llegar después
 	// de que el rig ya eligió el suyo.
 	void SetShadowBodyMesh(USkeletalMeshComponent* BodyMesh);
+	void SetFirstPersonVisible(bool bNewVisible);
 
 	UAnimSequence* GetGestureSequence(EAstraeonHandGesture Gesture) const;
 
@@ -67,10 +68,10 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Rig")
 	TObjectPtr<UStaticMeshComponent> ToolRotorMesh;
 
-	// Ajuste de encuadre pendiente de revisión visual: coloca el ojo del rig (1,60 m sobre
-	// la raíz) en la cámara, y gira el frente del rig (+Y tras la importación) hacia +X.
+	// Ojo del rig a 1,60 m; elevar 12 cm las manos mantiene el guante dentro del encuadre.
+	// El frente importado (+Y) gira hacia +X.
 	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
-	FVector HandsOffsetCm = FVector(0.0f, 0.0f, -160.0f);
+	FVector HandsOffsetCm = FVector(0.0f, 0.0f, -148.0f);
 
 	UPROPERTY(EditAnywhere, Category = "Astraeon|Rig")
 	FRotator HandsRotation = FRotator(0.0f, -90.0f, 0.0f);
@@ -136,12 +137,15 @@ private:
 	TObjectPtr<UAnimSequence> ActiveSequence;
 
 	FName CurrentHandItemId;
+	bool bHeldToolInitialized = false;
+	bool bFirstPersonVisible = true;
 	float GestureSecondsRemaining = 0.0f;
 	bool bWasFallingLastFrame = false;
 	float LandingSecondsRemaining = 0.0f;
 	float RotorAngleDegrees = 0.0f;
 
 	void RefreshHeldTool();
+	void UpdateBodyLocomotion();
 	UAnimSequence* SelectLocomotionSequence() const;
 
 	// Equivalente del clip de manos en el juego de clips del cuerpo. Devuelve nullptr si no

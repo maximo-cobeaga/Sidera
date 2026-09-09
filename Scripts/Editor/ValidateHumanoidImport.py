@@ -3,6 +3,9 @@ import hashlib
 import json
 from pathlib import Path
 import unreal
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from CharacterAnimationScale import normalize_root_scale, validate_pose_scale
 
 ROOT = Path(unreal.Paths.project_dir()).resolve()
 DEST = '/Game/Astraeon/ArtValidation/HumanoidBlockout'
@@ -59,6 +62,9 @@ def main():
             assets = [a for a in task.get_objects() if isinstance(a, expected_type)]
             assert len(assets) == 1, 'Expected one imported asset: ' + item['id']
             asset = assets[0]
+            if not is_mesh:
+                normalize_root_scale(asset)
+                validate_pose_scale(asset)
             row = {'id': item['id'], 'sha256': item['sha256'], 'passed': True}
             if is_mesh:
                 actual_skeleton = asset.get_editor_property('skeleton')

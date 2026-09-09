@@ -738,3 +738,29 @@ el cambio de malla ese clip vive en otro esqueleto (`SKEL_Humanoid_A`, 57 huesos
 `ContentPipeline/reports/body_render_check.json`: `skeletons_match: false`, con materiales
 correctos y opacos. La prueba ahora exige que el cuerpo reciba una animación propia y que no
 pertenezca al esqueleto de las manos.
+
+## 2026-09-08 — Protagonista visible: escala de animación y materiales
+
+Cierre del síntoma "el personaje no se ve", abierto en `INVESTIGACION_PERSONAJE_INVISIBLE.md`.
+
+| Prueba | Resultado |
+|---|---|
+| `RunCharacterChecks.ps1 -Check Audit` | mide la pose evaluada; cabeza a **1,64 cm** de los pies en los 59 clips |
+| `RunCharacterChecks.ps1 -Check Repair` | `passed: true`; 59 clips normalizados y materiales con uso de malla esquelética |
+| `AstraeonEditor Win64 Development` | Succeeded |
+| `Automation RunTests Astraeon` | **55 éxitos, 0 fallos** |
+| Smoke de cámara en editor | `AstraeonCharacterViewSmoke: Passed=true` en ambos sentidos, `HeadHeightCm=163.89 / 163.90` |
+| Captura en partida, editor | `Docs/evidencia/QA_Personaje_TerceraPersona_Integrado.png`, `QA_Personaje_PrimeraPersona_Integrado.png` |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL`, 62,97 s |
+| Smoke de cámara sobre el **ejecutable** | `Passed=true` en ambos sentidos, `HeadHeightCm=163.89 / 163.90`; capturas en `Builds/WindowsProtagonista/Astraeon/Saved/Screenshots/Windows/` |
+| Recorrido crítico sobre el **ejecutable** | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579` |
+
+Causa: la importación FBX de animaciones sueltas perdía la conversión metros→centímetros del
+Armature. El esqueleto lleva `root` a escala 100 en la pose de referencia y las claves de
+animación quedaban a 1, de modo que evaluar cualquier clip encogía al personaje a 1/100.
+Segunda causa concurrente: materiales generados por script sin `MATUSAGE_SKELETAL_MESH`.
+
+El smoke de cámara ya no simula el toggle por código: inyecta la **tecla V real** por
+`PlayerController::InputKey` en ambos sentidos y comprueba, un cuarto de segundo después,
+cámara activa, `bOwnerNoSee` del cuerpo, visibilidad del rig de manos y altura de cabeza
+entre 140 y 195 cm. La misma prueba corre sobre el editor y sobre el ejecutable.

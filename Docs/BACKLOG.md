@@ -195,6 +195,19 @@ Este bloque no sustituye la prioridad del fallo manual de ESCOTILLA ni certifica
    - Sonido/partículas/UI de alerta.
    - Arte final y mejor composición visual (depende de H5.2).
 
+## Cerrado 2026-09-08 — Protagonista visible en juego
+
+- El personaje **se ve**: cuerpo con casco, mochila y computadora de muñeca en tercera
+  persona (tecla V), y mano con escáner en primera. Verificado con captura dentro de partida
+  en editor y repetido sobre el ejecutable empaquetado.
+- Causa del "personaje invisible": la importación FBX de animaciones sueltas perdía la
+  conversión metros→centímetros del Armature; al evaluar cualquier clip la pose colapsaba a
+  1/100. Corregido en la importación y en los 59 clips ya existentes.
+- Equipo montado con `SetLeaderPoseComponent`; manos de primera persona dentro del encuadre.
+- 55 pruebas automáticas, `BUILD SUCCESSFUL`, smoke de cámara y recorrido crítico sobre el
+  ejecutable, todo en verde.
+- Detalle: `Docs/INVESTIGACION_PERSONAJE_INVISIBLE.md`.
+
 ## Cerrado 2026-09-08 — Protagonista
 
 - Personaje optimizado (65.284 tris, 4 LOD coherentes, 75 huesos), texturas separadas

@@ -12,6 +12,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonFirstPersonRigTest,
@@ -40,6 +41,24 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("SKEL_Humanoid_A keeps its 57 bones"), Skeleton->GetReferenceSkeleton().GetNum(), 57);
 	TestEqual(TEXT("Root bone survives the FBX round trip"),
 		Skeleton->GetReferenceSkeleton().GetBoneName(0), FName(TEXT("root")));
+
+	// Regression: mesh bounds stayed 183 cm while every animated bone collapsed to 1/100.
+	// Evaluate the runtime component, including its compressed animation, at several times.
+	auto CheckAnimatedScale = [this](USkeletalMeshComponent* Component, UAnimSequence* Sequence)
+	{
+		if (!Sequence) return;
+		Component->PlayAnimation(Sequence, false);
+		for (float Fraction : { 0.0f, 0.25f, 0.5f, 0.75f, 1.0f })
+		{
+			Component->SetPosition(Sequence->GetPlayLength() * Fraction, false);
+			Component->TickAnimation(0.0f, false);
+			Component->RefreshBoneTransforms();
+			const float HeadHeightCm = Component->GetSocketLocation(TEXT("head")).Z
+				- Component->GetSocketLocation(TEXT("root")).Z;
+			TestTrue(FString::Printf(TEXT("%s animated head height %.2f cm"), *Sequence->GetName(), HeadHeightCm),
+				HeadHeightCm > 65.0f && HeadHeightCm < 220.0f);
+		}
+	};
 
 	// El cuerpo completo sólo existe para la sombra propia: si el dueño lo viera, el
 	// jugador se encontraría dentro de su propia malla.
@@ -122,6 +141,12 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		{
 			AddError(TEXT("Body has no animation instance after being wired as shadow body"));
 		}
+		for (const TCHAR* Clip : { TEXT("Idle"), TEXT("Walk_F"), TEXT("Run_F"), TEXT("Jump_Loop"), TEXT("Jump_Land") })
+		{
+			const FString Path = FString::Printf(TEXT("/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_%s"), Clip);
+			UAnimSequence* Sequence = LoadObject<UAnimSequence>(nullptr, *Path);
+			if (TestNotNull(TEXT("Body locomotion loads"), Sequence)) CheckAnimatedScale(Body, Sequence);
+		}
 
 		// La sombra sólo sirve si la figura mide lo que mide el personaje.
 		const float BodyHeightCm = BodyMesh->GetBounds().BoxExtent.Z * 2.0f;
@@ -152,6 +177,7 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		if (!TestNotNull(TEXT("Gesture resolves to a clip"), Sequence)) continue;
 		TestEqual(TEXT("Gesture clip targets the shared skeleton"), Sequence->GetSkeleton(), Skeleton);
 		TestTrue(TEXT("Gesture clip has duration"), Sequence->GetPlayLength() > 0.0f);
+		CheckAnimatedScale(Rig, Sequence);
 	}
 	TestNull(TEXT("The empty gesture stays empty"), Rig->GetGestureSequence(EAstraeonHandGesture::None));
 
@@ -181,6 +207,7 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		if (TestNotNull(TEXT("Locomotion clip loads from Content"), Sequence))
 		{
 			TestEqual(TEXT("Locomotion clip targets the shared skeleton"), Sequence->GetSkeleton(), Skeleton);
+			CheckAnimatedScale(Rig, Sequence);
 		}
 	}
 
@@ -200,6 +227,49 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		TestNotNull(TEXT("Held item mesh loads from Content"), LoadObject<UStaticMesh>(nullptr, AssetPath));
 	}
 
+	// BeginPlay must initialize the default scanner even when the held item is NAME_None.
+	Character->DispatchBeginPlay();
+	if (Tool)
+	{
+		TestTrue(TEXT("Tool is registered for rendering"), Tool->IsRegistered());
+		TestNotNull(TEXT("New game has a visible scanner mesh"), Tool->GetStaticMesh().Get());
+		TestTrue(TEXT("Static tool does not inherit FBX bone scale 100"), Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f));
+	}
+	Rig->TickAnimation(0.0f, false);
+	Rig->RefreshBoneTransforms();
+	if (FirstPerson)
+	{
+		const FVector HandInView = FirstPerson->GetComponentTransform().InverseTransformPosition(Rig->GetSocketLocation(TEXT("hand_r")));
+		TestTrue(TEXT("Ready hand is ahead of the eye and within the vertical field of view"),
+			HandInView.X > 20 && FMath::Abs(HandInView.Z / HandInView.X) < 0.56f);
+	}
+	int32 EquipmentCount = 0;
+	for (UActorComponent* Component : Character->GetComponents())
+	{
+		USkeletalMeshComponent* Part = Cast<USkeletalMeshComponent>(Component);
+		if (!Part || Part == Body || Part == Rig) continue;
+		++EquipmentCount;
+		TestNotNull(TEXT("Equipment mesh loads"), Part->GetSkeletalMeshAsset());
+		TestTrue(TEXT("Equipment follows the body pose"), Part->LeaderPoseComponent.Get() == Body);
+		TestTrue(TEXT("Equipment hidden from first person owner"), Part->bOwnerNoSee);
+		Character->ToggleCameraView();
+		TestFalse(TEXT("Equipment visible in third person"), Part->bOwnerNoSee);
+		Character->ToggleCameraView();
+	}
+	TestEqual(TEXT("Helmet, backpack and wrist computer mounted"), EquipmentCount, 3);
+	// A hand gesture must not freeze body locomotion or expose a drill rotor in FP.
+	Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	Character->GetCharacterMovement()->Velocity = FVector(800, 0, 0);
+	Rig->PlayGesture(EAstraeonHandGesture::Scan);
+	Rig->TickComponent(0.016f, LEVELTICK_All, nullptr);
+	if (UAnimSingleNodeInstance* Instance = Body->GetSingleNodeInstance())
+	{
+		TestTrue(TEXT("Body runs while hands scan"), Instance->GetAnimationAsset()->GetName().EndsWith(TEXT("Run_F")));
+	}
+	for (USceneComponent* Child : Tool->GetAttachChildren())
+	{
+		TestFalse(TEXT("Empty hand scanner never displays the drill rotor"), Child->IsVisible());
+	}
 	World->DestroyWorld(false);
 	return true;
 }

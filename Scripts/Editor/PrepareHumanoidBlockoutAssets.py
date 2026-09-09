@@ -3,6 +3,9 @@ import hashlib
 import json
 from pathlib import Path
 import unreal
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from CharacterAnimationScale import normalize_root_scale, validate_pose_scale
 
 ROOT = Path(unreal.Paths.project_dir()).resolve()
 DEST = '/Game/Astraeon/Art/Blockouts/Human'
@@ -50,6 +53,9 @@ def import_asset(fbx, name, kind, skeleton=None):
     found = [a for a in task.get_objects() if isinstance(a, expected)]
     if len(found) != 1:
         raise RuntimeError('Expected exactly one ' + kind + ': ' + name)
+    if kind == 'animation':
+        normalize_root_scale(found[0])
+        validate_pose_scale(found[0])
     return found[0]
 
 
@@ -71,6 +77,7 @@ def flat_material(name, color, cache):
         material, unreal.MaterialExpressionConstant)
     roughness.set_editor_property('r', 0.65)
     unreal.MaterialEditingLibrary.connect_material_property(roughness, '', unreal.MaterialProperty.MP_ROUGHNESS)
+    unreal.MaterialEditingLibrary.set_material_usage(material, unreal.MaterialUsage.MATUSAGE_SKELETAL_MESH)
     unreal.MaterialEditingLibrary.recompile_material(material)
     if not unreal.EditorAssetLibrary.save_loaded_asset(material):
         raise RuntimeError('Could not save material: ' + path)

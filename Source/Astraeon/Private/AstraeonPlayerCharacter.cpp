@@ -22,6 +22,7 @@
 #include "Misc/Parse.h"
 #include "UnrealClient.h"
 #include "TimerManager.h"
+#include "InputKeyEventArgs.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -115,8 +116,7 @@ AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 	FirstPersonRig = CreateDefaultSubobject<UAstraeonFirstPersonRigComponent>(TEXT("FirstPersonRig"));
 	FirstPersonRig->SetupAttachment(FirstPersonCamera);
 
-	// El cuerpo completo existe para la sombra propia: el jugador en primera persona no lo
-	// ve, pero sin él la figura no proyecta nada y la escala deja de leerse en el suelo.
+	// Cuerpo visible en tercera persona y sombra propia en primera persona.
 	// La raíz del rig está en los pies, de ahí el -96 (media altura de la cápsula); el
 	// frente del rig queda en +Y tras la importación, de ahí el yaw de -90.
 	if (USkeletalMeshComponent* BodyMesh = GetMesh())
@@ -124,10 +124,7 @@ AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 		// Protagonista definitivo: 65 284 triángulos, 4 LOD, 75 huesos, 45 clips y tres
 		// morph targets, validado por Scripts/Editor/ValidateMainCharacterImport.py.
 		// Lleva su propio esqueleto, distinto del SKEL_Humanoid_A de 57 huesos que anima
-		// las manos de primera persona. Son deliberadamente dos esqueletos: la sombra y
-		// las manos no comparten animación —el cuerpo sólo existe para proyectar la
-		// silueta— y unificarlos exigiría re-autorizar las poses de brazo de los 45 clips,
-		// que hoy separan las manos medio metro. Ver Docs/PENDIENTE_PROTAGONISTA.md, P9.
+		// las manos de primera persona. Cada vista usa clips compatibles con su esqueleto.
 		// El blockout queda como respaldo si el paquete no está en el checkout.
 		static ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerBody(
 			TEXT("/Game/Astraeon/Characters/Player/Optimized/SK_Astraeon_Player.SK_Astraeon_Player"));
@@ -146,6 +143,22 @@ AAstraeonPlayerCharacter::AAstraeonPlayerCharacter()
 		BodyMesh->SetOwnerNoSee(true);
 		BodyMesh->SetCastHiddenShadow(true);
 		BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BodyMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	}
+	// Las piezas fueron exportadas en el mismo espacio y esqueleto que el cuerpo.
+	// Comparten su pose, sin duplicar animación ni multiplicar la escala de un socket.
+	for (const TCHAR* Name : { TEXT("Helmet"), TEXT("Backpack"), TEXT("WristComputer") })
+	{
+		USkeletalMeshComponent* Part = CreateDefaultSubobject<USkeletalMeshComponent>(FName(Name));
+		Part->SetupAttachment(GetMesh());
+		const FString Asset = FString::Printf(TEXT("/Game/Astraeon/Characters/Player/Optimized/SK_Astraeon_%s.SK_Astraeon_%s"), Name, Name);
+		ConstructorHelpers::FObjectFinder<USkeletalMesh> Finder(*Asset);
+		Part->SetSkeletalMeshAsset(Finder.Object);
+		Part->SetLeaderPoseComponent(GetMesh());
+		Part->SetOwnerNoSee(true);
+		Part->SetCastHiddenShadow(true);
+		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BodyEquipment.Add(Part);
 	}
 
 	BuildPreviewMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BuildPreviewMesh"));
@@ -253,6 +266,41 @@ void AAstraeonPlayerCharacter::BeginPlay()
 				LogCameraState();
 				FScreenshotRequest::RequestScreenshot(TEXT("AstraeonCameraShot"), false, false);
 			}), 12.0f, false);
+			// Verifica la misma entrada V que usa el jugador, en ambos sentidos.
+			for (float ToggleTime : { 13.0f, 17.0f })
+			{
+				FTimerHandle ToggleTimer;
+				CurrentWorld->GetTimerManager().SetTimer(ToggleTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+				{
+					const bool bPreviousView = bThirdPersonView;
+					if (APlayerController* PC = Cast<APlayerController>(GetController()))
+					{
+						PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::V, IE_Pressed, 1.0f));
+						PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::V, IE_Released, 0.0f));
+					}
+					// InputKey encola la tecla; evaluar después de ProcessPlayerInput.
+					FTimerHandle VerifyTimer;
+					GetWorld()->GetTimerManager().SetTimer(VerifyTimer, FTimerDelegate::CreateWeakLambda(this, [this, bPreviousView]()
+					{
+						const float HeadHeight = GetMesh()->GetSocketLocation(TEXT("head")).Z - GetMesh()->GetSocketLocation(TEXT("root")).Z;
+						const bool bPassed = bPreviousView != bThirdPersonView && HeadHeight > 140.0f && HeadHeight < 195.0f
+							&& FirstPersonRig->IsVisible() == !bThirdPersonView && GetMesh()->bOwnerNoSee == !bThirdPersonView;
+						UE_LOG(LogTemp, Display, TEXT("AstraeonCharacterViewSmoke: Passed=%s ThirdPerson=%d HeadHeightCm=%.2f"),
+							bPassed ? TEXT("true") : TEXT("false"), bThirdPersonView, HeadHeight);
+						if (!bPassed) FPlatformMisc::RequestExitWithStatus(false, 1);
+					}), 0.25f, false);
+				}), ToggleTime, false);
+			}
+			FTimerHandle AlternateShotTimer;
+			CurrentWorld->GetTimerManager().SetTimer(AlternateShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+			{
+				FScreenshotRequest::RequestScreenshot(TEXT("AstraeonCameraShot_Alternate"), false, false);
+			}), 15.0f, false);
+			FTimerHandle ExitTimer;
+			CurrentWorld->GetTimerManager().SetTimer(ExitTimer, FTimerDelegate::CreateWeakLambda(this, []()
+			{
+				FPlatformMisc::RequestExit(false);
+			}), 19.0f, false);
 		}
 	}
 
@@ -323,6 +371,17 @@ void AAstraeonPlayerCharacter::ToggleCameraView()
 
 void AAstraeonPlayerCharacter::LogCameraState() const
 {
+	for (const USkeletalMeshComponent* Part : { GetMesh(), static_cast<USkeletalMeshComponent*>(FirstPersonRig) })
+	{
+		if (!Part) continue;
+		UE_LOG(LogTemp, Display, TEXT("AstraeonPose: %s actorHidden=%d mainPass=%d rendered=%d bones=%d"),
+			*Part->GetName(), IsHidden(), Part->bRenderInMainPass, Part->WasRecentlyRendered(), Part->GetNumBones());
+		for (const TCHAR* Bone : { TEXT("root"), TEXT("head"), TEXT("hand_r"), TEXT("pelvis") })
+		{
+			const FTransform Transform = Part->GetSocketTransform(FName(Bone));
+			UE_LOG(LogTemp, Display, TEXT("AstraeonPose: %s %s %s"), *Part->GetName(), Bone, *Transform.ToHumanReadableString());
+		}
+	}
 	// Diagnóstico de una línea por cada cosa que puede dejar al personaje invisible: el
 	// brazo colapsado por colisión mete la cámara dentro de la propia malla, y las banderas
 	// de visibilidad la sacan del render aunque la cámara esté bien.
@@ -421,11 +480,15 @@ void AAstraeonPlayerCharacter::ApplyCameraView()
 	{
 		BodyMesh->SetOwnerNoSee(bThirdPersonView ? false : true);
 	}
+	for (USkeletalMeshComponent* Part : BodyEquipment)
+	{
+		Part->SetOwnerNoSee(!bThirdPersonView);
+	}
 	// Las manos están pegadas a la cámara de primera persona: en tercera flotarían delante
 	// del encuadre.
 	if (FirstPersonRig)
 	{
-		FirstPersonRig->SetVisibility(!bThirdPersonView, true);
+		FirstPersonRig->SetFirstPersonVisible(!bThirdPersonView);
 	}
 }
 

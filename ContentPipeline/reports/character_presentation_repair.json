@@ -1,0 +1,719 @@
+{
+  "passed": true,
+  "animations": [
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Enter.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Enter",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        158.95177209678153,
+        138.61745121504833,
+        136.25102115110465,
+        136.25256491140433
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Exit.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Exit",
+      "repaired": false,
+      "head_heights_cm": [
+        136.2525820843056,
+        146.10962834618365,
+        158.89650053261283,
+        163.47977569560612,
+        164.18072041604188
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Idle",
+      "repaired": false,
+      "head_heights_cm": [
+        136.2525820843056,
+        136.54186821936906,
+        136.50946804078256,
+        136.37843642673815,
+        136.2525820843056
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_B.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_B",
+      "repaired": false,
+      "head_heights_cm": [
+        142.6755305936566,
+        138.36815921571167,
+        142.6755305936566,
+        138.53316871430786,
+        142.6755305936566
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_F.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_F",
+      "repaired": false,
+      "head_heights_cm": [
+        142.6755305936566,
+        138.53316871430786,
+        142.6755305936566,
+        138.36816517617615,
+        142.6755305936566
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_L.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_L",
+      "repaired": false,
+      "head_heights_cm": [
+        136.25258187590757,
+        135.60072759925046,
+        136.05258445082822,
+        135.4155419283978,
+        136.25258187590757
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_R.AN_Astraeon_Player_All_Armature_AN_Player_Crouch_Walk_R",
+      "repaired": false,
+      "head_heights_cm": [
+        136.2525815650961,
+        135.600727288439,
+        136.05258414001676,
+        135.41554161758634,
+        136.2525815650961
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Idle",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        164.64816839516885,
+        164.1728376310127,
+        164.75579861231043,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Inspect.AN_Astraeon_Player_All_Armature_AN_Player_Inspect",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        163.60045585002226,
+        163.60045585002226,
+        163.60045585002226,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Interact.AN_Astraeon_Player_All_Armature_AN_Player_Interact",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        163.90469075571826,
+        163.38618066496502,
+        163.9316396744568,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land",
+      "repaired": false,
+      "head_heights_cm": [
+        162.78006595452737,
+        142.76022797788553,
+        156.03040235376065,
+        163.6389317574072,
+        164.18070912488025
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop",
+      "repaired": false,
+      "head_heights_cm": [
+        169.05160707849248,
+        169.75160402673467,
+        170.45160097497686,
+        169.75160402673467,
+        169.05160707849248
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Jump_Start.AN_Astraeon_Player_All_Armature_AN_Player_Jump_Start",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        160.32851540360065,
+        154.25957711760998,
+        172.1854529786492,
+        171.5550686758924
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Aim.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Aim",
+      "repaired": false,
+      "head_heights_cm": [
+        163.77499499910743,
+        164.0688950084917,
+        164.19559438979337,
+        164.06889498174348,
+        163.77499499910743
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Equip.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Equip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        164.0535709536464,
+        164.09601625102565,
+        163.85344215054565,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Idle.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Idle",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        164.41745382111822,
+        164.35357698573995,
+        164.17574664441182,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Lower.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Lower",
+      "repaired": false,
+      "head_heights_cm": [
+        163.77499499910743,
+        163.84498237409971,
+        163.93274445211222,
+        164.0701224783744,
+        164.18070235335892
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_OneHand_Unequip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        163.99248988415846,
+        163.99089224408178,
+        164.149405212921,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Pickup.AN_Astraeon_Player_All_Armature_AN_Player_Pickup",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        150.8733107493393,
+        139.73219597946783,
+        163.7076564089098,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Run_B.AN_Astraeon_Player_All_Armature_AN_Player_Run_B",
+      "repaired": false,
+      "head_heights_cm": [
+        159.65276867811025,
+        167.92961657829196,
+        159.65276639737323,
+        167.92961640470463,
+        159.65276867811025
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Run_F.AN_Astraeon_Player_All_Armature_AN_Player_Run_F",
+      "repaired": false,
+      "head_heights_cm": [
+        159.65276867811025,
+        167.92961640470463,
+        159.65276639737323,
+        167.92961657829196,
+        159.65276867811025
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Run_L.AN_Astraeon_Player_All_Armature_AN_Player_Run_L",
+      "repaired": false,
+      "head_heights_cm": [
+        162.65641184176937,
+        162.05641360606685,
+        162.45640845622555,
+        162.44463057841793,
+        162.65641184176937
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Run_R.AN_Astraeon_Player_All_Armature_AN_Player_Run_R",
+      "repaired": false,
+      "head_heights_cm": [
+        162.6564120205334,
+        162.05641378483088,
+        162.45640863498957,
+        162.44463075718195,
+        162.6564120205334
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Scan.AN_Astraeon_Player_All_Armature_AN_Player_Scan",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        163.92039104878424,
+        163.0565232770337,
+        162.9104867123152,
+        164.18071037697703
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Equip.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Equip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        164.05327805416053,
+        163.97373485877196,
+        164.1718026115125,
+        164.0951886435106
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Idle.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Idle",
+      "repaired": false,
+      "head_heights_cm": [
+        164.0951740884142,
+        164.41698235897837,
+        164.3560123127604,
+        164.17507796847173,
+        164.0951740884142
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Unequip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.0951740884142,
+        164.10632579331636,
+        163.9545215468015,
+        164.1381632646479,
+        164.18069585125514
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Tool_Use.AN_Astraeon_Player_All_Armature_AN_Player_Tool_Use",
+      "repaired": false,
+      "head_heights_cm": [
+        164.0951740884142,
+        164.0951740884142,
+        163.67001988281905,
+        164.0935771286293,
+        164.0951740884142
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Aim.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Aim",
+      "repaired": false,
+      "head_heights_cm": [
+        163.22306479274076,
+        163.9244896153181,
+        164.19560141492374,
+        163.92448957339957,
+        163.22306479274076
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Equip.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Equip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.18071037697703,
+        163.9640544174031,
+        164.01377328972418,
+        163.84380269975588,
+        164.02870712384112
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Idle.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Idle",
+      "repaired": false,
+      "head_heights_cm": [
+        164.02867917070216,
+        164.41146799558678,
+        164.35354922321778,
+        164.17488496710033,
+        164.02867917070216
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Lower.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Lower",
+      "repaired": false,
+      "head_heights_cm": [
+        163.22306479274076,
+        163.49966040081037,
+        163.8673090612845,
+        163.99865057288343,
+        164.02870612912298
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Unequip.AN_Astraeon_Player_All_Armature_AN_Player_TwoHand_Unequip",
+      "repaired": false,
+      "head_heights_cm": [
+        164.02867917070216,
+        163.91992980823036,
+        163.84948830048774,
+        164.13392379069555,
+        164.1806826078578
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_UseTool.AN_Astraeon_Player_All_Armature_AN_Player_UseTool",
+      "repaired": false,
+      "head_heights_cm": [
+        164.0951740884142,
+        163.95010094145997,
+        163.53777978469202,
+        164.07680722392394,
+        164.0951740884142
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Walk_B.AN_Astraeon_Player_All_Armature_AN_Player_Walk_B",
+      "repaired": false,
+      "head_heights_cm": [
+        164.39216602799965,
+        165.01863068977337,
+        164.3921598376668,
+        165.01863068977337,
+        164.39216602799965
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Walk_F.AN_Astraeon_Player_All_Armature_AN_Player_Walk_F",
+      "repaired": false,
+      "head_heights_cm": [
+        164.39216602799965,
+        165.01863068977337,
+        164.3921598376668,
+        165.01863068977337,
+        164.39216602799965
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Walk_L.AN_Astraeon_Player_All_Armature_AN_Player_Walk_L",
+      "repaired": false,
+      "head_heights_cm": [
+        162.8500298133054,
+        162.2500315776029,
+        162.6500264277616,
+        162.63824854995397,
+        162.8500298133054
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_Walk_R.AN_Astraeon_Player_All_Armature_AN_Player_Walk_R",
+      "repaired": false,
+      "head_heights_cm": [
+        162.85004178249895,
+        162.25004354679643,
+        162.65003839695513,
+        162.6382605191475,
+        162.85004178249895
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Fist.AN_Astraeon_Player_All_Armature_Grip_Fist",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Object.AN_Astraeon_Player_All_Armature_Grip_Object",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Open.AN_Astraeon_Player_All_Armature_Grip_Open",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Pistol.AN_Astraeon_Player_All_Armature_Grip_Pistol",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Rifle.AN_Astraeon_Player_All_Armature_Grip_Rifle",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_Tool.AN_Astraeon_Player_All_Armature_Grip_Tool",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_Grip_TwoHand.AN_Astraeon_Player_All_Armature_Grip_TwoHand",
+      "repaired": false,
+      "head_heights_cm": [
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238,
+        163.90942627265238
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Grip_Blockout.AN_Human_Grip_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Idle_Blockout.AN_Human_Idle_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99647045307321,
+        154.99999011158707,
+        154.9964702836999,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Interact_Blockout.AN_Human_Interact_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Jump_Blockout.AN_Human_Jump_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        149.80277353932053,
+        144.2132960340972,
+        149.80277353932053,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Land_Blockout.AN_Human_Land_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        149.90150856322353,
+        137.30135717888334,
+        149.90150865717536,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Run_Blockout.AN_Human_Run_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.64963681748435,
+        148.62984233580983,
+        154.64963681748435,
+        148.6298363753458,
+        154.64963681748435
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_Human_Walk_Blockout.AN_Human_Walk_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.9780556010705,
+        155.60720642053226,
+        154.9780556010705,
+        155.60720046006824,
+        154.9780556010705
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Consume_Tool_Blockout.AN_Human_Consume_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Drill_Tool_Blockout.AN_Human_Drill_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Hammer_Tool_Blockout.AN_Human_Hammer_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Maul_Tool_Blockout.AN_Human_Maul_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Present_Tool_Blockout.AN_Human_Present_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Pulse_Tool_Blockout.AN_Human_Pulse_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Tools/AN_Human_Scan_Tool_Blockout.AN_Human_Scan_Tool_Blockout",
+      "repaired": false,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Idle.AN_HandsFP_Idle",
+      "ready_pose": true,
+      "head_heights_cm": [
+        154.99999011158707,
+        154.99647045307321,
+        154.99999011158707,
+        154.9964702836999,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Walk.AN_HandsFP_Walk",
+      "ready_pose": true,
+      "head_heights_cm": [
+        154.9780556010705,
+        155.60720642053226,
+        154.9780556010705,
+        155.60720046006824,
+        154.9780556010705
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Run.AN_HandsFP_Run",
+      "ready_pose": true,
+      "head_heights_cm": [
+        154.64963681748435,
+        148.62984233580983,
+        154.64963681748435,
+        148.6298363753458,
+        154.64963681748435
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Jump.AN_HandsFP_Jump",
+      "ready_pose": true,
+      "head_heights_cm": [
+        154.99999011158707,
+        149.80277353932053,
+        144.2132960340972,
+        149.80277353932053,
+        154.99999011158707
+      ]
+    },
+    {
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Land.AN_HandsFP_Land",
+      "ready_pose": true,
+      "head_heights_cm": [
+        154.99999011158707,
+        149.90150856322353,
+        137.30135717888334,
+        149.90150865717536,
+        154.99999011158707
+      ]
+    }
+  ],
+  "materials": [
+    "/Game/Astraeon/Characters/Player/Optimized/M_Player_Character.M_Player_Character",
+    "/Game/Astraeon/Characters/Player/Optimized/M_Player_Gear.M_Player_Gear",
+    "/Game/Astraeon/Characters/Player/Optimized/M_Player_Helmet.M_Player_Helmet",
+    "/Game/Astraeon/Characters/Player/Optimized/M_Player_Suit.M_Player_Suit",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_accent.M_Human_accent",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_fabric.M_Human_fabric",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_shell.M_Human_shell",
+    "/Game/Astraeon/Art/Blockouts/Human/M_Human_visor.M_Human_visor"
+  ]
+}

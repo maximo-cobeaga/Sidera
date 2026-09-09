@@ -2,6 +2,7 @@
 
 #include "AstraeonGameInstance.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
@@ -48,6 +49,7 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 	SetCastShadow(false);
 	SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetGenerateOverlapEvents(false);
+	VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	// Sin esto las manos se cullean al mirar hacia abajo, porque los bounds del rig
 	// completo quedan mayormente detrás de la cámara.
 	bUseAttachParentBound = false;
@@ -64,6 +66,7 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 	ToolMesh->SetCastShadow(false);
 	ToolMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ToolMesh->SetGenerateOverlapEvents(false);
+	ToolMesh->SetAbsolute(false, false, true);
 
 	ToolRotorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("HandToolRotorMesh"));
 	ToolRotorMesh->SetupAttachment(ToolMesh);
@@ -115,11 +118,11 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 	BodyJumpSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Loop")));
 	BodyLandSequence = Load<UAnimSequence>(MeshRef(PlayerPath, TEXT("AN_Astraeon_Player_All_Armature_AN_Player_Jump_Land")));
 
-	IdleSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Idle_Blockout")));
-	WalkSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Walk_Blockout")));
-	RunSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Run_Blockout")));
-	JumpSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Jump_Blockout")));
-	LandSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_Human_Land_Blockout")));
+	IdleSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Idle")));
+	WalkSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Walk")));
+	RunSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Run")));
+	JumpSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Jump")));
+	LandSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Land")));
 
 	const TPair<EAstraeonHandGesture, const TCHAR*> Gestures[] = {
 		{EAstraeonHandGesture::Scan, TEXT("AN_Human_Scan_Tool_Blockout")},
@@ -153,12 +156,27 @@ void UAstraeonFirstPersonRigComponent::BeginPlay()
 
 	SetRelativeLocation(HandsOffsetCm);
 	SetRelativeRotation(HandsRotation);
-	ToolMesh->SetRelativeTransform(ToolGripTransform);
+	// El socket hereda la escala 100 de la raíz FBX. El agarre está documentado en cm:
+	// convertir su offset a unidades locales del socket y conservar la malla a escala 1.
+	FTransform LocalGrip = ToolGripTransform;
+	const FVector RootScale = GetSkeletalMeshAsset()->GetRefSkeleton().GetRefBonePose()[0].GetScale3D();
+	LocalGrip.SetTranslation(LocalGrip.GetTranslation() / RootScale);
+	ToolMesh->SetRelativeTransform(LocalGrip);
+	ToolMesh->RegisterComponent();
+	ToolRotorMesh->RegisterComponent();
 	ToolRotorMesh->SetStaticMesh(RotorMesh);
 
 	CurrentHandItemId = NAME_None;
 	RefreshHeldTool();
 	PlaySequence(IdleSequence, true);
+}
+
+void UAstraeonFirstPersonRigComponent::SetFirstPersonVisible(bool bNewVisible)
+{
+	bFirstPersonVisible = bNewVisible;
+	SetVisibility(bNewVisible);
+	ToolMesh->SetVisibility(bNewVisible);
+	ToolRotorMesh->SetVisibility(bNewVisible && CurrentHandItemId == TEXT("tool_core_drill"));
 }
 
 void UAstraeonFirstPersonRigComponent::PlayGesture(EAstraeonHandGesture Gesture)
@@ -202,6 +220,7 @@ void UAstraeonFirstPersonRigComponent::TickComponent(float DeltaSeconds, ELevelT
 	}
 	bWasFallingLastFrame = bFalling;
 	LandingSecondsRemaining = FMath::Max(0.0f, LandingSecondsRemaining - DeltaSeconds);
+	UpdateBodyLocomotion();
 
 	if (GestureSecondsRemaining > 0.0f)
 	{
@@ -257,14 +276,16 @@ void UAstraeonFirstPersonRigComponent::PlaySequence(UAnimSequence* Sequence, boo
 
 	ActiveSequence = Sequence;
 	PlayAnimation(Sequence, bLoop);
+}
 
-	// El cuerpo de sombra NO recibe el clip de las manos: vive sobre otro esqueleto y
-	// evaluarlo con una secuencia ajena lo deja sin pose válida, es decir invisible.
+void UAstraeonFirstPersonRigComponent::UpdateBodyLocomotion()
+{
+	// Sigue actualizándose durante un gesto de manos y cuando se oculta el rig FP.
 	if (!ShadowBody)
 	{
 		return;
 	}
-	UAnimSequence* BodySequence = BodyCounterpart(Sequence);
+	UAnimSequence* BodySequence = BodyCounterpart(SelectLocomotionSequence());
 	if (!BodySequence)
 	{
 		return;
@@ -272,7 +293,11 @@ void UAstraeonFirstPersonRigComponent::PlaySequence(UAnimSequence* Sequence, boo
 	const USkeletalMesh* BodyMesh = ShadowBody->GetSkeletalMeshAsset();
 	if (BodyMesh && BodyMesh->GetSkeleton() == BodySequence->GetSkeleton())
 	{
-		ShadowBody->PlayAnimation(BodySequence, bLoop);
+		const UAnimSingleNodeInstance* Instance = ShadowBody->GetSingleNodeInstance();
+		if (!Instance || Instance->GetAnimationAsset() != BodySequence)
+		{
+			ShadowBody->PlayAnimation(BodySequence, BodySequence != BodyLandSequence);
+		}
 	}
 }
 
@@ -311,15 +336,16 @@ void UAstraeonFirstPersonRigComponent::RefreshHeldTool()
 		? GetOwner()->GetGameInstance<UAstraeonGameInstance>()
 		: nullptr;
 	const FName HeldItemId = AstraeonGameInstance ? AstraeonGameInstance->GetHandItemId() : NAME_None;
-	if (HeldItemId == CurrentHandItemId)
+	if (bHeldToolInitialized && HeldItemId == CurrentHandItemId)
 	{
 		return;
 	}
 
 	CurrentHandItemId = HeldItemId;
+	bHeldToolInitialized = true;
 	const TObjectPtr<UStaticMesh>* Found = ToolMeshesByItemId.Find(HeldItemId);
 	// Con las manos vacías queda el escáner: es la herramienta que el diseño da por
 	// disponible desde el primer minuto y no ocupa una ranura de inventario.
 	ToolMesh->SetStaticMesh(Found ? Found->Get() : ScannerMesh.Get());
-	ToolRotorMesh->SetVisibility(HeldItemId == TEXT("tool_core_drill"));
+	ToolRotorMesh->SetVisibility(bFirstPersonVisible && HeldItemId == TEXT("tool_core_drill"));
 }

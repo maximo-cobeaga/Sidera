@@ -1,5 +1,18 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-08 — Normalizar la escala de raíz en la importación, no en el runtime
+
+La importación FBX de animaciones sueltas pierde la conversión metros→centímetros del
+Armature de Blender: el esqueleto lleva `root` a escala 100 y las claves de animación quedan
+a 1. Se corrige **en la importación** (`Scripts/Editor/CharacterAnimationScale.py`, enganchado
+a todos los scripts de import y validación) y no compensando en C++ ni escalando componentes.
+Razón: el defecto está en los datos, y cualquier compensación en runtime se multiplicaría con
+la de un socket o un componente hijo. La normalización sólo actúa ante el desajuste exacto
+1 contra 100 y aborta ante cualquier otro caso, para no "arreglar" animación legítima.
+Se acompaña de `validate_pose_scale()`, que exige altura de cabeza entre 65 y 220 cm en cinco
+muestras de cada clip, y de un smoke que pulsa la **tecla V real** y comprueba la altura de
+cabeza medida en juego, en editor y sobre el ejecutable empaquetado.
+
 ## 2026-09-07 — Escena proxy aislada y generación pendiente
 
 Con Bridge conectado, crear `CHR_Astraeon_Player_Work` preservando Scene, sus objetos

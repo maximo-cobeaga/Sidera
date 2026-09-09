@@ -79,6 +79,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Presentation")
 	TObjectPtr<UAstraeonFirstPersonRigComponent> FirstPersonRig;
 
+	UPROPERTY(VisibleAnywhere, Category = "Astraeon|Presentation")
+	TArray<TObjectPtr<USkeletalMeshComponent>> BodyEquipment;
+
 	// Fantasma de colocación: la pieza que se va a construir, translúcida y sin colisión,
 	// siguiendo la superficie apuntada. Construir a ciegas y corregir después sería mucho
 	// más costoso que previsualizar.

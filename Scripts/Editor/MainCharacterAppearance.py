@@ -44,6 +44,8 @@ def pbr(region,destination,source):
     for channel,property in [('R',unreal.MaterialProperty.MP_AMBIENT_OCCLUSION),
                               ('G',unreal.MaterialProperty.MP_ROUGHNESS),('B',unreal.MaterialProperty.MP_METALLIC)]:
         unreal.MaterialEditingLibrary.connect_material_property(samples['ORM'],channel,property)
+    unreal.MaterialEditingLibrary.set_material_usage(material, unreal.MaterialUsage.MATUSAGE_SKELETAL_MESH)
+    unreal.MaterialEditingLibrary.set_material_usage(material, unreal.MaterialUsage.MATUSAGE_MORPH_TARGETS)
     unreal.MaterialEditingLibrary.recompile_material(material)
     for asset in textures+[material]:
         assert unreal.EditorAssetLibrary.save_loaded_asset(asset)

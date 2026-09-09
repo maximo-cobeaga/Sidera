@@ -95,6 +95,9 @@ def main():
             candidates = [a for a in animations if a.get_name().endswith(clip['name'])]
             assert len(candidates) == 1, 'Cannot identify clip ' + clip['name']
             anim = candidates[0]
+            from CharacterAnimationScale import normalize_root_scale, validate_pose_scale
+            normalize_root_scale(anim)
+            validate_pose_scale(anim)
             length = unreal.AnimationLibrary.get_sequence_length(anim)
             expected = clip.get('export_duration_s', clip['duration_s'])
             assert abs(length - expected) < .035, f'Duration {clip["name"]}: {length} != {expected}'

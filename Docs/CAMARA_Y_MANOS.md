@@ -88,3 +88,29 @@ Es el mismo problema que se midió en el rig del protagonista: los clips levanta
 el costado en vez de llevarlo al frente. Ver `PENDIENTE_PROTAGONISTA.md`, P9.
 
 **Mientras tanto**, la tecla V da la vía para ver al personaje completo.
+
+## Personaje invisible: la escala perdida en la importación — CORREGIDO
+
+Corregido lo anterior, el personaje **seguía sin verse**. Ninguna bandera de render lo
+explicaba, porque el problema no era de render: la importación FBX de animaciones sueltas
+perdía la conversión metros→centímetros del Armature. El esqueleto lleva `root` a escala 100
+en su pose de referencia; las claves de animación quedaban a 1. En pose de referencia la
+malla medía bien —de ahí que todos los diagnósticos dieran correctos—, pero al evaluar
+cualquier clip la pose se encogía a 1/100: **cabeza a 1,64 cm de los pies**.
+
+`Scripts/Editor/CharacterAnimationScale.py` reescribe las claves de `root` con la escala de
+la pose de referencia, sólo ante el desajuste exacto 1 contra 100, y valida que la cabeza
+quede entre 65 y 220 cm en cinco muestras del clip. Los 59 clips existentes se repararon con
+`RepairCharacterPresentation.py` y todos los scripts de importación lo aplican de entrada.
+
+Segunda causa concurrente: los materiales generados por script no declaraban
+`MATUSAGE_SKELETAL_MESH`. El editor compila ese uso al vuelo; el cocinado no.
+
+Las manos de primera persona dejaron de colgar fuera del encuadre: `AN_HandsFP_*` copian la
+pose de brazos del agarre de escáner ya autorizado sobre los clips de locomoción. Y el
+agarre de herramienta divide su offset en cm por la escala 100 del socket antes de aplicarlo.
+
+Evidencia: `Docs/evidencia/QA_Personaje_TerceraPersona_Integrado.png` y
+`QA_Personaje_PrimeraPersona_Integrado.png`; smoke con la tecla V real, en editor y sobre el
+ejecutable, con `HeadHeightCm=163.9`. Investigación completa en
+`INVESTIGACION_PERSONAJE_INVISIBLE.md`.

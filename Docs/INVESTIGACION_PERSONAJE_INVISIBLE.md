@@ -1,83 +1,85 @@
 # Personaje invisible en juego — investigación
 
-Fecha: 2026-09-08. Estado: **SIN RESOLVER**.
+Fecha de apertura: 2026-09-08. Cierre: 2026-09-08. Estado: **RESUELTO**.
 
 Síntoma reportado por el propietario: el protagonista no se ve. Ni como sombra en primera
-persona, ni con la cámara en tercera persona (tecla V). La cámara alterna correctamente,
-pero donde debería estar el personaje no hay nada.
+persona, ni con la cámara en tercera persona (tecla V). La cámara alternaba correctamente,
+pero donde debería estar el personaje no había nada.
 
-Este documento existe porque el problema **no se resolvió** y la próxima sesión no debería
-repetir lo ya descartado.
+Evidencia del fallo: `Docs/evidencia/QA_TerceraPersona_SinPersonaje.png`.
+Evidencia del cierre: `Docs/evidencia/QA_Personaje_TerceraPersona_Integrado.png` y
+`Docs/evidencia/QA_Personaje_PrimeraPersona_Integrado.png`, ambas dentro de partida.
 
 ---
 
-## 1. Lo que sí quedó hecho y funciona
+## 1. Causa raíz
 
-| | Evidencia |
+**La importación FBX de animaciones sueltas perdía la escala de unidad del Armature de
+Blender (metros → centímetros).**
+
+El esqueleto importado lleva el hueso `root` a escala **100** en su pose de referencia, que
+es como el FBX convierte metros a centímetros. Al importar cada clip por separado el
+importador elimina el contenedor Armature y escribe las claves de `root` a escala **1**.
+
+Consecuencia: la malla en pose de referencia medía bien —por eso todos los diagnósticos de
+CPU decían «visible», con materiales asignados y bounds razonables—, pero **en cuanto se
+evaluaba una animación la pose colapsaba a 1/100**: la cabeza quedaba a **1,64 cm** de los
+pies en vez de 164 cm. Un personaje de centímetro y medio a 3,5 m de la cámara no ocupa ni
+un píxel. El personaje siempre estuvo ahí; medía nada.
+
+Medición que lo probó, en `Scripts/Editor/AuditCharacterPose.py`: altura de `head` menos
+`root` en espacio de mundo, muestreada en cinco instantes de cada clip.
+
+**Segunda causa, real y concurrente:** los materiales generados por script
+(`M_Player_*`, `M_Human_*`) no declaraban `MATUSAGE_SKELETAL_MESH` ni
+`MATUSAGE_MORPH_TARGETS`. Un material sin esa bandera no tiene shader compilado para malla
+esquelética; el editor lo parchea al vuelo, el cocinado no. Corregido en el mismo lote.
+
+---
+
+## 2. La corrección
+
+| Pieza | Qué hace |
 |---|---|
-| Cámara en tercera persona con tecla **V** | `Astraeon.Art.Character.FirstPersonRigIsWired` alterna y verifica en ambos sentidos |
-| El personaje está asignado al `AstraeonPlayerCharacter` | `ContentPipeline/reports/player_body_wiring.json` |
-| El cuerpo recibe animación de su propio esqueleto | log: `animacion=AN_Astraeon_Player_All_Armature_AN_Player_Idle` |
-| Build, 55 pruebas automáticas y smoke crítico | `Docs/TEST_REPORT.md` |
+| `Scripts/Editor/CharacterAnimationScale.py` | `normalize_root_scale()` reescribe las claves de `root` con la escala de la pose de referencia; sólo actúa si mide exactamente el desajuste 1 contra 100 y aborta ante cualquier otro caso. `validate_pose_scale()` exige altura de cabeza entre 65 y 220 cm en cinco muestras |
+| `Scripts/Editor/RepairCharacterPresentation.py` | Repara de forma idempotente los **59 clips** ya importados (45 del cuerpo + 14 de manos y herramientas), fija las banderas de uso de los materiales y los recompila |
+| `PrepareHumanoidBlockoutAssets.py`, `PrepareToolsBlockoutAssets.py`, `ValidateHumanoidImport.py`, `ValidateToolsImport.py`, `ValidateMainCharacterImport.py` | Normalizan y validan **en la importación**, para que el defecto no pueda volver a entrar |
+| `MainCharacterAppearance.py` | Declara `MATUSAGE_SKELETAL_MESH` y `MATUSAGE_MORPH_TARGETS` antes de recompilar |
 
-Herramienta de diagnóstico añadida y reutilizable, en `AstraeonPlayerCharacter`:
+Reporte de la reparación: `ContentPipeline/reports/character_presentation_repair.json`
+(`passed: true`, con las alturas de cabeza medidas clip por clip).
 
-| Parámetro de línea de comandos | Efecto |
-|---|---|
-| `-AstraeonStartThirdPerson` | arranca en tercera persona sin depender de pulsar V |
-| `-AstraeonCameraShot` | inicia partida y saca una captura a los 12 s |
-| `-AstraeonBasicBodyMaterial` | fuerza `WorldGridMaterial` en el cuerpo (A/B de material) |
-| consola `Astraeon.ToggleCamera` | alterna la vista desde `-ExecCmds` |
+### Lo que se arregló en el mismo paso, ya visible el personaje
 
-`LogCameraState()` vuelca en cada cambio de vista: brazo pedido vs real, malla, banderas de
-visibilidad, posiciones de cuerpo y cámara, materiales por slot y animación activa.
-
----
-
-## 2. Estado medido en el momento exacto en que no se ve nada
-
-Corrida real, partida iniciada, tercera persona
-(`Saved/Logs/ShotRun6.log`, captura en `Docs/evidencia/QA_TerceraPersona_SinPersonaje.png`):
-
-```
-vista=tercera  brazo_pedido=320  brazo_real=325
-cuerpo malla=SK_Astraeon_Player  oculto=0  ownerNoSee=0  visible=1
-       origen=(220,-0,146)  extension=(59,90,92)
-cuerpo en (220,0,54)  camara en (-90,-100,202)  distancia=357  registrado=1
-materiales=2
-  slot 0 = /Game/Astraeon/Characters/Player/Optimized/M_Player_Character
-  slot 1 = /Game/Astraeon/Characters/Player/Optimized/M_Player_Suit
-animacion=AN_Astraeon_Player_All_Armature_AN_Player_Idle
-```
-
-Todo dice que debería verse. La captura muestra el interior de Ítaca con el HUD de partida
-en curso y **nada en el centro del encuadre**.
-
-Detalle relevante: `extension` cambia entre corridas —(19,92,92) en pose de referencia,
-(59,90,92) y (74,82,92) con animación—, o sea que **la pose se está evaluando**. No es una
-malla congelada ni degenerada.
+- **Equipo montado**: casco, mochila y computadora de muñeca son ahora componentes con
+  `SetLeaderPoseComponent(GetMesh())`, así que siguen la pose del cuerpo sin duplicar
+  animación ni multiplicar la escala de un socket.
+- **Manos dentro del encuadre**: `AN_HandsFP_{Idle,Walk,Run,Jump,Land}` se generan copiando
+  la pose de brazos del agarre de escáner ya autorizado sobre los clips de locomoción. Los
+  brazos dejan de colgar a los costados; torso y piernas conservan su locomoción.
+- **Agarre de herramienta**: el socket hereda la escala 100 de la raíz, así que el offset
+  documentado en cm se divide por esa escala antes de aplicarlo y la malla queda a escala 1.
 
 ---
 
-## 3. Descartado con evidencia
+## 3. Descartado con evidencia por el camino
 
 | Hipótesis | Cómo se descartó |
 |---|---|
 | La malla no está asignada | log: `malla=SK_Astraeon_Player`; y `player_body_wiring.json` |
 | El actor o el componente están ocultos | log: `oculto=0`, `visible=1`, `registrado=1` |
 | `bOwnerNoSee` deja el cuerpo invisible para su jugador | log: `ownerNoSee=0` en tercera persona |
-| El brazo de cámara colapsa y mete la cámara dentro de la malla | log: `brazo_pedido=320 brazo_real=325`; y en otra corrida 239 con la cámara a 336 cm |
+| El brazo de cámara colapsa y mete la cámara dentro de la malla | log: `brazo_pedido=320 brazo_real=325` |
 | La cámara mira a otro lado | cuerpo a 357 cm de la cámara, centrado por el brazo |
-| Materiales nulos | ambos slots asignados; `body_render_check.json` los da opacos y no nulos |
-| Materiales transparentes | `blend_mode = BLEND_OPAQUE`, `two_sided = false` |
+| Materiales nulos o transparentes | ambos slots asignados, `BLEND_OPAQUE`, `two_sided = false` |
 | El paquete no incluye el asset | el ejecutable empaquetado reporta la misma malla y materiales |
-| La malla está sin animar y colapsada | `animacion=AN_Player_Idle`, y los bounds cambian con la pose |
-| El cuerpo se anima con clips de otro esqueleto | **era cierto y se corrigió** (ver §4); no resolvió el síntoma |
-| El escenario tapa al personaje | la captura muestra el interior despejado alrededor del punto donde debería estar |
+| El escenario tapa al personaje | la captura muestra el interior despejado |
+| LOD sin datos de render | descartada al medir la pose: el problema era de escala, no de nivel de detalle |
+| El cuerpo se anima con clips de otro esqueleto | **era cierto y se corrigió** (ver §4); no resolvió el síntoma por sí solo |
 
 ---
 
-## 4. Un defecto real encontrado y corregido por el camino
+## 4. Defecto anterior, real, corregido antes del cierre
 
 `UAstraeonFirstPersonRigComponent` empujaba su clip de locomoción al cuerpo de sombra:
 
@@ -86,58 +88,47 @@ ShadowBody->PlayAnimation(Sequence, bLoop);   // Sequence vive en SKEL_Humanoid_
 ```
 
 Mientras el cuerpo fue el blockout humano compartían esqueleto. Al pasar el cuerpo al
-protagonista dejaron de compartirlo (57 huesos contra 75) y evaluar una malla con una
-secuencia de otro esqueleto no produce pose válida.
-
-Medido antes de tocar nada, en `ContentPipeline/reports/body_render_check.json`:
-
-```
-body_skeleton   : SK_Astraeon_Player_Skeleton
-idle_skeleton   : SKEL_Humanoid_A
-skeletons_match : false
-```
-
-Corregido: el cuerpo tiene su propio juego de clips y `BodyCounterpart()` traduce; antes de
-reproducir se comprueba que el esqueleto coincida. Cubierto por prueba. **Era un bug real,
-pero el personaje sigue sin verse**, así que no era la causa del síntoma.
+protagonista dejaron de compartirlo (57 huesos contra 75). Corregido: el cuerpo tiene su
+propio juego de clips y `BodyCounterpart()` traduce; antes de reproducir se comprueba que el
+esqueleto coincida. Era necesario, pero no suficiente: debajo estaba la escala.
 
 ---
 
-## 5. Hipótesis viva, y cómo probarla
+## 5. Verificación del cierre
 
-La que queda en pie es que **el asset no tiene datos de render utilizables en juego**, pese a
-que todos los indicadores de CPU son correctos. Dos variantes:
+| Prueba | Resultado |
+|---|---|
+| `Automation RunTests Astraeon` | **55 éxitos, 0 fallos** |
+| Smoke de cámara, editor | `AstraeonCharacterViewSmoke: Passed=true` en ambos sentidos, `HeadHeightCm=163.89 / 163.90` |
+| Captura dentro de partida, editor | cuerpo con casco y mochila en tercera; mano con escáner en primera |
+| `BuildCookRun` Win64 Development | `BUILD SUCCESSFUL` |
+| Smoke de cámara, **ejecutable empaquetado** | `Passed=true` en ambos sentidos, `HeadHeightCm=163.89 / 163.90`; capturas en `Builds/WindowsProtagonista/Astraeon/Saved/Screenshots/Windows/` |
+| Recorrido crítico, **ejecutable empaquetado** | `Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true Seed=13579` |
 
-1. **LOD sin datos de render.** Los LOD1–3 se importaron con
-   `SkeletalMeshEditorSubsystem.import_lod`. Si las pantallas de LOD o el `MinLOD` quedaron
-   mal, a 357 cm el motor puede estar eligiendo un nivel sin geometría válida.
-   *Prueba:* `BodyMesh->SetForcedLOD(1)` (fuerza LOD0) y capturar. Si aparece, es esto.
+Todo se lanza con `Scripts/RunCharacterChecks.ps1 -Check <Audit|Repair|Automation|Visual|VisualFP|Package|PackagedVisual|Critical|PackagedCritical>`.
 
-2. **Los materiales generados no compilan a nada visible.** `M_Player_Character` y
-   `M_Player_Suit` se crearon por script con `MaterialFactoryNew` y
-   `MaterialEditingLibrary`. Un material sin shader válido normalmente cae al material por
-   defecto, pero conviene descartarlo.
-   *Prueba:* ya está el parámetro `-AstraeonBasicBodyMaterial`, que fuerza
-   `WorldGridMaterial`. **No llegó a ejecutarse con partida iniciada**: en el intento el
-   smoke cerró el juego antes de que saltara el temporizador. Es el siguiente paso obvio.
+Herramientas de diagnóstico que quedan disponibles en `AstraeonPlayerCharacter`:
 
-Orden recomendado: primero la prueba 2 (ya está el parámetro, cuesta una corrida), después
-la 1.
-
-Si ninguna de las dos, el siguiente corte es aislar el asset: spawnear
-`SK_Astraeon_Player` como `SkeletalMeshActor` en un mapa vacío con una luz, y capturar. Eso
-separa "el asset no se dibuja nunca" de "no se dibuja en este personaje".
+| Parámetro de línea de comandos | Efecto |
+|---|---|
+| `-AstraeonStartThirdPerson` | arranca en tercera persona sin depender de pulsar V |
+| `-AstraeonCameraShot` | inicia partida, alterna la vista con la tecla real y captura ambas |
+| `-AstraeonBasicBodyMaterial` | fuerza `WorldGridMaterial` en el cuerpo (A/B de material) |
+| consola `Astraeon.ToggleCamera` | alterna la vista desde `-ExecCmds` |
 
 ---
 
 ## 6. Nota de método
 
-Perdí varias iteraciones deduciendo a partir de reportes de estado en vez de mirar un
-fotograma. Los reportes decían "visible" en todos los intentos y el personaje no estaba.
-La captura dentro del juego fue lo único que permitió descartar de verdad, y debió ser el
-primer paso, no el sexto.
+Se perdieron varias iteraciones deduciendo a partir de reportes de estado en vez de mirar un
+fotograma, y después mirando el fotograma sin **medir la pose evaluada**. Los reportes decían
+«visible» en todos los intentos porque la malla lo estaba: lo que fallaba era su tamaño una
+vez animada, y ningún indicador de visibilidad lo dice.
 
-Trampas encontradas al montar el diagnóstico, por si se repiten:
+Regla que queda: ante un asset que «está pero no se ve», medir la geometría **evaluada**
+—altura de un hueso conocido, no bounds ni banderas— antes de seguir con hipótesis de render.
+
+Trampas del arnés de diagnóstico, por si se repiten:
 
 - `-ExecCmds` corre antes de que exista el pawn: un comando de consola que dependa del
   personaje no se ejecuta.

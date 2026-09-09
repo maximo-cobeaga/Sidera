@@ -403,26 +403,24 @@ Estas limitaciones no se ocultaron mediante un cambio de colisión o de controle
 - **Impacto**: se ve en cualquier plano del personaje con casco puesto.
 - **Cierre esperado**: rediseño de la cúpula y el visor, acordado como trabajo futuro.
 
-### Manos de primera persona fuera del encuadre
+### 2026-09-08 — Resuelto: manos de primera persona fuera del encuadre
 
-- **Motivo**: `SK_Human_HandsFP_Blockout` mide ±59,1 cm de ancho con su centro a 104,6 cm de
-  altura: son brazos colgando a los costados, no manos sostenidas frente a la cara. Con la
-  cámara a 160 cm quedan 35–77 cm por debajo y hasta 59 cm a cada lado.
-- **Impacto**: el jugador no ve nada de su cuerpo en primera persona.
-- **Cierre esperado**: re-autorizar las poses de brazo del lote humano en Blender. Reencuadrar
-  la malla no sirve: a 30 cm de la cámara, ±59 cm son ~63° fuera de eje por lado.
-- **Paliativo disponible**: tecla **V**, vista en tercera persona.
+- **Motivo**: `SK_Human_HandsFP_Blockout` medía ±59,1 cm de ancho con su centro a 104,6 cm de
+  altura: brazos colgando a los costados, no manos sostenidas frente a la cara.
+- **Cierre**: `AN_HandsFP_{Idle,Walk,Run,Jump,Land}` copian la pose de brazos del agarre de
+  escáner ya autorizado sobre los clips de locomoción, dejando torso y piernas intactos. La
+  mano con el escáner aparece en el encuadre: `Docs/evidencia/QA_Personaje_PrimeraPersona_Integrado.png`.
 
-### El protagonista no se ve en juego — SIN RESOLVER
+### 2026-09-08 — Resuelto: el protagonista no se veía en juego
 
-- **Motivo**: desconocido. Todos los indicadores dicen que debería verse —malla asignada,
-  `oculto=0`, `ownerNoSee=0`, `visible=1`, `registrado=1`, materiales opacos asignados,
-  animación propia corriendo, cámara a 357 cm y centrada— y en la captura dentro del juego
-  no hay nada en el encuadre.
-- **Impacto**: el personaje no se ve ni como sombra en primera persona ni con la cámara en
-  tercera (tecla V).
-- **Evidencia**: `Docs/evidencia/QA_TerceraPersona_SinPersonaje.png`, `Saved/Logs/ShotRun6.log`,
-  `ContentPipeline/reports/body_render_check.json`.
-- **Investigación completa, con lo ya descartado**: `Docs/INVESTIGACION_PERSONAJE_INVISIBLE.md`.
-- **Siguiente paso**: correr con `-AstraeonBasicBodyMaterial` y partida iniciada (fuerza
-  `WorldGridMaterial`), después forzar LOD0. Ambas pruebas están preparadas.
+- **Motivo**: la importación FBX de animaciones sueltas perdía la escala de unidad del
+  Armature (metros → centímetros). El esqueleto lleva `root` a escala 100 en su pose de
+  referencia y las claves de animación se escribían a 1, así que al evaluar cualquier clip
+  la pose colapsaba a 1/100: cabeza a **1,64 cm** de los pies. Por eso todos los indicadores
+  de visibilidad daban correctos: la malla estaba, medía nada. Segunda causa concurrente:
+  los materiales generados por script no declaraban `MATUSAGE_SKELETAL_MESH`.
+- **Cierre**: `Scripts/Editor/CharacterAnimationScale.py` normaliza y valida la escala de
+  `root`, aplicado a los 59 clips existentes y enganchado a todos los scripts de importación
+  para que no vuelva a entrar. Verificado en editor y en el ejecutable empaquetado, con
+  `HeadHeightCm=163.9` y capturas dentro de partida.
+- **Detalle completo**: `Docs/INVESTIGACION_PERSONAJE_INVISIBLE.md`.

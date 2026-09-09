@@ -3,6 +3,9 @@ import hashlib
 import json
 from pathlib import Path
 import unreal
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from CharacterAnimationScale import normalize_root_scale, validate_pose_scale
 
 ROOT = Path(unreal.Paths.project_dir()).resolve()
 DEST = '/Game/Astraeon/Art/Blockouts/Tools'
@@ -47,6 +50,9 @@ def import_asset(fbx, name, kind, skeleton=None):
     found = [a for a in task.get_objects() if isinstance(a, expected)]
     if len(found) != 1:
         raise RuntimeError('Expected exactly one ' + kind + ': ' + name)
+    if kind == 'animation':
+        normalize_root_scale(found[0])
+        validate_pose_scale(found[0])
     return found[0]
 
 
