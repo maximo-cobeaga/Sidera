@@ -15,7 +15,7 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 ### Puerta de salida
 
 - [x] No queda documento rector que prohíba la esfera ni que mande Landscape plano.
-- [x] El proyecto compila y **las 65 pruebas pasan** (58 previas + 7 nuevas del marco planetario).
+- [x] El proyecto compila y **las 69 pruebas pasan** (58 previas + 9 del marco planetario + 2 del baseline).
 - [x] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
 - [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
 - [x] La calibración Blender → Unreal respeta escala y ejes (`evidencia/CALIBRACION_BLENDER_UNREAL.md`).
