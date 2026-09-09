@@ -156,6 +156,7 @@ private:
 	void CloseFabricatorIfOutOfReach();
 
 	void ApplyCameraView();
+	void LogCameraState() const;
 
 	void ToggleBuildMode();
 	void CycleStructureType();

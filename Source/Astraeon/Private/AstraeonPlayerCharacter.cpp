@@ -4,6 +4,7 @@
 #include "AstraeonGameInstance.h"
 #include "AstraeonGameModeBase.h"
 #include "AstraeonPlayerController.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Creatures/AstraeonCreatureActor.h"
 #include "Building/AstraeonBuiltStructure.h"
@@ -14,7 +15,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "Engine/World.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "UnrealClient.h"
+#include "TimerManager.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -195,7 +202,59 @@ void AAstraeonPlayerCharacter::BeginPlay()
 	// first known-safe ground location for the fall-rescue safety net.
 	MarkLocationAsSafeGround(GetActorLocation());
 
+	// Permite arrancar en tercera persona desde línea de comandos para diagnosticar sin
+	// depender de que alguien pulse la tecla.
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonStartThirdPerson")))
+	{
+		bThirdPersonView = true;
+	}
 	ApplyCameraView();
+	LogCameraState();
+
+	// `-AstraeonCameraShot` pide una captura unos segundos después de arrancar. Es la única
+	// forma de comprobar qué se dibuja de verdad: los reportes de estado dicen que la malla
+	// está visible y bien colocada, y aun así no se veía.
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonCameraShot")))
+	{
+		if (UWorld* CurrentWorld = GetWorld())
+		{
+			// Sin partida iniciada la vista es la del menú, no la del personaje: la captura
+			// no diría nada. Se arranca una para que haya realmente algo que mirar.
+			FTimerHandle StartTimer;
+			CurrentWorld->GetTimerManager().SetTimer(StartTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+			{
+				if (AAstraeonPlayerController* Controller = Cast<AAstraeonPlayerController>(GetController()))
+				{
+					Controller->StartSelectedNewGame();
+					UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: partida iniciada para la captura"));
+				}
+			}), 1.5f, false);
+
+			FTimerHandle ShotTimer;
+			CurrentWorld->GetTimerManager().SetTimer(ShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+			{
+				// A/B para separar "no se dibuja" de "se dibuja con un material que no se ve":
+				// con este parámetro el cuerpo usa un material del motor, conocido y visible.
+				if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonBasicBodyMaterial")))
+				{
+					if (USkeletalMeshComponent* BodyMesh = GetMesh())
+					{
+						if (UMaterialInterface* Fallback = LoadObject<UMaterialInterface>(
+							nullptr, TEXT("/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial")))
+						{
+							for (int32 Index = 0; Index < BodyMesh->GetNumMaterials(); ++Index)
+							{
+								BodyMesh->SetMaterial(Index, Fallback);
+							}
+							UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: cuerpo forzado a WorldGridMaterial"));
+						}
+					}
+				}
+				LogCameraState();
+				FScreenshotRequest::RequestScreenshot(TEXT("AstraeonCameraShot"), false, false);
+			}), 12.0f, false);
+		}
+	}
 
 	if (FirstPersonRig)
 	{
@@ -259,9 +318,92 @@ void AAstraeonPlayerCharacter::ToggleCameraView()
 {
 	bThirdPersonView = !bThirdPersonView;
 	ApplyCameraView();
-	UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: %s"),
-		bThirdPersonView ? TEXT("tercera persona") : TEXT("primera persona"));
+	LogCameraState();
 }
+
+void AAstraeonPlayerCharacter::LogCameraState() const
+{
+	// Diagnóstico de una línea por cada cosa que puede dejar al personaje invisible: el
+	// brazo colapsado por colisión mete la cámara dentro de la propia malla, y las banderas
+	// de visibilidad la sacan del render aunque la cámara esté bien.
+	const USkeletalMeshComponent* BodyMesh = GetMesh();
+	const float RequestedArm = ThirdPersonBoom ? ThirdPersonBoom->TargetArmLength : 0.0f;
+	float ActualArm = 0.0f;
+	if (ThirdPersonBoom && ThirdPersonCamera)
+	{
+		ActualArm = FVector::Dist(ThirdPersonBoom->GetComponentLocation(),
+			ThirdPersonCamera->GetComponentLocation());
+	}
+	UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: vista=%s brazo_pedido=%.0f brazo_real=%.0f"),
+		bThirdPersonView ? TEXT("tercera") : TEXT("primera"), RequestedArm, ActualArm);
+	if (BodyMesh)
+	{
+		const FBoxSphereBounds Bounds = BodyMesh->Bounds;
+		UE_LOG(LogTemp, Display,
+			TEXT("AstraeonCamera: cuerpo malla=%s oculto=%d ownerNoSee=%d visible=%d origen=(%.0f,%.0f,%.0f) extension=(%.0f,%.0f,%.0f)"),
+			BodyMesh->GetSkeletalMeshAsset() ? *BodyMesh->GetSkeletalMeshAsset()->GetName() : TEXT("NINGUNA"),
+			BodyMesh->bHiddenInGame ? 1 : 0, BodyMesh->bOwnerNoSee ? 1 : 0,
+			BodyMesh->IsVisible() ? 1 : 0,
+			Bounds.Origin.X, Bounds.Origin.Y, Bounds.Origin.Z,
+			Bounds.BoxExtent.X, Bounds.BoxExtent.Y, Bounds.BoxExtent.Z);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AstraeonCamera: el personaje no tiene componente de malla"));
+	}
+	if (BodyMesh)
+	{
+		const FVector BodyLocation = BodyMesh->GetComponentLocation();
+		const FVector CameraLocation = ThirdPersonCamera ? ThirdPersonCamera->GetComponentLocation() : FVector::ZeroVector;
+		UE_LOG(LogTemp, Display,
+			TEXT("AstraeonCamera: cuerpo en (%.0f,%.0f,%.0f) camara en (%.0f,%.0f,%.0f) distancia=%.0f registrado=%d"),
+			BodyLocation.X, BodyLocation.Y, BodyLocation.Z,
+			CameraLocation.X, CameraLocation.Y, CameraLocation.Z,
+			FVector::Dist(BodyLocation, CameraLocation), BodyMesh->IsRegistered() ? 1 : 0);
+		const int32 MaterialCount = BodyMesh->GetNumMaterials();
+		UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: materiales=%d"), MaterialCount);
+		for (int32 Index = 0; Index < MaterialCount; ++Index)
+		{
+			const UMaterialInterface* Material = BodyMesh->GetMaterial(Index);
+			UE_LOG(LogTemp, Display, TEXT("AstraeonCamera:   slot %d = %s"), Index,
+				Material ? *Material->GetPathName() : TEXT("NULO"));
+		}
+		if (const UAnimSingleNodeInstance* Single = BodyMesh->GetSingleNodeInstance())
+		{
+			const UAnimationAsset* Asset = Single->GetAnimationAsset();
+			UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: animacion=%s"),
+				Asset ? *Asset->GetName() : TEXT("NINGUNA"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Display, TEXT("AstraeonCamera: sin instancia de animacion (pose de referencia)"));
+		}
+	}
+}
+
+#if !UE_BUILD_SHIPPING
+// Permite forzar la vista desde `-ExecCmds` para diagnosticar sin depender de que alguien
+// pulse la tecla.
+static FAutoConsoleCommandWithWorld GAstraeonToggleCameraCommand(
+	TEXT("Astraeon.ToggleCamera"),
+	TEXT("Alterna primera/tercera persona en el personaje local y registra el estado."),
+	FConsoleCommandWithWorldDelegate::CreateStatic([](UWorld* World)
+	{
+		if (!World)
+		{
+			return;
+		}
+		if (APlayerController* Controller = World->GetFirstPlayerController())
+		{
+			if (AAstraeonPlayerCharacter* Character = Cast<AAstraeonPlayerCharacter>(Controller->GetPawn()))
+			{
+				Character->ToggleCameraView();
+				return;
+			}
+			UE_LOG(LogTemp, Warning, TEXT("AstraeonCamera: el pawn poseído no es AstraeonPlayerCharacter"));
+		}
+	}));
+#endif
 
 void AAstraeonPlayerCharacter::ApplyCameraView()
 {

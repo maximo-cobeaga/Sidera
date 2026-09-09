@@ -412,3 +412,17 @@ Estas limitaciones no se ocultaron mediante un cambio de colisión o de controle
 - **Cierre esperado**: re-autorizar las poses de brazo del lote humano en Blender. Reencuadrar
   la malla no sirve: a 30 cm de la cámara, ±59 cm son ~63° fuera de eje por lado.
 - **Paliativo disponible**: tecla **V**, vista en tercera persona.
+
+### El protagonista no se ve en juego — SIN RESOLVER
+
+- **Motivo**: desconocido. Todos los indicadores dicen que debería verse —malla asignada,
+  `oculto=0`, `ownerNoSee=0`, `visible=1`, `registrado=1`, materiales opacos asignados,
+  animación propia corriendo, cámara a 357 cm y centrada— y en la captura dentro del juego
+  no hay nada en el encuadre.
+- **Impacto**: el personaje no se ve ni como sombra en primera persona ni con la cámara en
+  tercera (tecla V).
+- **Evidencia**: `Docs/evidencia/QA_TerceraPersona_SinPersonaje.png`, `Saved/Logs/ShotRun6.log`,
+  `ContentPipeline/reports/body_render_check.json`.
+- **Investigación completa, con lo ya descartado**: `Docs/INVESTIGACION_PERSONAJE_INVISIBLE.md`.
+- **Siguiente paso**: correr con `-AstraeonBasicBodyMaterial` y partida iniciada (fuerza
+  `WorldGridMaterial`), después forzar LOD0. Ambas pruebas están preparadas.
