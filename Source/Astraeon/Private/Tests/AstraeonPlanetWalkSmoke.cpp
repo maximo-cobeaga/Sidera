@@ -299,6 +299,21 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	{
 		if (DistanceTravelledCm < 2.0*PI*Planet->RadiusCm)
 			Failures+=TEXT("No complete logical lap; ");
+		// Guardian del puente de colision: el suelo que se pisa es el del patch mas fino, asi
+		// que ese patch tiene que ser el que se ve. Mismo margen que el corte de locomocion.
+		if (const auto* Patches=Planet->GetPatchManager())
+		{
+			const auto& S=Patches->GetStats();
+			const int32 Checked=Planet->GetGroundCheckedFrames();
+			const double MismatchRatio=Checked>0 ? double(Planet->GetGroundMismatchFrames())/Checked : 1.0;
+			UE_LOG(LogTemp,Display,TEXT("AstraeonPlanetWalk: patches visibles=%d pedidos=%d confirmados=%d relevos=%d obsoletos=%d fallos=%d | suelo visible distinto del pisado=%d de %d frames"),
+				Patches->GetVisibleCount(),S.Requests,S.Commits,S.Relays,S.StaleDrops,S.Failures,
+				Planet->GetGroundMismatchFrames(),Checked);
+			if (Patches->GetVisibleCount()==0) Failures+=TEXT("ningun patch visible; ");
+			if (S.Failures>0) Failures+=FString::Printf(TEXT("%d patches fallidos; "),S.Failures);
+			if (MismatchRatio>0.005)
+				Failures+=FString::Printf(TEXT("suelo visible distinto del pisado el %.1f%% de los frames; "),MismatchRatio*100.0);
+		}
 	}
 	Finish(Failures.IsEmpty(), Failures.IsEmpty() ? TEXT("OK") : Failures);
 }

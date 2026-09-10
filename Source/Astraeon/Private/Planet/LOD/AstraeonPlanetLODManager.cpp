@@ -152,8 +152,7 @@ bool FAstraeonPlanetLODManager::Select(const FAstraeonPlanetDefinition& P, const
 		|| !FMath::IsFinite(S.MinCellSpanCm) || S.MinCellSpanCm < 1
 		|| !FMath::IsFinite(S.MaxErrorPixels) || S.MaxErrorPixels <= 0
 		|| !FMath::IsFinite(S.PredictionSeconds) || S.PredictionSeconds < 0 || S.PredictionSeconds > 10) return false;
-	while (Out.FinestAllowedLod < FAddress::MaxLod &&
-		2.0 * P.RadiusCm / (double(int64(1) << Out.FinestAllowedLod) * S.Quads) > S.MinCellSpanCm) ++Out.FinestAllowedLod;
+	Out.FinestAllowedLod = FinestAllowedLod(P, S);
 	FSet Leaves;
 	for (uint8 Face = 0; Face < 6; ++Face) { FAddress Root; Root.BodyId = P.BodyId; Root.Face = EAstraeonPlanetFace(Face); Leaves.Add(Root); }
 	for (;;)
@@ -176,6 +175,13 @@ bool FAstraeonPlanetLODManager::Select(const FAstraeonPlanetDefinition& P, const
 	}
 	Out.Leaves = Leaves.Array(); Out.Leaves.Sort(Less);
 	return ValidateCover(Out.Leaves);
+}
+
+uint8 FAstraeonPlanetLODManager::FinestAllowedLod(const FAstraeonPlanetDefinition& P, const FAstraeonPlanetLODSettings& S)
+{
+	uint8 Lod = 0;
+	while (Lod < FAddress::MaxLod && 2.0 * P.RadiusCm / (double(int64(1) << Lod) * S.Quads) > S.MinCellSpanCm) ++Lod;
+	return Lod;
 }
 
 double FAstraeonPlanetLODManager::SkirtDepthCm(const FAstraeonPlanetDefinition& P, const FAddress& A, int32 Quads)

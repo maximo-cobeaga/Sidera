@@ -19,9 +19,14 @@ que conecte workers y selector al runtime en `TL_12_PatchLOD`. Los límites de d
 deben medirse junto al planificador. La puerta de Fase 2 permanece abierta; P2.3–P2.8 pendientes.
 
 **P2.3-A hecho.** `FAstraeonPlanetPatchManager` une selector, cola y backend: pide lo que falta,
-confirma sólo revisiones vigentes, libera lo que sale y releva sin agujeros. **88/88
-Automation**. Todavía no lo consume el runtime: `TL_11` sigue con seis caras. Siguiente paso:
-P2.3-B, backend ProceduralMesh y runtime con el puente de colisión (`DECISIONS`).
+confirma sólo revisiones vigentes, libera lo que sale y releva sin agujeros.
+
+**P2.3-B hecho.** `TL_11` renderiza por patches con workers y backend ProceduralMesh; las seis
+caras sólo se ven hasta la primera cobertura. La colisión sigue siendo el parche cercano de
+Fase 1, ahora sobre la rejilla del patch más fino (64 en Lab), probada triángulo por triángulo.
+**89/89 Automation**, cardinales 26/26, caminata de 250 s en verde con 0 frames de suelo
+desalineado. `-AstraeonPlanetLegacyFaces` vuelve a las seis caras. Siguiente paso: P2.3-C,
+`TL_12_PatchLOD` a 50 km y su smoke.
 
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 

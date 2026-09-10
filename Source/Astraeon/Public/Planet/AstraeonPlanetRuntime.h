@@ -2,12 +2,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Planet/AstraeonPlanetDefinition.h"
+#include "Planet/LOD/AstraeonPlanetLODManager.h"
+#include "Planet/Patches/AstraeonPlanetPatchManager.h"
+#include "Planet/Patches/AstraeonPlanetProceduralPatchBackend.h"
 #include "Planet/Surface/AstraeonCubeSphereMesh.h"
 #include "AstraeonPlanetRuntime.generated.h"
 class UProceduralMeshComponent;
 class UMaterialInterface;
 
-// Phase 1 fixed-resolution proof. No quadtree, massive content or full-planet collision.
+// Phase 2: render through the quadtree patch manager; collision stays the Phase 1 near patch
+// until P2.4, rebuilt on the finest patch grid so it matches the rendered triangles exactly.
+// `-AstraeonPlanetLegacyFaces` restores the six fixed faces for comparison until P2.4 closes.
 UCLASS()
 class ASTRAEON_API AAstraeonPlanetRuntime : public AActor
 {
@@ -28,11 +33,20 @@ public:
 	// Cuantas veces se recreo la seccion de colision. Correlacionar esto con los cortes de
 	// animacion es lo que separa "el clip esta mal" de "algo para al personaje".
 	int32 GetCollisionRebuildCount() const { return CollisionRebuilds; }
+	bool IsUsingPatches() const { return Patches.IsValid(); }
+	const FAstraeonPlanetPatchManager* GetPatchManager() const { return Patches.Get(); }
+	// Frames in which the patch under the player was not the finest one on screen: the ground
+	// the player sees and the ground the player stands on differ there.
+	int32 GetGroundMismatchFrames() const { return GroundMismatchFrames; }
+	int32 GetGroundCheckedFrames() const { return GroundCheckedFrames; }
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
+	void UpdatePatches(float DeltaSeconds);
+	bool ObserverBodyCm(FVector& OutPosition, FVector& OutVelocity) const;
 	UPROPERTY() TArray<TObjectPtr<UProceduralMeshComponent>> Faces;
 	// Dos secciones de colision que se alternan. Con una sola habia que moverla y recocer su
 	// cuerpo fisico en el sitio, y el jugador se quedaba sin suelo mientras tanto.
@@ -40,7 +54,18 @@ private:
 	UPROPERTY() TObjectPtr<UProceduralMeshComponent> NearCollisionRelay;
 	int32 ActiveCollisionBuffer = 0;
 	TArray<FAstraeonCubeSphereMesh> FaceData;
+	// Grid of FaceData. Equals FaceQuads with legacy faces; with patches it is the finest patch
+	// grid, so collision triangles are the rendered ones. Radius and cadence stay on FaceQuads.
+	int32 CollisionQuads = 0;
 	FVector CollisionDirection = FVector::ZeroVector;
 	int32 CollisionTriangles = 0;
 	int32 CollisionRebuilds = 0;
+	FAstraeonPlanetLODSettings LODSettings;
+	TUniquePtr<FAstraeonPlanetStreamingManager> Streaming;
+	TUniquePtr<FAstraeonPlanetProceduralPatchBackend> Backend;
+	TUniquePtr<FAstraeonPlanetPatchManager> Patches;
+	float SinceSelection = 0.f;
+	bool bFacesRetired = false;
+	int32 GroundMismatchFrames = 0;
+	int32 GroundCheckedFrames = 0;
 };

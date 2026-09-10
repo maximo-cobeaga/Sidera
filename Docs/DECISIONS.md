@@ -22,6 +22,13 @@ uno durante un relevo; por eso el selector separa `ValidatePartition` de `Valida
 build fallido no se sustituye por terreno plano: el patch que iba a reemplazar se queda. Las
 solicitudes se ordenan por distancia al observador, con desempate determinista.
 
+Integración (B). Las seis caras siguen construyéndose al empezar y se retiran en el frame en que
+aparece la primera cobertura de patches: nunca hay un frame sin planeta y nunca se ven los dos
+a la vez. Si el radio exige una rejilla de colisión mayor que 128 quads, el puente no puede ser
+exacto; el runtime lo dice con un `Warning` y usa las seis caras, en vez de dejar suelo
+desalineado en silencio. Selección cada 0,1 s y 2 subidas por frame: provisionales, se miden en
+`TL_12`.
+
 Desvío del plan: no se sube `MaxTrackedPatches` de 64 a 512. El gestor libera cada dirección
 del streaming apenas recoge su resultado, así que ese registro cuenta trabajo pendiente —acotado
 por los 2 trabajos simultáneos— y el conjunto confirmado es del gestor. La cola se abstrae en

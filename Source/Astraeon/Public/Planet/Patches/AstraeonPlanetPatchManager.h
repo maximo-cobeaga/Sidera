@@ -53,6 +53,8 @@ public:
 	void Reset();
 
 	TArray<FAddress> GetVisible() const;
+	bool IsVisible(const FAddress& Address) const { return Visible.Contains(Address); }
+	int32 GetVisibleCount() const { return Visible.Num(); }
 	const TArray<FAddress>& GetTarget() const { return Target; }
 	bool IsSettled() const;
 	int32 GetPendingCount() const;

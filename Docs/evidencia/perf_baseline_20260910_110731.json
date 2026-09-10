@@ -1,0 +1,18 @@
+{
+	"timestamp": "2026-09-10T11:07:31.534Z",
+	"map": "TL_11_CubeSphereClosed",
+	"warmup_seconds": 10,
+	"sample_seconds": 30,
+	"frame_count": 6115,
+	"mean_fps": 203.82085877537855,
+	"median_frame_ms": 4.7729015350341797,
+	"p99_frame_ms": 5.814259797334671,
+	"worst_frame_ms": 400.00000596046448,
+	"hitches_over_50ms": 1,
+	"memory_start_mb": 2274.23828125,
+	"memory_end_mb": 2295.22265625,
+	"command_line": "-unattended -nosplash -nop4 -abslog=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Logs\\Planet_Walk_20000.log /Game/Maps/TL_11_CubeSphereClosed -game -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -AstraeonPlanetRadiusCm=20000 -AstraeonSmokePlanetWalk -AstraeonWalkSeconds=250 -AstraeonPerfBaseline -AstraeonPerfWarmup=10 -AstraeonPerfSeconds=30 -AstraeonPerfKeepRunning",
+	"build_configuration": "Development",
+	"viewport_width": 1920,
+	"viewport_height": 1080
+}

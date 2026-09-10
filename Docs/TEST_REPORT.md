@@ -1,3 +1,42 @@
+## 2026-09-10 — Fase 2, P2.3-B: `TL_11` renderiza por patches
+
+Implementación en `Planet/Patches/AstraeonPlanetProceduralPatchBackend.*` y
+`Planet/AstraeonPlanetRuntime.*`; guardián nuevo en `AstraeonPlanetWalkSmoke.cpp`; prueba nueva
+`Patches.CollisionBridgeMatchesFinestPatches`. `RunPlanetChecks.ps1` acepta `-LegacyFaces`.
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' Astraeon Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Profile
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals -LegacyFaces
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **89/89 Automation**.
+La prueba del puente confirma, en las seis caras, que la colisión a rejilla 64 es triángulo por
+triángulo y en el mismo orden de vértices la de los patches LOD 1 (el más fino en Lab).
+
+- **Cardinals PASS 26/26** en modo patches. Primera cobertura: 24 patches en el frame 13;
+  0 fallos, 0 obsoletos; **suelo visible distinto del pisado: 0 de 21.531 frames**.
+- **Cardinals PASS 26/26 con `-LegacyFaces`**: el respaldo funciona (`mode=legacy_faces`).
+- **Caminata 250 s `RESULTADO=OK`**: 141.215 cm (antes 141.224), 62 saltos, 0 frames en Idle
+  caminando, racha de caída 1,03 s, **0 de 51.600 frames con suelo visible distinto del
+  pisado**. 434 reconstrucciones de colisión, las mismas que antes: el radio y la cadencia en
+  metros no cambiaron.
+
+Perfil: [perf_baseline_20260910_110731.json](evidencia/perf_baseline_20260910_110731.json),
+**203,8 FPS medios** (antes 209,3), p99 **5,81 ms** (antes 5,56), memoria 2.274→2.295 MB, el
+mismo pico aislado de 400 ms que ya tenían los dos baselines anteriores. La diferencia es de un
+3 % y no se atribuye todavía; el perfil de patches con relevos es el de `TL_12`.
+
+Captura: se compararon `PlanetCardinalLab.png` en modo patches y con `-LegacyFaces` en el mismo
+sitio. Son la misma imagen salvo el relieve más fino; los bloques de tono son el damero del
+material y aparecen en las dos. Sin huecos ni grietas visibles.
+
+Lo que esto **no** prueba: en Lab la selección son 24 patches LOD 1 y no cambia al caminar (un
+relevo en toda la sesión). Relevos en movimiento, faldones y conteo transitorio se miden en `TL_12`.
+
 ## 2026-09-10 — Fase 2, P2.3-A: gestor de patches con relevo sin agujeros
 
 Implementación en `Planet/Patches/AstraeonPlanetPatchManager.*`, interfaz de cola en

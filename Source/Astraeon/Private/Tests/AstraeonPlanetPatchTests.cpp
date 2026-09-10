@@ -6,6 +6,8 @@
 #include "Planet/Patches/AstraeonPlanetPatchMesh.h"
 #include "Planet/Streaming/AstraeonPlanetStreamingManager.h"
 #include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "Planet/Surface/AstraeonCubeSphereMesh.h"
+#include "Planet/LOD/AstraeonPlanetLODManager.h"
 #include <limits>
 
 namespace AstraeonPatchTests
@@ -335,6 +337,48 @@ bool FAstraeonPatchOrderTest::RunTest(const FString& Parameters)
 			Manager.Release(Item.Address);
 		}
 	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPatchCollisionBridgeTest, "Astraeon.Planet.Patches.CollisionBridgeMatchesFinestPatches",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonPatchCollisionBridgeTest::RunTest(const FString& Parameters)
+{
+	// P2.3 keeps whole-face collision until P2.4. It is only honest if a face built at
+	// Quads << FinestLod is, triangle by triangle and in the same winding, the finest patches.
+	using namespace AstraeonPatchTests;
+	const auto P = Planet(20000.0);
+	const FAstraeonPlanetLODSettings Settings;
+	const uint8 Finest = FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings);
+	const int32 Grid = Settings.Quads << Finest;
+	if (!TestTrue(TEXT("Lab radius fits the builder"), Finest > 0 && Grid <= 128)) return false;
+	const int32 Q = Settings.Quads, Count = 1 << Finest;
+	for (int32 Face = 0; Face < 6; ++Face)
+	{
+		FAstraeonCubeSphereMesh Whole;
+		if (!TestTrue(TEXT("Collision face builds"), FAstraeonCubeSphereMesh::BuildFace(P, EAstraeonPlanetFace(Face), Grid, Whole))) return false;
+		for (int32 PY = 0; PY < Count; ++PY)
+		for (int32 PX = 0; PX < Count; ++PX)
+		{
+			auto A = Address(Finest, PX, PY); A.BodyId = P.BodyId; A.Face = EAstraeonPlanetFace(Face);
+			FAstraeonPlanetPatchBuildResult Patch;
+			if (!Build(P, A, Patch)) { AddError(TEXT("Finest patch build failed")); return false; }
+			int32 Mismatches = 0;
+			for (int32 Y = 0; Y < Q; ++Y)
+			for (int32 X = 0; X < Q; ++X)
+			{
+				const int32 PatchCell = (Y * Q + X) * 6, FaceCell = ((PY * Q + Y) * Grid + PX * Q + X) * 6;
+				for (int32 K = 0; K < 6; ++K)
+				{
+					const FVector Rendered = Patch.Vertices[Patch.Indices[PatchCell + K]] + Patch.OriginBodyCm;
+					const FVector Collided = Whole.Vertices[Whole.Indices[FaceCell + K]] + Whole.OriginBodyCm;
+					Mismatches += !Rendered.Equals(Collided, 1.e-6);
+				}
+			}
+			TestEqual(TEXT("Every collision triangle is a rendered triangle, same corner order"), Mismatches, 0);
+		}
+	}
+	AddInfo(FString::Printf(TEXT("CollisionBridge radius_cm=%.0f finest_lod=%d grid=%d"), P.RadiusCm, Finest, Grid));
 	return true;
 }
 

@@ -35,6 +35,8 @@ struct ASTRAEON_API FAstraeonPlanetLODManager
 {
 	static bool Select(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetLODView& View,
 		const FAstraeonPlanetLODSettings& Settings, FAstraeonPlanetLODSelection& Out);
+	// First level whose cell is no wider than MinCellSpanCm. Depends on the radius, not the view.
+	static uint8 FinestAllowedLod(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetLODSettings& Settings);
 	static bool SameLevelNeighbor(const FAstraeonPlanetPatchAddress& Address, EAstraeonPatchEdge Edge,
 		FAstraeonPlanetPatchAddress& Out);
 	// Partition: every face fully covered, no overlap. Cover: partition plus LOD delta <= 1.

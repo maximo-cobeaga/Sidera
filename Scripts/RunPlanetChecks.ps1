@@ -2,12 +2,13 @@ param(
     [ValidateSet('Map','Walk','Cardinals','Automation','Critical')][string]$Check='Automation',
     [double]$RadiusCm=20000,
     [int]$Seconds=250,
-    [switch]$Profile
+    [switch]$Profile,
+    [switch]$LegacyFaces
 )
 $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 $editor='C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
-$label="Planet_${Check}_${RadiusCm}"
+$label="Planet_${Check}_${RadiusCm}$(if ($LegacyFaces) {'_legacy'})"
 $log=Join-Path $repo "Saved\Logs\$label.log"
 $arguments=@("$repo\Astraeon.uproject",'-unattended','-nosplash','-nop4',"-abslog=$log")
 switch ($Check) {
@@ -18,6 +19,7 @@ switch ($Check) {
         $arguments+=@('/Game/Maps/TL_11_CubeSphereClosed','-game','-RenderOffscreen','-windowed','-ForceRes','-ResX=1920','-ResY=1080',"-AstraeonPlanetRadiusCm=$RadiusCm")
         if ($Check -eq 'Walk') { $arguments+=@('-AstraeonSmokePlanetWalk',"-AstraeonWalkSeconds=$Seconds") }
         else { $arguments+='-AstraeonSmokePlanetCardinals' }
+        if ($LegacyFaces) { $arguments+='-AstraeonPlanetLegacyFaces' }
         if ($Profile) { $arguments+=@('-AstraeonPerfBaseline','-AstraeonPerfWarmup=10','-AstraeonPerfSeconds=30','-AstraeonPerfKeepRunning') }
     }
 }
@@ -37,8 +39,8 @@ if ($content -notmatch [regex]::Escape($expected)) { throw "Missing completion m
 $successes=[regex]::Matches($content,'Test Completed. Result=\{Success\}').Count
 if ($Check -eq 'Automation') {
     $discovered=[regex]::Match($content,"Found (\d+) automation tests based on 'Astraeon'")
-    if (-not $discovered.Success -or $successes -lt 88 -or $successes -ne [int]$discovered.Groups[1].Value) {
-        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 88"
+    if (-not $discovered.Success -or $successes -lt 89 -or $successes -ne [int]$discovered.Groups[1].Value) {
+        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 89"
     }
     foreach ($required in @(
         'Astraeon.Planet.Patches.AddressHierarchy',
@@ -53,7 +55,8 @@ if ($Check -eq 'Automation') {
         'Astraeon.Planet.Streaming.SubmissionOrderDeterminism',
         'Astraeon.Planet.PatchManager.HoleFreeSplitAndMerge',
         'Astraeon.Planet.PatchManager.RejectsStaleFailedAndInvalid',
-        'Astraeon.Planet.PatchManager.DeterministicRouteWithWorkers'
+        'Astraeon.Planet.PatchManager.DeterministicRouteWithWorkers',
+        'Astraeon.Planet.Patches.CollisionBridgeMatchesFinestPatches'
     )) {
         if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
             throw "Missing required Phase 2 test: $required"

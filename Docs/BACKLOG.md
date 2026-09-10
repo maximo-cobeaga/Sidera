@@ -12,7 +12,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
 - [~] P2.3 — Selector quadtree/LOD balanceado implementado y probado (tres tests); pendiente
       integración del backend/workers y mapa `TL_12`. Plan en cuatro incrementos (`DECISIONS`):
   - [x] A — Gestor de patches con relevo sin agujeros, interfaces de cola y backend; tres tests.
-  - [ ] B — Backend ProceduralMesh y runtime de `TL_11` con puente de colisión exacto.
+  - [x] B — Backend ProceduralMesh y runtime de `TL_11` con puente de colisión exacto.
+        Cardinales 26/26, caminata de 250 s con 0 cortes y 0 frames de suelo desalineado.
   - [ ] C — `TL_12_PatchLOD` a 50 km, smoke `-AstraeonSmokePatchLOD`, faldón medido, Insights.
   - [ ] D — Documentación y prueba humana en `TL_11` y `TL_12`.
 - [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.

@@ -13,6 +13,12 @@
 - **Baja, abierta (P2.3-A):** si el objetivo cambia más rápido de lo que se construye, un padre
   puede quedarse en pantalla mucho tiempo esperando a sus cuatro hijos. No hay agujero, pero sí
   detalle demorado. Medir el tiempo de asentamiento en el smoke de `TL_12`.
+- **Baja, abierta (P2.3-B):** con patches la caminata de `TL_11` bajó de 209,3 a 203,8 FPS
+  medios y el p99 subió de 5,56 a 5,81 ms. Un 3 %, sin atribuir; puede ser el faldón o las 24
+  secciones contra 6. Se perfila con Insights en `TL_12`.
+- **Baja, abierta (P2.3-B):** el puente de colisión exacto sólo cabe hasta una rejilla de 128
+  quads por cara (radio ≤ 448 m con la configuración actual). Por encima, el runtime avisa con
+  un `Warning` y vuelve a las seis caras. `TL_12` no usa colisión; P2.4 quita el límite.
 - **Media, heredada:** sigue pendiente el coste excesivo de reconstrucción de colisión
   documentado abajo. Corresponde a P2.4; no se altera el relevo validado de Fase 1.
 - **Resueltos durante desarrollo:** exportar una clase propietaria de `TFuture` instanciaba
