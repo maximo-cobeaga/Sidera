@@ -179,10 +179,16 @@ sistema estelar, ecología, civilizaciones y ciudades.
 
 ---
 
-## 8. Dos archivos sin commitear a propósito
+## 8. Un archivo sin commitear a propósito
 
-- `captura-personaje-brazos-pegados-al-cuerpo.png` en la raíz — evidencia suelta del defecto de
-  brazos reportado por el propietario. Si se conserva, va a `Docs/evidencia/`.
-- `graphics/characters/main_player/exports/AN_Astraeon_Player_All_Polished_20260910_before_arm_pose.fbx`
-  — export intermedio. `ASTRAEON_TRANSICION_AL_JUEGO_OBJETIVO.md` pide no confirmar artefactos
-  temporales.
+`graphics/characters/main_player/exports/AN_Astraeon_Player_All_Polished_20260910_before_arm_pose.fbx`
+es un export intermedio, y `ASTRAEON_TRANSICION_AL_JUEGO_OBJETIVO.md` pide no confirmar artefactos
+temporales. Sirve como referencia del antes/después del pulido de brazos; si deja de hacer falta,
+se borra.
+
+## 9. El repositorio remoto
+
+Este cierre fue **el primer push** a `github.com/maximo-cobeaga/Sidera`: hasta ahora el repositorio
+existía como remoto configurado pero sin nada subido. Se subieron la historia completa y 696 MB de
+objetos LFS. Conviene confirmar que la visibilidad del repositorio en GitHub es la que se pretende
+antes de seguir subiendo arte.
