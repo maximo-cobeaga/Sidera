@@ -82,7 +82,9 @@ def pelvis(up=0.0, side=0.0, back=0.0):
 RELAXED_HANDS = hands(0.26, thumb=0.30, spread=0.05)
 
 STAND = merge(
-    {'upperarm_l': (-1.245, 0.0, -0.130), 'upperarm_r': (-1.245, 0.0, 0.130),
+    # A-pose funcional: separa hombro/brazo del tórax sin convertir el personaje
+    # en una T. Este valor también es la base de idle y de los ciclos locomotores.
+    {'upperarm_l': (-1.080, 0.0, -0.130), 'upperarm_r': (-1.080, 0.0, 0.130),
      'lowerarm_l': (0.300, 0.0, 0.0), 'lowerarm_r': (0.300, 0.0, 0.0),
      'clavicle_l': (0.0, 0.0, 0.0), 'clavicle_r': (0.0, 0.0, 0.0),
      'thigh_l': (0.02, 0.0, -0.055), 'thigh_r': (0.02, 0.0, 0.055),
@@ -102,28 +104,28 @@ WALK_HALF = [
     merge(STAND, pelvis(up=-0.012),
           {'thigh_r': (0.42, 0.0, 0.05), 'calf_r': (-0.14, 0.0, 0.0), 'foot_r': (0.20, 0.0, 0.0),
            'thigh_l': (-0.34, 0.0, -0.05), 'calf_l': (-0.22, 0.0, 0.0), 'foot_l': (-0.28, 0.0, 0.0),
-           'upperarm_l': (-1.245, 0.0, -0.45), 'upperarm_r': (-1.245, 0.0, -0.19),
+           'upperarm_l': (-1.080, 0.0, -0.45), 'upperarm_r': (-1.080, 0.0, -0.19),
            'lowerarm_l': (0.46, 0.0, 0.0), 'lowerarm_r': (0.24, 0.0, 0.0),
            'spine_02': (0.05, 0.0, 0.07)}),
     # phi = 0.125  APOYO / punto bajo
     merge(STAND, pelvis(up=-0.040, side=0.012),
           {'thigh_r': (0.24, 0.0, 0.05), 'calf_r': (-0.32, 0.0, 0.0), 'foot_r': (0.02, 0.0, 0.0),
            'thigh_l': (-0.14, 0.0, -0.05), 'calf_l': (-0.62, 0.0, 0.0), 'foot_l': (-0.10, 0.0, 0.0),
-           'upperarm_l': (-1.245, 0.0, -0.30), 'upperarm_r': (-1.245, 0.0, -0.12),
+           'upperarm_l': (-1.080, 0.0, -0.30), 'upperarm_r': (-1.080, 0.0, -0.12),
            'lowerarm_l': (0.40, 0.0, 0.0), 'lowerarm_r': (0.26, 0.0, 0.0),
            'spine_02': (0.04, 0.0, 0.04)}),
     # phi = 0.250  PASO / punto alto
     merge(STAND, pelvis(up=0.008, side=0.016),
           {'thigh_r': (0.02, 0.0, 0.05), 'calf_r': (-0.10, 0.0, 0.0), 'foot_r': (0.00, 0.0, 0.0),
            'thigh_l': (0.12, 0.0, -0.05), 'calf_l': (-0.88, 0.0, 0.0), 'foot_l': (0.18, 0.0, 0.0),
-           'upperarm_l': (-1.245, 0.0, -0.13), 'upperarm_r': (-1.245, 0.0, 0.13),
+           'upperarm_l': (-1.080, 0.0, -0.13), 'upperarm_r': (-1.080, 0.0, 0.13),
            'lowerarm_l': (0.32, 0.0, 0.0), 'lowerarm_r': (0.32, 0.0, 0.0),
            'spine_02': (0.02, 0.0, 0.0)}),
     # phi = 0.375  IMPULSO
     merge(STAND, pelvis(up=-0.004, side=0.010),
           {'thigh_r': (-0.20, 0.0, 0.05), 'calf_r': (-0.08, 0.0, 0.0), 'foot_r': (-0.24, 0.0, 0.0),
            'thigh_l': (0.34, 0.0, -0.05), 'calf_l': (-0.52, 0.0, 0.0), 'foot_l': (0.14, 0.0, 0.0),
-           'upperarm_l': (-1.245, 0.0, 0.06), 'upperarm_r': (-1.245, 0.0, 0.30),
+           'upperarm_l': (-1.080, 0.0, 0.06), 'upperarm_r': (-1.080, 0.0, 0.30),
            'lowerarm_l': (0.28, 0.0, 0.0), 'lowerarm_r': (0.40, 0.0, 0.0),
            'spine_02': (0.03, 0.0, -0.03)}),
 ]
@@ -132,30 +134,33 @@ RUN_HALF = [
     merge(STAND, pelvis(up=-0.030),
           {'thigh_r': (0.72, 0.0, 0.04), 'calf_r': (-0.40, 0.0, 0.0), 'foot_r': (0.24, 0.0, 0.0),
            'thigh_l': (-0.55, 0.0, -0.04), 'calf_l': (-0.75, 0.0, 0.0), 'foot_l': (-0.20, 0.0, 0.0),
-           'upperarm_l': (-1.150, 0.0, -0.80), 'upperarm_r': (-1.150, 0.0, -0.30),
-           'lowerarm_l': (1.35, 0.0, 0.0), 'lowerarm_r': (0.95, 0.0, 0.0),
+           # Oscilacion contenida: el rango anterior levantaba ambos brazos
+           # hasta una T en el frame de apoyo. El balanceo debe leerse hacia
+           # delante/atras, no como abduccion lateral.
+           'upperarm_l': (-1.080, 0.0, -0.42), 'upperarm_r': (-1.080, 0.0, -0.18),
+           'lowerarm_l': (0.61, 0.0, 0.0), 'lowerarm_r': (0.43, 0.0, 0.0),
            'spine_01': (0.10, 0.0, 0.0), 'spine_02': (0.12, 0.0, 0.14),
            'neck_01': (-0.10, 0.0, 0.0)}),
     merge(STAND, pelvis(up=-0.075, side=0.018),
           {'thigh_r': (0.34, 0.0, 0.04), 'calf_r': (-0.72, 0.0, 0.0), 'foot_r': (0.02, 0.0, 0.0),
            'thigh_l': (-0.30, 0.0, -0.04), 'calf_l': (-1.10, 0.0, 0.0), 'foot_l': (0.10, 0.0, 0.0),
-           'upperarm_l': (-1.150, 0.0, -0.50), 'upperarm_r': (-1.150, 0.0, -0.10),
-           'lowerarm_l': (1.15, 0.0, 0.0), 'lowerarm_r': (1.05, 0.0, 0.0),
+           'upperarm_l': (-1.080, 0.0, -0.30), 'upperarm_r': (-1.080, 0.0, -0.08),
+           'lowerarm_l': (0.52, 0.0, 0.0), 'lowerarm_r': (0.47, 0.0, 0.0),
            'spine_01': (0.12, 0.0, 0.0), 'spine_02': (0.14, 0.0, 0.07),
            'neck_01': (-0.12, 0.0, 0.0)}),
     # vuelo: ambos pies fuera del suelo
     merge(STAND, pelvis(up=0.050, side=0.010),
           {'thigh_r': (-0.30, 0.0, 0.04), 'calf_r': (-0.30, 0.0, 0.0), 'foot_r': (-0.30, 0.0, 0.0),
            'thigh_l': (0.55, 0.0, -0.04), 'calf_l': (-1.55, 0.0, 0.0), 'foot_l': (0.25, 0.0, 0.0),
-           'upperarm_l': (-1.150, 0.0, -0.15), 'upperarm_r': (-1.150, 0.0, 0.15),
-           'lowerarm_l': (1.05, 0.0, 0.0), 'lowerarm_r': (1.05, 0.0, 0.0),
+           'upperarm_l': (-1.080, 0.0, -0.12), 'upperarm_r': (-1.080, 0.0, 0.12),
+           'lowerarm_l': (0.47, 0.0, 0.0), 'lowerarm_r': (0.47, 0.0, 0.0),
            'spine_01': (0.11, 0.0, 0.0), 'spine_02': (0.13, 0.0, -0.02),
            'neck_01': (-0.11, 0.0, 0.0)}),
     merge(STAND, pelvis(up=0.010),
           {'thigh_r': (-0.52, 0.0, 0.04), 'calf_r': (-0.55, 0.0, 0.0), 'foot_r': (-0.34, 0.0, 0.0),
            'thigh_l': (0.78, 0.0, -0.04), 'calf_l': (-1.05, 0.0, 0.0), 'foot_l': (0.20, 0.0, 0.0),
-           'upperarm_l': (-1.150, 0.0, 0.25), 'upperarm_r': (-1.150, 0.0, 0.62),
-           'lowerarm_l': (0.95, 0.0, 0.0), 'lowerarm_r': (1.25, 0.0, 0.0),
+           'upperarm_l': (-1.080, 0.0, 0.18), 'upperarm_r': (-1.080, 0.0, 0.34),
+           'lowerarm_l': (0.43, 0.0, 0.0), 'lowerarm_r': (0.56, 0.0, 0.0),
            'spine_01': (0.10, 0.0, 0.0), 'spine_02': (0.12, 0.0, -0.12),
            'neck_01': (-0.10, 0.0, 0.0)}),
 ]
@@ -210,8 +215,8 @@ def strafe_cycle(lead='l'):
         p['thigh_' + trail] = (0.04, 0.0, (0.07 + lift_trail * 0.30) * s_trail)
         p['calf_' + trail] = (-0.10 - lift_trail, 0.0, 0.0)
         p['foot_' + trail] = (0.03 + lift_trail * 0.35, 0.0, 0.0)
-        p['upperarm_l'] = (-1.230, 0.0, -0.13)
-        p['upperarm_r'] = (-1.230, 0.0, 0.13)
+        p['upperarm_l'] = (-1.080, 0.0, -0.13)
+        p['upperarm_r'] = (-1.080, 0.0, 0.13)
         p['spine_02'] = (0.02, 0.0, 0.05 * s_lead)
         return p
 
@@ -311,22 +316,22 @@ def build_clips():
                          'calf_l': (-1.05, 0.0, 0.0), 'calf_r': (-1.05, 0.0, 0.0),
                          'foot_l': (0.42, 0.0, 0.0), 'foot_r': (0.42, 0.0, 0.0),
                          'spine_02': (0.16, 0.0, 0.0), 'neck_01': (-0.12, 0.0, 0.0),
-                         'upperarm_l': (-1.100, 0.0, 0.42), 'upperarm_r': (-1.100, 0.0, -0.42),
-                         'lowerarm_l': (0.55, 0.0, 0.0), 'lowerarm_r': (0.55, 0.0, 0.0)})
+                         'upperarm_l': (-1.100, 0.0, 0.25), 'upperarm_r': (-1.100, 0.0, -0.25),
+                         'lowerarm_l': (0.40, 0.0, 0.0), 'lowerarm_r': (0.40, 0.0, 0.0)})
     launch = merge(STAND, pelvis(up=0.035),
                    {'thigh_l': (-0.10, 0.0, -0.05), 'thigh_r': (-0.10, 0.0, 0.05),
                     'calf_l': (-0.05, 0.0, 0.0), 'calf_r': (-0.05, 0.0, 0.0),
                     'foot_l': (-0.55, 0.0, 0.0), 'foot_r': (-0.55, 0.0, 0.0),
                     'spine_02': (-0.04, 0.0, 0.0),
-                    'upperarm_l': (-0.480, 0.0, -0.42), 'upperarm_r': (-0.480, 0.0, 0.42),
-                    'lowerarm_l': (0.30, 0.0, 0.0), 'lowerarm_r': (0.30, 0.0, 0.0)})
+                    'upperarm_l': (-0.900, 0.0, -0.25), 'upperarm_r': (-0.900, 0.0, 0.25),
+                    'lowerarm_l': (0.32, 0.0, 0.0), 'lowerarm_r': (0.32, 0.0, 0.0)})
     airborne = merge(STAND, pelvis(up=-0.010),
                      {'thigh_l': (0.38, 0.0, -0.10), 'thigh_r': (0.24, 0.0, 0.10),
                       'calf_l': (-0.72, 0.0, 0.0), 'calf_r': (-0.48, 0.0, 0.0),
                       'foot_l': (-0.18, 0.0, 0.0), 'foot_r': (-0.24, 0.0, 0.0),
                       'spine_02': (0.06, 0.0, 0.0),
-                      'upperarm_l': (-0.820, 0.0, -0.30), 'upperarm_r': (-0.820, 0.0, 0.30),
-                      'lowerarm_l': (0.72, 0.0, 0.0), 'lowerarm_r': (0.72, 0.0, 0.0)})
+                      'upperarm_l': (-1.050, 0.0, -0.18), 'upperarm_r': (-1.050, 0.0, 0.18),
+                      'lowerarm_l': (0.45, 0.0, 0.0), 'lowerarm_r': (0.45, 0.0, 0.0)})
     seq('AN_Player_Jump_Start', 16, False, [
         (0.00, STAND), (0.45, crouch_load), (0.80, launch),
         (1.00, merge(launch, pelvis(up=0.045), {'thigh_l': (0.10, 0.0, -0.05),
@@ -337,7 +342,7 @@ def build_clips():
         (0.50, merge(airborne, pelvis(up=0.004),
                      {'thigh_l': (0.30, 0.0, -0.10), 'calf_l': (-0.62, 0.0, 0.0),
                       'thigh_r': (0.32, 0.0, 0.10), 'calf_r': (-0.58, 0.0, 0.0),
-                      'upperarm_l': (-0.880, 0.0, -0.26), 'upperarm_r': (-0.880, 0.0, 0.26)})),
+                      'upperarm_l': (-1.050, 0.0, -0.16), 'upperarm_r': (-1.050, 0.0, 0.16)})),
         (1.00, airborne),
     ])
     impact = merge(STAND, pelvis(up=-0.215, back=-0.090),
@@ -345,8 +350,8 @@ def build_clips():
                     'calf_l': (-1.42, 0.0, 0.0), 'calf_r': (-1.42, 0.0, 0.0),
                     'foot_l': (0.56, 0.0, 0.0), 'foot_r': (0.56, 0.0, 0.0),
                     'spine_02': (0.24, 0.0, 0.0), 'neck_01': (-0.16, 0.0, 0.0),
-                    'upperarm_l': (-0.760, 0.0, -0.50), 'upperarm_r': (-0.760, 0.0, 0.50),
-                    'lowerarm_l': (0.95, 0.0, 0.0), 'lowerarm_r': (0.95, 0.0, 0.0)})
+                    'upperarm_l': (-0.950, 0.0, -0.30), 'upperarm_r': (-0.950, 0.0, 0.30),
+                    'lowerarm_l': (0.55, 0.0, 0.0), 'lowerarm_r': (0.55, 0.0, 0.0)})
     seq('AN_Player_Jump_Land', 22, False, [
         (0.00, merge(airborne, {'foot_l': (0.28, 0.0, 0.0), 'foot_r': (0.28, 0.0, 0.0)})),
         (0.26, impact),

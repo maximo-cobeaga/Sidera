@@ -1,5 +1,17 @@
 # ASTRAEON — Main Character Pipeline
 
+## Estado actualizado 2026-09-10 — locomoción corregida
+
+La escena canónica quedó guardada. El lote pulido de 51 acciones se exportó a
+`exports/AN_Astraeon_Player_All_Polished_20260910.fbx` y se importó en Unreal en la ruta aislada
+`/Game/Astraeon/Characters/Player/Optimized_Polished`; el runtime ya la consume y `/Optimized`
+queda como comparación. Evidencia: `ContentPipeline/reports/polished_character_animation_import.json`.
+
+La captura del propietario mostró una pose base demasiado cerrada. Se fijó una A funcional
+(`upperarm X = -1,08 rad`) en `Idle`, `Walk_*` y `Run_*`; `Walk_F` conserva 37 frames a 30 FPS
+(1,2 s) y cierra en la misma pose. El componente C++ aplica histeresis Idle/Walk/Run y conserva
+la fase normalizada entre ciclos locomotores.
+
 Fecha: 2026-09-08. Estado: **TERMINADO E INTEGRADO — optimizado, horneado, validado en
 Unreal 5.7.4 y conectado a `AstraeonPlayerCharacter`.**
 
@@ -20,6 +32,10 @@ Estado, decisiones y limitaciones al día: [PENDIENTE_PROTAGONISTA.md](../../../
 Fuente Blender: `blender/CHR_Astraeon_Player.blend` (canónico, texturas empaquetadas, 113 MB).
 Los checkpoints `CHK_*.blend` de la sesión se eliminaron tras verificar el resultado y están
 ignorados por git: son copias de recuperación de ~100 MB cada una y `.blend` va a LFS.
+Avance 2026-09-10: pulido de brazos y salto aplicado en la escena canónica abierta por Higgsfield
+Bridge. El archivo canónico quedó guardado, el FBX fue reexportado y la variante Unreal fue
+reimportada; el FBX anterior se conserva como `..._before_arm_pose.fbx`.
+
 Generadores: `Tools/Blender/main_character_{rig,anim,helmet,export}.py`.
 
 ---
@@ -271,8 +287,9 @@ Round-trip real: los FBX se reimportaron en una escena aislada de Blender.
 > que el primer FBX salió con el esqueleto posado (envergadura 1,323 m) y Unreal habría tomado esa
 > pose como reference pose del Skeleton. `main_character_export.reset_pose()` lo previene.
 
-**No se ha ejecutado una importación real en el editor de Unreal** en esta sesión: la validación
-es del FBX, no del asset de UE.
+La importación real en Unreal 5.7.4 quedó verificada en la ruta aislada
+`/Game/Astraeon/Characters/Player/Optimized_Polished`; el reporte y los paquetes guardados son la
+evidencia vigente de este lote.
 
 ---
 
@@ -309,7 +326,7 @@ la fuente de 1.948.729 tris y es una costura de textura de Tripo.
 7. Skinning por distancia: correcto en las pruebas realizadas, pero sin weight painting manual
    en axilas, ingle y hombros.
 8. La costura de textura en la mejilla derecha viene de la generación y no se ha retocado.
-9. **Sin compilación, importación en Unreal, smoke test ni build nuevo** en este lote.
+9. Medición de patinaje de pies contra `CharacterMovement` y prueba humana aún no realizadas.
 10. Créditos Higgsfield: el saldo era 10 (plan free) y la generación consumió 10. Cualquier
     generación adicional requiere recargar.
 
@@ -323,7 +340,6 @@ la fuente de 1.948.729 tris y es una costura de textura de Tripo.
 4. Weight painting manual en hombros, axilas, ingle y muñecas; añadir twist bones.
 5. Shape keys faciales mínimas: blink L/R, mouth open, smile, frown, brows up/down.
 6. Modelar mochila y computadora de muñeca como props sobre `socket_backpack` y `lowerarm_l`.
-7. Ensayo de importación real en Unreal 5.7.4 en destino aislado; medir altura, jerarquía, skin,
-   normales y duraciones antes de conectar el runtime.
+7. Medición cuantitativa de patinaje de pies contra `CharacterMovement` y validación humana.
 8. Root motion: variantes con desplazamiento para los clips de locomoción, usando
    `travel_speed_ms` del contrato como referencia.

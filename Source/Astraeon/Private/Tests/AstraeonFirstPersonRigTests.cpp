@@ -36,6 +36,16 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 
 	USkeletalMesh* Hands = Rig->GetSkeletalMeshAsset();
 	if (!TestNotNull(TEXT("Hands mesh loads from Content"), Hands)) return false;
+	for (const TCHAR* Clip : { TEXT("Idle"), TEXT("Walk"), TEXT("Run"), TEXT("Jump"), TEXT("Land") })
+	{
+		const FString Path = FString::Printf(TEXT("/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_%s"), Clip);
+		UAnimSequence* Sequence = LoadObject<UAnimSequence>(nullptr, *Path);
+		TestNotNull(TEXT("Polished first-person locomotion loads"), Sequence);
+		if (Sequence)
+		{
+			TestTrue(TEXT("Polished first-person locomotion has duration"), Sequence->GetPlayLength() > 0.0f);
+		}
+	}
 	USkeleton* Skeleton = Hands->GetSkeleton();
 	if (!TestNotNull(TEXT("Hands are skinned to a skeleton"), Skeleton)) return false;
 	TestEqual(TEXT("SKEL_Humanoid_A keeps its 57 bones"), Skeleton->GetReferenceSkeleton().GetNum(), 57);
@@ -143,7 +153,7 @@ bool FAstraeonFirstPersonRigTest::RunTest(const FString& Parameters)
 		}
 		for (const TCHAR* Clip : { TEXT("Idle"), TEXT("Walk_F"), TEXT("Run_F"), TEXT("Jump_Loop"), TEXT("Jump_Land") })
 		{
-			const FString Path = FString::Printf(TEXT("/Game/Astraeon/Characters/Player/Optimized/AN_Astraeon_Player_All_Armature_AN_Player_%s"), Clip);
+			const FString Path = FString::Printf(TEXT("/Game/Astraeon/Characters/Player/Optimized_Polished/AN_Astraeon_Player_All_Armature_AN_Player_%s"), Clip);
 			UAnimSequence* Sequence = LoadObject<UAnimSequence>(nullptr, *Path);
 			if (TestNotNull(TEXT("Body locomotion loads"), Sequence)) CheckAnimatedScale(Body, Sequence);
 		}

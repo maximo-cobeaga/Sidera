@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "destination": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP",
+  "kinds": [
+    {
+      "kind": "Idle",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Idle.AN_HandsFP_Polished_Idle",
+      "keys": 91,
+      "duration_s": 3.0
+    },
+    {
+      "kind": "Walk",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Walk.AN_HandsFP_Polished_Walk",
+      "keys": 31,
+      "duration_s": 1.0
+    },
+    {
+      "kind": "Run",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Run.AN_HandsFP_Polished_Run",
+      "keys": 21,
+      "duration_s": 0.6666666865348816
+    },
+    {
+      "kind": "Jump",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Jump.AN_HandsFP_Polished_Jump",
+      "keys": 31,
+      "duration_s": 1.0
+    },
+    {
+      "kind": "Land",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Land.AN_HandsFP_Polished_Land",
+      "keys": 19,
+      "duration_s": 0.6000000238418579
+    }
+  ],
+  "source_assets": [
+    "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Idle.AN_HandsFP_Idle",
+    "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Walk.AN_HandsFP_Walk",
+    "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Run.AN_HandsFP_Run",
+    "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Jump.AN_HandsFP_Jump",
+    "/Game/Astraeon/Art/Blockouts/Human/AN_HandsFP_Land.AN_HandsFP_Land"
+  ]
+}

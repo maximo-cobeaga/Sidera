@@ -1,0 +1,105 @@
+{
+  "passed": true,
+  "clips": [
+    {
+      "kind": "Idle",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Idle.AN_HandsFP_Polished_Idle",
+      "duration_s": 3.0,
+      "sampled_rotation_delta": 0.013954167987318078,
+      "sample": {
+        "first": [
+          3.6384811135919705e-08,
+          6.686313915705227e-11,
+          -0.48824238143604,
+          -0.8727080708745985
+        ],
+        "middle": [
+          -0.0034064887408310337,
+          -0.00608892390109198,
+          0.4882303314343173,
+          0.8726869222738026
+        ]
+      }
+    },
+    {
+      "kind": "Walk",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Walk.AN_HandsFP_Polished_Walk",
+      "duration_s": 1.0,
+      "sampled_rotation_delta": 0.06943072049585497,
+      "sample": {
+        "first": [
+          3.6384811135919705e-08,
+          6.686313915705227e-11,
+          -0.48824238143604,
+          -0.8727080708745985
+        ],
+        "middle": [
+          -0.01694616492177476,
+          -0.030290277515435348,
+          0.48794805248453754,
+          0.8721823345258887
+        ]
+      }
+    },
+    {
+      "kind": "Run",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Run.AN_HandsFP_Polished_Run",
+      "duration_s": 0.6666666865348816,
+      "sampled_rotation_delta": 0.1047199629494378,
+      "sample": {
+        "first": [
+          3.6384811135919705e-08,
+          6.686313915705227e-11,
+          -0.48824238143604,
+          -0.8727080708745985
+        ],
+        "middle": [
+          -0.025552720338854685,
+          -0.045673978859058856,
+          0.48757314767679266,
+          0.871512117989768
+        ]
+      }
+    },
+    {
+      "kind": "Jump",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Jump.AN_HandsFP_Polished_Jump",
+      "duration_s": 1.0,
+      "sampled_rotation_delta": 0.06162235993774117,
+      "sample": {
+        "first": [
+          3.6384811135919705e-08,
+          6.686313915705227e-11,
+          -0.48824238143604,
+          -0.8727080708745985
+        ],
+        "middle": [
+          -0.015040949464599562,
+          -0.026884789002681167,
+          0.4880105066072622,
+          0.8722939432326743
+        ]
+      }
+    },
+    {
+      "kind": "Land",
+      "asset": "/Game/Astraeon/Art/Blockouts/Human/PolishedFP/AN_HandsFP_Polished_Land.AN_HandsFP_Polished_Land",
+      "duration_s": 0.6000000238418579,
+      "sampled_rotation_delta": 0.036883313854811604,
+      "sample": {
+        "first": [
+          3.6384811135919705e-08,
+          6.686313915705227e-11,
+          -0.48824238143604,
+          -0.8727080708745985
+        ],
+        "middle": [
+          0.009003401910386503,
+          0.01609321053335578,
+          0.4881592042889146,
+          0.8725597621921279
+        ]
+      }
+    }
+  ]
+}

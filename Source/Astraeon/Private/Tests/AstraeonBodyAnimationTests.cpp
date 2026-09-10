@@ -7,7 +7,7 @@
 
 namespace AstraeonBodyAnimationTest
 {
-	const TCHAR* PlayerPath = TEXT("/Game/Astraeon/Characters/Player/Optimized/");
+	const TCHAR* PlayerPath = TEXT("/Game/Astraeon/Characters/Player/Optimized_Polished/");
 
 	FAstraeonBodyAnimationState Walking(const FVector2D& Direction, float SpeedCms)
 	{

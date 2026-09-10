@@ -34,7 +34,7 @@ enum class EAstraeonHandGesture : uint8
  *
  * La selección de clip es un pequeño estado en C++ sobre `PlayAnimation`, no un
  * AnimBlueprint: es Q1 y evita depender de un asset de Blueprint que ningún generador
- * reproduce. Sin BlendSpace ni transiciones: los clips cortan.
+ * reproduce. Sin BlendSpace: los cambios locomotores conservan fase y usan histeresis.
  */
 UCLASS(ClassGroup = (Astraeon), meta = (BlueprintSpawnableComponent))
 class ASTRAEON_API UAstraeonFirstPersonRigComponent : public USkeletalMeshComponent

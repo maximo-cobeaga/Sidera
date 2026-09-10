@@ -42,8 +42,8 @@ struct FAstraeonBodyClip
  * clip de caminar de frente, escanear no tenía gesto de cuerpo y el salto era un único
  * bucle sin despegue ni aterrizaje. Esto no añade arte: engancha el que ya estaba.
  *
- * Sin BlendSpace ni transiciones —los clips cortan— porque la reproducción sigue siendo de
- * un solo nodo. Lo que aporta es que el clip que corta sea el correcto.
+ * Sin BlendSpace: la reproducción sigue siendo de un solo nodo, pero el selector aplica
+ * histeresis y el componente conserva la fase normalizada al cambiar entre ciclos.
  */
 class ASTRAEON_API FAstraeonBodyAnimation
 {

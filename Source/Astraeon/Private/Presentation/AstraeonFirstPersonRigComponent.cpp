@@ -15,14 +15,19 @@
 namespace AstraeonFirstPersonRig
 {
 	const TCHAR* HumanPath = TEXT("/Game/Astraeon/Art/Blockouts/Human/");
+	const TCHAR* PolishedHandsPath = TEXT("/Game/Astraeon/Art/Blockouts/Human/PolishedFP/");
 	const TCHAR* ToolsPath = TEXT("/Game/Astraeon/Art/Blockouts/Tools/");
-	const TCHAR* PlayerPath = TEXT("/Game/Astraeon/Characters/Player/Optimized/");
+	// Variante pulida importada desde Blender; /Optimized queda como comparación.
+	const TCHAR* PlayerPath = TEXT("/Game/Astraeon/Characters/Player/Optimized_Polished/");
 
 	// Por debajo de esto el personaje está efectivamente quieto; por encima del umbral de
 	// carrera usa el clip corto. Los dos valores salen de las velocidades reales del
 	// Character (520 cm/s caminando, 900 cm/s corriendo).
 	constexpr float StandingSpeedCms = 10.0f;
+	constexpr float WalkEnterSpeedCms = StandingSpeedCms + 6.0f;
+	constexpr float WalkKeepAliveSpeedCms = 6.0f;
 	constexpr float RunSpeedThresholdCms = 620.0f;
+	constexpr float RunKeepAliveSpeedCms = 560.0f;
 	constexpr float LandingSeconds = 0.6f;
 
 	template <typename AssetType>
@@ -125,11 +130,11 @@ UAstraeonFirstPersonRigComponent::UAstraeonFirstPersonRigComponent()
 		}
 	}
 
-	IdleSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Idle")));
-	WalkSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Walk")));
-	RunSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Run")));
-	JumpSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Jump")));
-	LandSequence = Load<UAnimSequence>(MeshRef(HumanPath, TEXT("AN_HandsFP_Land")));
+	IdleSequence = Load<UAnimSequence>(MeshRef(PolishedHandsPath, TEXT("AN_HandsFP_Polished_Idle")));
+	WalkSequence = Load<UAnimSequence>(MeshRef(PolishedHandsPath, TEXT("AN_HandsFP_Polished_Walk")));
+	RunSequence = Load<UAnimSequence>(MeshRef(PolishedHandsPath, TEXT("AN_HandsFP_Polished_Run")));
+	JumpSequence = Load<UAnimSequence>(MeshRef(PolishedHandsPath, TEXT("AN_HandsFP_Polished_Jump")));
+	LandSequence = Load<UAnimSequence>(MeshRef(PolishedHandsPath, TEXT("AN_HandsFP_Polished_Land")));
 
 	const TPair<EAstraeonHandGesture, const TCHAR*> Gestures[] = {
 		{EAstraeonHandGesture::Scan, TEXT("AN_Human_Scan_Tool_Blockout")},
@@ -281,13 +286,21 @@ UAnimSequence* UAstraeonFirstPersonRigComponent::SelectLocomotionSequence() cons
 	// UpdateBodyAnimation: sobre una esfera, Size2D mezcla vertical con horizontal.
 	const float SpeedCms = FAstraeonPlanetFrame::ProjectToTangent(
 		Movement->Velocity, OwningCharacter->GetActorUpVector()).Size();
+	// Histeresis: la aceleracion del personaje cruza los umbrales varias veces
+	// durante unos frames. Sin esto, Walk/Run/Idle se reinician y se percibe que
+	// el ciclo corta antes de llegar al apoyo siguiente.
+	if (ActiveSequence == RunSequence && SpeedCms >= RunKeepAliveSpeedCms && RunSequence)
+	{
+		return RunSequence;
+	}
 	if (SpeedCms >= RunSpeedThresholdCms && RunSequence)
 	{
 		return RunSequence;
 	}
-	if (SpeedCms >= StandingSpeedCms && WalkSequence)
+	if ((ActiveSequence == WalkSequence && SpeedCms >= WalkKeepAliveSpeedCms) ||
+		SpeedCms >= WalkEnterSpeedCms)
 	{
-		return WalkSequence;
+		return WalkSequence ? WalkSequence : IdleSequence;
 	}
 	return IdleSequence;
 }
@@ -299,8 +312,28 @@ void UAstraeonFirstPersonRigComponent::PlaySequence(UAnimSequence* Sequence, boo
 		return;
 	}
 
+	UAnimSingleNodeInstance* PreviousInstance = GetSingleNodeInstance();
+	const UAnimationAsset* PreviousAsset = PreviousInstance ? PreviousInstance->GetAnimationAsset() : nullptr;
+	const float PreviousLength = PreviousInstance ? PreviousInstance->GetLength() : 0.0f;
+	const float PreviousPhase = PreviousInstance && PreviousLength > KINDA_SMALL_NUMBER
+		? FMath::Frac(PreviousInstance->GetCurrentTime() / PreviousLength)
+		: 0.0f;
+	const bool bPreviousLocomotion = PreviousAsset == IdleSequence || PreviousAsset == WalkSequence || PreviousAsset == RunSequence;
+	const bool bNextLocomotion = Sequence == IdleSequence || Sequence == WalkSequence || Sequence == RunSequence;
+
 	ActiveSequence = Sequence;
 	PlayAnimation(Sequence, bLoop);
+
+	// Mantener la fase sólo entre ciclos locomotores evita que Walk->Run o un
+	// cambio de direccion vuelva siempre al frame 0. Idle conserva su entrada
+	// normal para no arrastrar una pierna levantada al quedar quieto.
+	if (bPreviousLocomotion && bNextLocomotion && Sequence != IdleSequence)
+	{
+		if (UAnimSingleNodeInstance* Instance = GetSingleNodeInstance())
+		{
+			Instance->SetPosition(PreviousPhase * Instance->GetLength(), false);
+		}
+	}
 }
 
 void UAstraeonFirstPersonRigComponent::UpdateBodyLocomotion()
@@ -418,10 +451,22 @@ void UAstraeonFirstPersonRigComponent::PlayBodyClip(const FAstraeonBodyClip& Cli
 	{
 		return;
 	}
-	const UAnimSingleNodeInstance* Instance = ShadowBody->GetSingleNodeInstance();
+	UAnimSingleNodeInstance* Instance = ShadowBody->GetSingleNodeInstance();
 	if (Instance && Instance->GetAnimationAsset() == Sequence)
 	{
 		return;
 	}
+	const float PreviousLength = Instance ? Instance->GetLength() : 0.0f;
+	const float PreviousPhase = Instance && PreviousLength > KINDA_SMALL_NUMBER
+		? FMath::Frac(Instance->GetCurrentTime() / PreviousLength)
+		: 0.0f;
+	const bool bPreviousLoop = Instance && Instance->IsLooping();
 	ShadowBody->PlayAnimation(Sequence, Clip.bLoop);
+	if (bPreviousLoop && Clip.bLoop && Sequence != GetBodyClip(FName(TEXT("Idle"))))
+	{
+		if (UAnimSingleNodeInstance* NewInstance = ShadowBody->GetSingleNodeInstance())
+		{
+			NewInstance->SetPosition(PreviousPhase * NewInstance->GetLength(), false);
+		}
+	}
 }
