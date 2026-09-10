@@ -1,5 +1,18 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — Selección quadtree LOD como contrato puro
+
+La selección LOD se implementa como función de datos sin mundo ni UObjects. Comienza con una
+hoja por cara, subdivide por error geométrico proyectado con predicción de velocidad y aplica
+balanceo hasta que ningún vecino difiera en más de un nivel. Cada selección queda limitada a
+384 hojas y se valida la cobertura completa de cada cara. El runtime de producción todavía no
+la consume: la integración con workers, commit de malla y `TL_12_PatchLOD` permanece pendiente.
+
+El error usado para decidir es una aproximación conservadora (sagita de la celda más un término
+acotado de relieve); no se presenta como certificado geométrico. Los faldones siguen siendo la
+solución inicial para el borde y se recalculan con el tamaño de la celda vecina. Stitching se
+difiere hasta medir grietas visibles.
+
 ## 2026-09-10 — Primer incremento de Fase 2: identidad y generación de patches
 
 La dirección de patch usa `BodyId` del contrato existente, cara, nivel y coordenadas enteras.

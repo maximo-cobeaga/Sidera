@@ -9,7 +9,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
       Integrado como constructor del patch raíz en `TL_11`; cinco pruebas de contrato nuevas.
 - [x] P2.2 — Servicio de workers acotados, cancelación y rechazo de resultados obsoletos por revisión.
       Dos pruebas nuevas con tareas reales; conexión al runtime mediante el selector en P2.3.
-- [ ] P2.3 — Quadtree/LOD balanceado, backend de malla e integración de streaming en `TL_12`.
+- [~] P2.3 — Selector quadtree/LOD balanceado implementado y probado (tres tests); pendiente
+      integración del backend/workers y mapa `TL_12`.
 - [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
 - [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
 - [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.

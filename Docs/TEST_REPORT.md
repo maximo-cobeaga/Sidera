@@ -1,7 +1,8 @@
-## 2026-09-10 — Fase 2, P2.1/P2.2: patches independientes y workers
+## 2026-09-10 — Fase 2, P2.1/P2.2/P2.3 parcial: patches, workers y LOD
 
-Implementación identificable en `Planet/Patches/`, `Planet/Streaming/` y
-`Tests/AstraeonPlanetPatchTests.cpp`; integración del constructor mediante `BuildFace`.
+Implementación identificable en `Planet/Patches/`, `Planet/Streaming/`, `Planet/LOD/` y
+`Tests/AstraeonPlanetPatchTests.cpp`/`AstraeonPlanetLODTests.cpp`; integración del constructor
+mediante `BuildFace`.
 
 ```powershell
 & 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
@@ -12,13 +13,13 @@ Implementación identificable en `Planet/Patches/`, `Planet/Streaming/` y
 ```
 
 Resultados: editor y target de juego Development **`Succeeded`**, sin warnings de compilación;
-**82/82 Automation**, cero fallos; caminata de 250 s `RESULTADO=OK`; **Cardinals PASS en las
+**85/85 Automation**, cero fallos; caminata de 250 s `RESULTADO=OK`; **Cardinals PASS en las
 26 direcciones**, salto y aterrizaje comprobados. Se repitió Automation para verificar el
-guardián actualizado: ahora exige todas las pruebas descubiertas y las siete nuevas por nombre.
+guardián actualizado: ahora exige todas las pruebas descubiertas y las diez nuevas por nombre.
 No aparecieron warnings nuevos de proyecto. Persisten los dos avisos del motor sobre iconos
 VisionOS en los smokes y `EditorPerf`/sección `Compile` en Automation, presentes en el baseline.
 
-Las siete pruebas nuevas cubren jerarquía y bordes de dirección, vector fijo de hash,
+Las diez pruebas nuevas cubren jerarquía y bordes de dirección, vector fijo de hash,
 separación de canales/versiones/seed, presupuesto de malla, faldones radiales separados de
 colisión, precisión de conversión local float a los tres tiers, coincidencia de normales y
 posiciones entre caras y muestras de LOD consecutivo, entradas inválidas, cancelación,
@@ -45,7 +46,8 @@ array al construir faldones. Se resolvieron con propietario no copiable y copias
 respectivamente, manteniendo todas las pruebas. Un intento de build Game fue bloqueado al
 rotar el log de UBT en AppData; se reejecutó con la autorización de sandbox requerida.
 
-La Fase 2 **no cierra**: faltan quadtree/LOD y backend, integración de workers, anillo de
+El selector quadtree/LOD ya está probado, pero la Fase 2 **no cierra**: faltan su integración
+con el runtime y backend en `TL_12`, anillo de
 colisión, marcos locales en vivo, deltas y save v3, recuperación de dos pruebas, Insights y
 build empaquetada. Estado detallado en `PHASE_STATUS.md` y `BACKLOG.md` P2.3–P2.8.
 

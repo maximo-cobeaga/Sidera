@@ -47,17 +47,20 @@ Bloque B de `ESTADO_Y_RUTA_MAPA.md`.
 - [ ] **Una criatura abatida sigue abatida** tras descargar y recargar su patch (`BACKLOG` MV4).
 - [ ] `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` salen de cuarentena.
 
-### Avance técnico 2026-09-10 — P2.1/P2.2
+### Avance técnico 2026-09-10 — P2.1/P2.2 y selección LOD
 
 Direcciones jerárquicas, hash estable con vector fijo, constructor independiente 33×33 con
 faldones radiales e índices separados de colisión. La construcción de caras de `TL_11` usa
 ahora el patch raíz sin cambiar su relieve. Servicio de workers acotado, cancelación y
-revisiones que sobreviven al ciclo descargar/solicitar; **82/82 Automation**, siete nuevas.
+revisiones que sobreviven al ciclo descargar/solicitar. El selector quadtree puro ya mantiene
+la cobertura completa de las seis caras, delta de LOD ≤ 1, presupuesto máximo de 384 hojas y
+selección determinista con predicción de velocidad; **85/85 Automation**, diez nuevas.
 Editor y juego Development compilados; cardinales 26/26 y caminata de 250 s en verde,
 sin cortes de locomoción. Perfil y revisión de captura registrados en `TEST_REPORT.md`.
 
-Esto verifica contratos de datos y generación. El runtime aún usa seis caras de resolución
-fija: conectar el servicio al selector LOD y al backend es P2.3. No acredita todavía streaming
+Esto verifica contratos de datos, generación y selección LOD. El runtime aún usa seis caras de
+resolución fija: conectar el servicio al selector LOD y al backend es la parte de integración de
+P2.3. No acredita todavía streaming
 visible en Target, colisión por anillos, transición de frame ni persistencia de criaturas.
 La cuarentena y los ocho criterios de salida permanecen abiertos.
 

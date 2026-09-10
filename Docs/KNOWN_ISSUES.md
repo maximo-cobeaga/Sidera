@@ -11,7 +11,7 @@
 - **Resueltos durante desarrollo:** exportar una clase propietaria de `TFuture` instanciaba
   copia implícita incompatible; se prohíbe copiar el manager. El primer test de skirts detectó
   un assert de `TArray::Add` al copiar desde el mismo array; se toman copias locales antes de
-  añadir. Build posterior y las 82 pruebas pasan, sin desactivar aserciones.
+  añadir. Build posterior y las 85 pruebas pasan, sin desactivar aserciones.
 
 ## 2026-09-10 — Resuelto: la locomoción se cortaba 1,3 veces por segundo, y no era animación
 

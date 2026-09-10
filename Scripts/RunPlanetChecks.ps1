@@ -43,6 +43,9 @@ if ($Check -eq 'Automation') {
     foreach ($required in @(
         'Astraeon.Planet.Patches.AddressHierarchy',
         'Astraeon.Planet.Patches.StableHashGoldenVectors',
+        'Astraeon.Planet.LOD.NeighborsAcrossAllFaces',
+        'Astraeon.Planet.LOD.BalancedDeterministicEngineeringTiers',
+        'Astraeon.Planet.LOD.RejectsHolesOverlapsAndUnbalancedTrees',
         'Astraeon.Planet.Patches.MeshBudgetAndPrecision',
         'Astraeon.Planet.Patches.SharedEdgesAndLodSamples',
         'Astraeon.Planet.Patches.InvalidAndCancelledBuilds',
