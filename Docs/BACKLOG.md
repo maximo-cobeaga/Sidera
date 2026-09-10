@@ -9,20 +9,32 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
       Integrado como constructor del patch raíz en `TL_11`; cinco pruebas de contrato nuevas.
 - [x] P2.2 — Servicio de workers acotados, cancelación y rechazo de resultados obsoletos por revisión.
       Dos pruebas nuevas con tareas reales; conexión al runtime mediante el selector en P2.3.
-- [~] P2.3 — Selector quadtree/LOD balanceado implementado y probado (tres tests); pendiente
-      integración del backend/workers y mapa `TL_12`. Plan en cuatro incrementos (`DECISIONS`):
+- [x] P2.3 — Selector quadtree/LOD, workers y backend integrados en `TL_11` y `TL_12`. Cerrado el
+      2026-09-10 con la confirmación humana de los dos mapas. Plan en cuatro incrementos (`DECISIONS`):
   - [x] A — Gestor de patches con relevo sin agujeros, interfaces de cola y backend; tres tests.
   - [x] B — Backend ProceduralMesh y runtime de `TL_11` con puente de colisión exacto.
         Cardinales 26/26, caminata de 250 s con 0 cortes y 0 frames de suelo desalineado.
   - [x] C — `TL_12_PatchLOD` a 50 km, smoke `-AstraeonSmokePatchLOD`, faldón medido, Insights.
         El perfil encontró el selector cuadrático (19 ms); corregido a 1,1 ms, resultado idéntico.
-  - [~] D — Documentación y prueba humana. `TL_11` confirmada. `TL_12` devolvió un defecto
-        (caía con Play); corregido con modo observador y smoke `Observer`. Falta re-mirarla.
+  - [x] D — Documentación y prueba humana. `TL_11` confirmada. `TL_12` devolvió un defecto
+        (caía con Play); corregido con modo observador y smoke `Observer`, y re-confirmada.
 - [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
 - [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
 - [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.
 - [ ] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
 - [ ] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.
+
+**Pedido del propietario, no bloqueante (2026-09-10, al mirar `TL_12`):** las montañas se leen
+como lomas. Quiere algunas **más imponentes y de formas y tamaños distintos**; el boceto actual
+le parece suficiente por ahora. Encaja con el entregable de arte de la Fase 2 en
+`ASTRAEON_TRANSICION_AL_JUEGO_OBJETIVO.md` —siluetas de montaña convertidas en *stamps*
+matemáticos y tres landmarks para lectura a distancia—, no con P2.4–P2.7. Al retomarlo:
+
+- Hoy la capa de montañas topa en `MountainMaxHeightCm` = 52 m. En 50 km de radio eso es una loma.
+- Subir la altura cambia `MaxReliefCm`, que dimensiona faldones y el error del selector LOD:
+  repetir `LOD.SkirtsCoverCoarseNeighbourSeams` y el perfil de `TL_12`, no suponer.
+- Cambiar el relieve exige subir `GeneratorVersion` (3 → 4); partidas y seeds lo registran.
+- El suelo sigue con su límite de escalón (`Terrain.Relief`); las montañas quedan exentas.
 
 ## Histórico 2026-09-10 — Trabajo de Fase 1 y pulido pendiente
 

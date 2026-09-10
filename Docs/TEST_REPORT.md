@@ -15,7 +15,11 @@ y verificado:
 Resultados: editor y juego Development **`Succeeded`**, sin warnings; **Observer
 `RESULTADO=OK`** (97 m de avance, 49 m de subida, altura mínima 200 cm); vuelo de `TL_12` OK con
 las mismas cifras que en C; cardinales 26/26; caminata de 250 s OK (141.216 cm, 62 saltos, 0
-frames en Idle); **91/91 Automation**. Queda pendiente la segunda mirada humana de `TL_12`.
+frames en Idle); **91/91 Automation**.
+
+**Re-mirada humana de `TL_12`: confirmada por el propietario** ("anduvo correctamente"), con el
+vuelo de observador. Única observación, estética y no bloqueante: las montañas se leen como
+lomas. Queda en `BACKLOG`. **P2.3 cerrado.**
 
 ## 2026-09-10 — Fase 2, P2.3-C: `TL_12_PatchLOD`, faldón medido y selector lineal
 

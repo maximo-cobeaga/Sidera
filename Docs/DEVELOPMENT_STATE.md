@@ -33,9 +33,10 @@ suficiente también para delta 2. Insights mostró un selector cuadrático de 19
 ahora es 1,1 ms con resultado idéntico y el p99 del vuelo pasó de 33,6 a 5,2 ms. El observador
 del LOD es la cámara. **91/91 Automation.**
 
-**P2.3-D en curso.** `TL_11` confirmada a mano. `TL_12` caía con Play porque no tiene colisión;
-ahora el personaje vuela como observador en planetas sin colisión cercana, con guardián
-`-Check Observer`. Siguiente paso: re-mirada humana de `TL_12` y cierre de P2.3.
+**P2.3 cerrado.** `TL_11` y `TL_12` confirmados a mano. `TL_12` caía con Play porque no tiene
+colisión; ahora el personaje vuela como observador en planetas sin colisión cercana, con
+guardián `-Check Observer`. Siguiente paso: **P2.4**, anillo de colisión cercano que reemplaza
+el puente de P2.3, paga la reconstrucción excesiva heredada y abre `TL_13_CollisionRing`.
 
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 

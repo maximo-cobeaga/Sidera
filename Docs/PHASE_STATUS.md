@@ -69,7 +69,8 @@ La cuarentena y los ocho criterios de salida permanecen abiertos.
 `TL_11` renderiza por patches con workers, y la colisión coincide triángulo por triángulo con lo
 visible. `TL_12_PatchLOD` (50 km) vuela 185 s y hace 918 relevos sin un agujero; el faldón está
 medido y cubre delta 1 y 2. Insights encontró un selector cuadrático y se corrigió: p99 del vuelo
-de 33,6 a 5,2 ms. **91/91 Automation.** Falta la prueba humana (P2.3-D). Esto aporta evidencia a
+de 33,6 a 5,2 ms. **91/91 Automation.** Prueba humana de los dos mapas confirmada (P2.3-D);
+**P2.3 cerrado**, sigue P2.4. Esto aporta evidencia a
 "sin grietas en la ruta de prueba" y a "sin hitches recurrentes", pero **ninguna casilla de la
 puerta se marca todavía**: la puerta pide Target a 500 km, colisión por anillos y estado mutable.
 
