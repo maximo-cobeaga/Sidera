@@ -1,11 +1,69 @@
 # Estado de fases — ASTRAEON
 
-## Actualización 2026-09-10 — Fase 1: la puerta está cumplida, falta declararla
+## Actualización 2026-09-10 — **Fase 1 CERRADA**. Fase activa: **Fase 2 — Patches, LOD y precisión**
 
-Todos los criterios de la puerta de la Fase 1 tienen evidencia, y la lista de cierre de
-`AGENTS.md` §15.1 está completa. **Falta una sola formalidad, y es una decisión del propietario**:
-aceptar por escrito que `Planet.Gravity.CardinalPoints` no existe con ese nombre y que lo cubre el
-smoke cardinal de 26 direcciones. Es desvío de nomenclatura, no hueco de cobertura.
+La puerta de la Fase 1 pasó entera, con los cinco criterios confirmados a mano por el propietario
+y la lista de cierre de `AGENTS.md` §15.1 completa.
+
+> **Desvío de nomenclatura aceptado por el propietario el 2026-09-10.**
+> `PLAN_TRANSICION_EJECUCION.md` §4 pedía un test de Automation llamado
+> `Astraeon.Planet.Gravity.CardinalPoints`. No existe con ese nombre: lo que hay es el smoke
+> `-AstraeonSmokePlanetCardinals` (`RunPlanetChecks.ps1 -Check Cardinals`), que recorre las **26
+> direcciones** —6 centros de cara, 12 aristas y 8 esquinas— sobre un mundo y un personaje vivos.
+> Es cobertura equivalente o mayor; lo que no da es el nombre. Se acepta el smoke como evidencia
+> del criterio y **no se registra el test faltante como deuda**, porque no la hay: un test de
+> Automation no puede levantar el mundo que ese criterio necesita.
+
+---
+
+## Fase activa: **2 — Patches, LOD, precisión y estado mutable**
+
+Abierta el 2026-09-10. Entregables y puerta en `PLAN_TRANSICION_EJECUCION.md` §4. Absorbe el
+Bloque B de `ESTADO_Y_RUTA_MAPA.md`.
+
+### Qué está permitido hacer hoy
+
+- `FAstraeonPlanetPatchAddress` y `StableHash64` con canal de generación y versión.
+- `PlanetPatchManager`, `PlanetLODManager`, `PlanetStreamingManager`.
+- `IPlanetPatchMeshBackend` envolviendo el constructor de malla. La decisión de producción se
+  registra por ADR **después de medir**, no antes.
+- Generación en workers, commit en game thread, cancelación y `BuildRevision`.
+- Skirts. Delta de LOD ≤ 1 entre vecinos. Stitching sólo si se mide que hace falta.
+- Colisión activa sólo en el anillo cercano.
+- `LocalReferenceFrameManager` y transición entre marcos.
+- `UAstraeonRuntimeStateManager`: deltas persistentes indexados por dirección planetaria.
+- Save v2 → v3. La maquinaria de migración ya existe de v1→v2.
+- `TL_12_PatchLOD`, `TL_13_CollisionRing`, `TL_14_FrameTransition`. Perfil en Unreal Insights.
+
+### Puerta de salida
+
+- [ ] El tier Target de 500 km funciona sin que los patches de alta resolución crezcan
+      linealmente con el radio.
+- [ ] El stress test no produce jitter cerca del jugador.
+- [ ] Sin grietas en la ruta de prueba.
+- [ ] La colisión no desaparece bajo el jugador.
+- [ ] Ida y vuelta regenera el mismo patch.
+- [ ] Sin hitches recurrentes sobre presupuesto.
+- [ ] **Una criatura abatida sigue abatida** tras descargar y recargar su patch (`BACKLOG` MV4).
+- [ ] `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` salen de cuarentena.
+
+### Deuda que esta fase hereda y debe pagar
+
+El parche de colisión abarca ~37 m pero se rehace cada 3,1 m: doce veces más seguido de lo que su
+tamaño exige, recorriendo las 6.144 celdas de las seis caras y recociendo cada vez. El doble búfer
+quitó el corte visible, no el desperdicio. Es de esta fase, que es la dueña del anillo de colisión.
+
+### Fuera de alcance en esta fase
+
+Biomas plurales, océano y atmósfera definitivos, nave pilotable, sistema estelar, ecología,
+civilizaciones y ciudades. El contenido de región es de la Fase 3.
+
+---
+
+## Histórico: **1 — Núcleo planetario** — puerta PASADA
+
+Cerrada el 2026-09-10. Los cinco criterios confirmados a mano por el propietario sobre
+`TL_11_CubeSphereClosed`.
 
 ### Criterios de la puerta
 
@@ -42,7 +100,7 @@ smoke cardinal de 26 direcciones. Es desvío de nomenclatura, no hueco de cobert
 
 ### Próximo paso
 
-Fase 2 — patches, LOD, precisión y estado mutable persistente.
+Fase 2 — patches, LOD, precisión y estado mutable persistente. Abierta arriba.
 
 ## Histórico: 2026-09-10 — Fase 1: núcleo técnico verificado, puerta aún abierta
 
@@ -180,8 +238,8 @@ Ninguna empieza antes de que pase la puerta de la anterior.
 | Fase | Nombre | Puerta principal | Estado |
 |---:|---|---|---|
 | 0 | Transición controlada | ADR y documentos sincronizados; spike de gravedad radial en pie | **PASADA** |
-| 1 | Núcleo planetario | Gravedad y cámara estables sobre una esfera cerrada | **en curso; puerta pendiente** |
-| 2 | Patches, LOD y precisión | Streaming sin grietas ni hitches; estado mutable persistente | pendiente |
+| 1 | Núcleo planetario | Gravedad y cámara estables sobre una esfera cerrada | **PASADA** |
+| 2 | Patches, LOD y precisión | Streaming sin grietas ni hitches; estado mutable persistente | **en curso** |
 | 3 | La primera señal esférica | Vertical slice completo; **cuarentena vacía** | pendiente |
 | 4 | Planeta visual y biomas | Seis biomas y rendimiento aprobado | pendiente |
 | 5 | Protagonista, Ítaca y vuelo | Ida y vuelta sin carga perceptible | pendiente |

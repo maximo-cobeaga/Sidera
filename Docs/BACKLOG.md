@@ -113,7 +113,8 @@ arriba y marcaba como abierto trabajo ya entregado. Un agente que la leyera cree
 - [x] Tiers Lab / Target / Stress, cubiertos por `Planet.Topology.MeshAtEngineeringTiers`. El radio
       es un dato (`RadiusCm`), no un `Scale`.
 - [x] Pruebas `Planet.Topology.FaceEdgesMatch` y `Planet.Height.Determinism`.
-- [~] `Planet.Gravity.CardinalPoints` **no existe con ese nombre**. Lo que la fase pedía lo cubre
+- [x] `Planet.Gravity.CardinalPoints` **no existe con ese nombre**, y el propietario aceptó el
+      desvío por escrito el 2026-09-10 (`PHASE_STATUS`). Lo que la fase pedía lo cubre
       el smoke `-AstraeonSmokePlanetCardinals` (`RunPlanetChecks.ps1 -Check Cardinals`), que
       recorre las 26 direcciones: 6 centros de cara, 12 aristas y 8 esquinas. Es un desvío de
       nomenclatura, no un hueco de cobertura, y hay que aceptarlo por escrito al cerrar la fase o
