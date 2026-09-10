@@ -1,5 +1,21 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P2.5: marco local por cambio de origen del mundo
+
+`UAstraeonLocalFrameSubsystem` pide un nuevo origen de mundo cuando la cámara se aleja más de
+5 km del actual; el motor lo aplica al principio del siguiente tick. Todo lo que guarda una
+posición absoluta la desplaza en `ApplyWorldOffset` (centro del planeta en la gravedad, suelo
+seguro y previsualización del personaje) o se guarda relativo al planeta (smokes).
+
+Chaos no desplaza su escena de forma nativa en UE 5.7: el motor teletransporta cada cuerpo. En un
+planeta son el anillo de colisión y algunos personajes; medido sin efecto en locomoción.
+
+La medición A/B mostró que LWC ya da precisión suficiente a 2.500 km: con y sin marco local no
+hay jitter. Se mantiene activo igual, porque acota las coordenadas absolutas cerca del jugador
+para cualquier sistema que siga en float (audio, partículas, navegación) y no cuesta nada medible.
+Se registra así, sin atribuirle una mejora que no se midió. `-AstraeonNoFrameShift` existe sólo
+para repetir esa comparación.
+
 ## 2026-09-10 — P2.4: colisión por anillo de patches
 
 El propietario autorizó cerrar la Fase 2 sin más pruebas humanas; la evidencia es automática y

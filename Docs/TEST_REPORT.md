@@ -1,3 +1,58 @@
+## 2026-09-10 — Fase 2, P2.5: marco local y `TL_14_FrameTransition`
+
+Implementación en `Planet/Coordinates/AstraeonLocalFrameSubsystem.*`, con `ApplyWorldOffset` en la
+gravedad, el personaje y los smokes. `TL_14` es el tier Target (500 km) generado por
+`CreatePlanetLabMap.py`; el Stress (2.500 km) es el mismo mapa con `-RadiusCm 250000000`. La
+caminata suma una fase quieta (`-AstraeonWalkStillSeconds`) y dos medidas de jitter de la cámara,
+relativas al planeta: el error contra la predicción de movimiento uniforme con los tiempos
+reales de cada frame, y la deriva estando quieto.
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check LabMap -Map TL_14_FrameTransition
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Map TL_14_FrameTransition -Profile -Extra '-AstraeonWalkStillSeconds=5'
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Map TL_14_FrameTransition -RadiusCm 250000000 -Extra '-AstraeonWalkStillSeconds=5','-AstraeonFrameShiftCm=20000'
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals -Map TL_14_FrameTransition -RadiusCm 250000000
+# A/B, 60 s sin saltos, con -Extra '-AstraeonNoFrameShift' o '-AstraeonFrameShiftCm=20000'
+```
+
+Caminatas completas de 250 s con saltos, fase quieta de 5 s:
+
+| | `TL_11` 200 m | `TL_13` 50 km | `TL_14` Target 500 km | `TL_14` Stress 2.500 km |
+|---|---|---|---|---|
+| Recorrido / saltos / Idle | 141.216 / 62 / 0 | 141.171 / 62 / 0 | 141.183 / 62 / 0 | 141.365 / 62 / 0 |
+| Frames sin colisión | 0 | 0 | 0 | 0 |
+| Cambios de marco (umbral) | 0 (5 km) | 1 (5 km) | 1 (5 km) | **8 (200 m)** |
+| Cámara quieta: deriva / paso | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| Error de trayectoria p99 / máx. | 1,37 / 3,2 cm | 1,43 / 4,4 cm | 1,23 / 3,7 cm | 1,36 / 4,0 cm |
+| Patches visibles al nivel más fino | — | — | **48** (nivel 13) | **48** (nivel 15) |
+
+Cardinales 26/26 a 2.500 km: cada sitio queda a miles de kilómetros del anterior y fuerza un
+cambio de marco; 100 patches de colisión, 0 frames sin suelo.
+
+**A/B del marco local**, 60 s sin saltos:
+
+| | Con cambios | Sin cambios |
+|---|---|---|
+| 500 km: error p99 / quieto | 1,15 cm / 0 | 1,43 cm / 0 |
+| 2.500 km: error p50 / p99 / máx. / quieto | 0,40 / 1,66 / 4,5 cm / 0 | 0,29 / 1,20 / 3,5 cm / 0 |
+
+**No hay jitter medible ni a 2.500 km, con o sin marco local.** Las coordenadas dobles de UE5
+(LWC) ya cubren la precisión de física y cámara a esa escala. El marco local tampoco introduce
+discontinuidad: el peor error nunca cae junto a un cambio. Se mantiene activo con umbral de 5 km
+como acotación de las coordenadas absolutas cerca del jugador (`DECISIONS`), no porque haya
+mejorado estas cifras.
+
+Perfil Target: [perf_baseline_20260910_162338.json](evidencia/perf_baseline_20260910_162338.json),
+197,9 FPS medios, p99 5,81 ms; el único hitch es la captura de pantalla.
+
+Fallo de medición encontrado y corregido: la primera medida de jitter daba 218 cm siempre a los
+30,4 s. Era la captura de pantalla: ese frame dura ~400 ms y el movimiento se limita a un paso
+máximo. Se corrigió la medida (tiempos reales de frame y enfriamiento tras un frame irregular);
+los hitches ya los mide el perfil.
+
+Regresión: `TL_11`, `TL_13`, `TL_12` (vuelo orbital, con cambios de marco) y `Observer` en
+verde; **92/92 Automation**; editor y juego Development sin warnings.
+
 ## 2026-09-10 — Fase 2, P2.4: anillo de colisión y `TL_13_CollisionRing`
 
 Implementación en `Planet/Collision/AstraeonPlanetCollisionRing.*` y `AstraeonPlanetRuntime.*`;

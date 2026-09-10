@@ -65,10 +65,10 @@ void AAstraeonPlanetCardinalSmoke::Tick(float DeltaSeconds)
 				Site,Planet->GetCollisionPatchCount(),Planet->GetCollisionTriangleCount()));
 			return;
 		}
-		Ground=Hit.ImpactPoint;
+		Ground=Hit.ImpactPoint-Center; // Relative to the planet: a local frame shift moves both.
 		Character->StopJumping(); Move->StopMovementImmediately();
 		Gravity->ClearPlanetBody();
-		Character->SetActorLocation(Ground+Up*(Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+3.0),false,nullptr,ETeleportType::TeleportPhysics);
+		Character->SetActorLocation(Center+Ground+Up*(Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()+3.0),false,nullptr,ETeleportType::TeleportPhysics);
 		Character->SetActorRotation(FAstraeonPlanetFrame::AlignToUp(FQuat::Identity,Up),ETeleportType::TeleportPhysics);
 		Gravity->SetPlanetBody(Center,Planet->RadiusCm,float(Planet->GravityMS2));
 		Move->SetMovementMode(MOVE_Falling);
@@ -82,7 +82,7 @@ void AAstraeonPlanetCardinalSmoke::Tick(float DeltaSeconds)
 	if (Elapsed>1.0)
 	{
 		bSawFlight |= Move->IsFalling();
-		MaxLiftCm=FMath::Max(MaxLiftCm,FVector::DotProduct(Character->GetActorLocation()-Ground,Directions[Site])-Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		MaxLiftCm=FMath::Max(MaxLiftCm,FVector::DotProduct(Character->GetActorLocation()-Planet->GetActorLocation()-Ground,Directions[Site])-Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
 	}
 	if (Elapsed>0.5)
 	{

@@ -826,6 +826,13 @@ void AAstraeonPlayerCharacter::MoveForward(float Value)
 	}
 }
 
+void AAstraeonPlayerCharacter::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
+{
+	Super::ApplyWorldOffset(InOffset, bWorldShift);
+	LastSafeGroundLocationCm += InOffset;
+	PreviewLocationCm += InOffset;
+}
+
 void AAstraeonPlayerCharacter::FlyLift(float Value)
 {
 	if (bObserverFlight && !FMath::IsNearlyZero(Value) && Controller)

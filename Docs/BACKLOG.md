@@ -20,7 +20,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
         (caía con Play); corregido con modo observador y smoke `Observer`, y re-confirmada.
 - [x] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
       20 patches de colisión donde había 434 reconstrucciones; `TL_13` se camina a 50 km.
-- [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
+- [x] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress. Sin jitter medible a
+      500 ni a 2.500 km; 48 patches finos visibles en los dos radios.
 - [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.
 - [ ] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
 - [ ] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.

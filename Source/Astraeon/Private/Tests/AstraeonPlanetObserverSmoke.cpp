@@ -49,12 +49,13 @@ void AAstraeonPlanetObserverSmoke::Tick(float DeltaSeconds)
 		}
 	}
 	if (Elapsed < MenuSeconds) return; // The menu phase is exactly what failed for the owner.
-	if (!bStarted) { PC->StartSelectedNewGame(); bStarted = true; ForwardStart = Character->GetActorLocation(); return; }
+	// Planet-relative: a local frame shift moves the whole world, planet included.
+	if (!bStarted) { PC->StartSelectedNewGame(); bStarted = true; ForwardStart = Character->GetActorLocation() - Center; return; }
 
 	if (Elapsed < ForwardEnd)
 	{
 		Character->AddMovementInput(Gravity->GetViewDirection(), 1.f);
-		ForwardDistanceCm = FVector::Dist(Character->GetActorLocation(), ForwardStart);
+		ForwardDistanceCm = FVector::Dist(Character->GetActorLocation() - Center, ForwardStart);
 		ClimbStartCm = AboveGround;
 	}
 	else if (Elapsed < ClimbEnd)

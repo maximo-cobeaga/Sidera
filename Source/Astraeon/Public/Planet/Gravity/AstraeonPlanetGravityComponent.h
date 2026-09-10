@@ -31,6 +31,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaSeconds, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// The planet centre is an absolute world position: a local frame shift moves it too.
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
 
 	// Grados por segundo a los que la cápsula persigue el arriba local. Un valor alto orienta al
 	// instante y da tirones al cruzar terreno; uno bajo deja al personaje inclinado en pendientes

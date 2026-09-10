@@ -55,6 +55,9 @@ public:
 	// observer instead of falling through the surface.
 	bool IsObserverFlight() const { return bObserverFlight; }
 
+	// Cached absolute positions move with a local frame shift.
+	virtual void ApplyWorldOffset(const FVector& InOffset, bool bWorldShift) override;
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;

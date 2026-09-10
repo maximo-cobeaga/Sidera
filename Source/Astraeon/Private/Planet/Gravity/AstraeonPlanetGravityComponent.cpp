@@ -133,6 +133,12 @@ void UAstraeonPlanetGravityComponent::TickComponent(float DeltaSeconds, ELevelTi
 	GroundIfRestingOnSurface();
 }
 
+void UAstraeonPlanetGravityComponent::ApplyWorldOffset(const FVector& InOffset, bool bWorldShift)
+{
+	Super::ApplyWorldOffset(InOffset, bWorldShift);
+	PlanetCenterCm += InOffset;
+}
+
 void UAstraeonPlanetGravityComponent::GroundIfRestingOnSurface()
 {
 	ACharacter* Character = GetOwnerCharacter();

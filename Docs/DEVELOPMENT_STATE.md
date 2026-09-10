@@ -33,6 +33,10 @@ suficiente también para delta 2. Insights mostró un selector cuadrático de 19
 ahora es 1,1 ms con resultado idéntico y el p99 del vuelo pasó de 33,6 a 5,2 ms. El observador
 del LOD es la cámara. **91/91 Automation.**
 
+**P2.5 cerrado.** Marco local por cambio de origen del mundo; `TL_14` se camina a 500 km (Target)
+y a 2.500 km (Stress) sin jitter, sin frames sin suelo y con 48 patches al nivel más fino en los
+dos. Sigue P2.6: estado mutable, criatura abatida persistente y save v3.
+
 **P2.4 cerrado.** Colisión por anillo de patches finos construidos en workers; `TL_13` (50 km)
 se camina 250 s sin un frame sin suelo, con 45 patches de colisión donde la Fase 1 hacía 434
 reconstrucciones. 92/92 Automation. Sigue P2.5: marcos locales y `TL_14` a 500 y 2.500 km.

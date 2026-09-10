@@ -125,15 +125,17 @@ void AAstraeonPlanetPatchLODSmoke::Place(float Seconds, float DeltaSeconds)
 	// Geometric altitude: 20 m to 300 km spends time at every order of magnitude.
 	const double AboveGround = FMath::Exp(FMath::Lerp(FMath::Loge(A.AboveGroundCm), FMath::Loge(B.AboveGroundCm), Alpha));
 	const FVector Position = Planet->GetSurfacePointCm(Up, AboveGround);
+	// Motion relative to the planet: local frame shifts move the world under the camera.
+	const FVector BodyPosition = Position - Planet->GetActorLocation();
 
-	FVector Motion = Position - LastPosition;
+	FVector Motion = BodyPosition - LastPosition;
 	if (DeltaSeconds > 0.f && !LastPosition.IsZero()) MaxSpeedCmS = FMath::Max(MaxSpeedCmS, Motion.Size() / DeltaSeconds);
 	Motion -= (Motion | Up) * Up;
 	if (Motion.SizeSquared() > 1.0) LastForward = Motion.GetSafeNormal();
 	else if (LastForward.IsZero()) LastForward = (To - (To | Up) * Up).GetSafeNormal();
 	if (LastForward.IsNearlyZero()) LastForward = FVector::CrossProduct(Up, FVector::UpVector).GetSafeNormal();
 	LastForward = (LastForward - (LastForward | Up) * Up).GetSafeNormal();
-	LastPosition = Position;
+	LastPosition = BodyPosition;
 	// Near the ground look ahead at the horizon; from orbit look down at the planet.
 	const double Height = FMath::Clamp(FMath::Loge(AboveGround / 2000.0) / FMath::Loge(30000000.0 / 2000.0), 0.0, 1.0);
 	const double Pitch = FMath::DegreesToRadians(FMath::Lerp(12.0, 85.0, Height));

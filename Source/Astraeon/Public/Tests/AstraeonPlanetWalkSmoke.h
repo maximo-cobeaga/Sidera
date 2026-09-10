@@ -90,5 +90,26 @@ private:
 	double WorstAlignment = 1.0;
 	double WorstAltitudeCm = 0.0;
 	double DistanceTravelledCm = 0.0;
+	// Relative to the planet centre, never absolute: a local frame shift moves the whole world
+	// and an absolute position would read it as an impossible jump.
 	FVector LastLocationCm = FVector::ZeroVector;
+
+	// Jitter (P2.5). `-AstraeonWalkStillSeconds=N` adds N seconds standing after the walk: a
+	// still player must not move. While walking, the second difference of the camera path
+	// separates a smooth walk from positional noise; it is clean with `-AstraeonNoJump`.
+	float StillSeconds = 0.0f;
+	FVector StillAnchorCm = FVector::ZeroVector;
+	bool bStillAnchored = false;
+	double StillMaxDriftCm = 0.0;
+	double StillMaxStepCm = 0.0;
+	FVector EyeHistory[2] = {FVector::ZeroVector, FVector::ZeroVector};
+	float EyeDeltaSeconds = 0.0f; // Duration of the previous frame: frames are not equal in length.
+	int32 EyeCooldownFrames = 0;
+	int32 EyeSamples = 0;
+	TArray<double> EyeSecondDifferencesCm;
+	double EyeWorstCm = 0.0;
+	float EyeWorstSeconds = 0.0f;
+	int32 EyeWorstShiftDelta = 0; // Frame shifts between the three samples of the worst frame.
+	int32 ShiftsAtSample[3] = {0, 0, 0};
+	int32 EyeSamplesNearShift = 0;
 };
