@@ -60,6 +60,25 @@ private:
 	float CurrentFallSeconds = 0.0f;
 	float LongestFallSeconds = 0.0f;
 	int32 FramesJumpClip = 0;
+
+	// Experimento de control del 2026-09-10: la locomocion se ve cortada aunque nadie salte.
+	// `Jump_Land` dura 0,6 s y tapa el ciclo, asi que contarlo aparte separa "el clip esta mal
+	// animado" de "algo lo interrumpe". `LocomotionRestarts` es la medida directa del corte.
+	int32 FramesLandClip = 0;
+	int32 LocomotionRestarts = 0;
+	FName LastClipId;
+	// Reparto de clips y transiciones: sin esto "cambia 2,7 veces por segundo" no dice
+	// ENTRE QUE dos clips oscila, que es la unica pregunta que queda.
+	TMap<FName,int32> ClipFrames;
+	TMap<FString,int32> ClipTransitions;
+	double SpeedSumCms = 0.0;
+	double MinSpeedCms = 1e9;
+	double MaxSpeedCms = 0.0;
+	// El defecto del 2026-09-10: caminando en linea recta, el personaje se quedaba sin suelo
+	// dos frames cada vez que se rehacia la colision cercana, la velocidad caia a 0 y el
+	// selector elegia `Idle`, reiniciando el ciclo de paso ~1,3 veces por segundo. Contar los
+	// frames en `Idle` mientras se camina es la medida directa de que eso no vuelve.
+	int32 FramesIdleWhileMoving = 0;
 	bool bFinished = false;
 
 	// Se acumulan en vez de abortar al primer frame malo: un frame aislado no es un defecto, y

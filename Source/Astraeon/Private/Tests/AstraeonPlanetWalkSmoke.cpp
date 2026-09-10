@@ -13,10 +13,15 @@
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
 #include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
+#include "Planet/AstraeonPlanetRuntime.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "UnrealClient.h"
 
 AAstraeonPlanetWalkSmoke::AAstraeonPlanetWalkSmoke()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	// Compare movement against this frame's dt, after CharacterMovement consumed it.
+	PrimaryActorTick.TickGroup = TG_PostPhysics;
 	FParse::Value(FCommandLine::Get(), TEXT("AstraeonWalkSeconds="), WalkSeconds);
 }
 
@@ -77,7 +82,15 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	// Saltos repetidos mientras camina, que es la acción que reportó el propietario: "al saltar
 	// y moverme en el aire". Un salto único no lo reproducía: hay que insistir para que la
 	// racha de caída, si se atasca, se acumule y se vea.
-	if (Elapsed - LastJumpSeconds >= JumpEverySeconds)
+	// `-AstraeonNoJump` es el control: si la locomocion se corta igual sin un solo salto, la
+	// causa no esta en el clip de salto ni en quien lo pide. `-AstraeonSprint` reproduce la
+	// carrera, que es donde el propietario reporto que ademas se frena.
+	const bool bNoJump = FParse::Param(FCommandLine::Get(), TEXT("AstraeonNoJump"));
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSprint")))
+	{
+		Character->GetCharacterMovement()->MaxWalkSpeed = 900.0f;
+	}
+	if (!bNoJump && Elapsed - LastJumpSeconds >= JumpEverySeconds)
 	{
 		LastJumpSeconds = Elapsed;
 		++JumpsRequested;
@@ -92,12 +105,23 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	}
 
 	const FVector Location = Character->GetActorLocation();
+	const double FrameDistance=FVector::Dist(Location,LastLocationCm);
+	const double MaxPlausible=FMath::Max(100.0,Character->GetVelocity().Size()*DeltaSeconds*4.0);
+	if (FrameDistance>MaxPlausible)
+	{
+		Finish(false,FString::Printf(TEXT("Impossible frame displacement %.1f cm (limit %.1f)"),FrameDistance,MaxPlausible));
+		return;
+	}
 	DistanceTravelledCm += FVector::Dist(Location, LastLocationCm);
 	LastLocationCm = Location;
 
 	const FVector LocalUp = Gravity->GetUpVector();
 	const double Alignment = FVector::DotProduct(Character->GetActorQuat().GetUpVector(), LocalUp);
-	const double AltitudeCm = Gravity->GetAltitudeCm();
+	double AltitudeCm = Gravity->GetAltitudeCm();
+	if (const auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
+		AltitudeCm-=FAstraeonPlanetSurface::SampleRadialHeightCm(Planet->GetDefinition(),LocalUp);
+	if (Elapsed>30.0f && Elapsed-DeltaSeconds<=30.0f)
+		FScreenshotRequest::RequestScreenshot(TEXT("PlanetWalkLab"),true,false);
 
 	++FramesSampled;
 	WorstAlignment = FMath::Min(WorstAlignment, Alignment);
@@ -149,6 +173,29 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 		{
 			++FramesJumpClip;
 		}
+		if (Clip == FName(TEXT("Jump_Land")))
+		{
+			++FramesLandClip;
+		}
+		// Cada cambio de clip reinicia la reproduccion: es exactamente lo que se ve como
+		// "el paso se corta antes de terminar".
+		if (!LastClipId.IsNone() && Clip != LastClipId)
+		{
+			++LocomotionRestarts;
+			++ClipTransitions.FindOrAdd(FString::Printf(TEXT("%s->%s"), *LastClipId.ToString(), *Clip.ToString()));
+		}
+		LastClipId = Clip;
+		++ClipFrames.FindOrAdd(Clip);
+		// Pasado el arranque, el smoke mantiene la entrada de avance pulsada sin soltarla: un
+		// solo frame en `Idle` significa que algo paro al personaje, no que dejo de caminar.
+		if (Elapsed > 5.0f && Clip == FName(TEXT("Idle"))
+			&& !FParse::Param(FCommandLine::Get(), TEXT("AstraeonJumpOnly")))
+		{
+			++FramesIdleWhileMoving;
+		}
+		SpeedSumCms += AnimState.SpeedCms;
+		MinSpeedCms = FMath::Min(MinSpeedCms, double(AnimState.SpeedCms));
+		MaxSpeedCms = FMath::Max(MaxSpeedCms, double(AnimState.SpeedCms));
 	}
 
 	// Progreso periódico. Sin esto, "recorrió 225 cm" no distingue entre caminar despacio y
@@ -175,6 +222,35 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	const double OutOfAltitudeRatio = FramesSampled > 0 ? double(FramesOutOfAltitude) / FramesSampled : 1.0;
 
 	const double JumpClipRatio = FramesSampled > 0 ? double(FramesJumpClip) / FramesSampled : 1.0;
+	const double LandClipRatio = FramesSampled > 0 ? double(FramesLandClip) / FramesSampled : 0.0;
+
+	UE_LOG(LogTemp, Display,
+		TEXT("AstraeonPlanetWalk: clip de aterrizaje=%.1f%% | cambios de clip=%d (%.2f por segundo)"),
+		LandClipRatio * 100.0, LocomotionRestarts,
+		Elapsed > 0.0f ? LocomotionRestarts / Elapsed : 0.0);
+
+	UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: frames en Idle mientras camina=%d (%.2f%%)"),
+		FramesIdleWhileMoving,
+		FramesSampled > 0 ? 100.0 * FramesIdleWhileMoving / FramesSampled : 0.0);
+
+	UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: velocidad de animacion min=%.0f media=%.0f max=%.0f (umbral de carrera %.0f)"),
+		MinSpeedCms, FramesSampled > 0 ? SpeedSumCms / FramesSampled : 0.0, MaxSpeedCms,
+		FAstraeonBodyAnimation::GetRunSpeedThresholdCms());
+	for (const auto& Pair : ClipFrames)
+	{
+		UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: clip %s = %d frames (%.1f%%)"),
+			*Pair.Key.ToString(), Pair.Value, FramesSampled > 0 ? 100.0 * Pair.Value / FramesSampled : 0.0);
+	}
+	for (const auto& Pair : ClipTransitions)
+	{
+		UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: transicion %s = %d veces"), *Pair.Key, Pair.Value);
+	}
+	if (const auto* PlanetActor = AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: reconstrucciones de colision=%d (%.2f por segundo)"),
+			PlanetActor->GetCollisionRebuildCount(),
+			Elapsed > 0.0f ? PlanetActor->GetCollisionRebuildCount() / Elapsed : 0.0);
+	}
 
 	UE_LOG(LogTemp, Display,
 		TEXT("AstraeonPlanetWalk: frames=%d recorrido=%.0f cm saltos=%d | desalineado=%.1f%% (peor cos=%.3f) | cayendo=%.1f%% (racha mas larga %.2f s) | clip de salto=%.1f%% | fuera de altitud=%.1f%% (peor=%.0f cm)"),
@@ -209,7 +285,21 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	{
 		Failures += FString::Printf(TEXT("fuera de altitud el %.1f%% del tiempo; "), OutOfAltitudeRatio * 100.0);
 	}
+	// Guardian del corte de locomocion. El defecto medido daba 53 cortes en 40 s; el arreglo
+	// da 0. Un 0,5% deja pasar el frame suelto de un arranque y no deja pasar una recaida.
+	const double IdleWhileMovingRatio = FramesSampled > 0 ? double(FramesIdleWhileMoving) / FramesSampled : 0.0;
+	if (IdleWhileMovingRatio > 0.005)
+	{
+		Failures += FString::Printf(
+			TEXT("el ciclo de paso se corta: %.1f%% de los frames en Idle mientras camina (%d frames); "),
+			IdleWhileMovingRatio * 100.0, FramesIdleWhileMoving);
+	}
 
+	if (const auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		if (DistanceTravelledCm < 2.0*PI*Planet->RadiusCm)
+			Failures+=TEXT("No complete logical lap; ");
+	}
 	Finish(Failures.IsEmpty(), Failures.IsEmpty() ? TEXT("OK") : Failures);
 }
 
@@ -218,5 +308,5 @@ void AAstraeonPlanetWalkSmoke::Finish(bool bPassed, const FString& Reason)
 	bFinished = true;
 	UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: RESULTADO=%s %s"),
 		bPassed ? TEXT("OK") : TEXT("FALLO"), *Reason);
-	FPlatformMisc::RequestExit(!bPassed);
+	FPlatformMisc::RequestExitWithStatus(false,bPassed?0:1);
 }
