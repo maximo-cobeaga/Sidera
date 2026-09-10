@@ -1,3 +1,29 @@
+## 2026-09-10 — Fase 3, P3.2: relieve regional y `Terrain.SurfaceContract` sobre la esfera
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Map L_Khepri -Seconds 90 -Extra '-AstraeonWalkStillSeconds=5'
+```
+
+**97/97 Automation.** `Terrain.SurfaceContract` sale de cuarentena migrada a la esfera, sin
+relajar ninguna aserción. Cada una tiene su contraparte:
+
+- Diez seeds sobre un cuerpo de 500 km: la muestra es válida, determinista, con normal unitaria,
+  y es exactamente la altura que da el cuerpo en ese punto.
+- La plataforma de Ítaca está en el contrato: el origen y las esquinas de la huella dan la cota
+  de la meseta.
+- El patch bajo Ítaca respeta el presupuesto y su malla está completa. Cada vértice está a la
+  altura del contrato; el peor error es menor a 0,01 cm.
+- Fuera del campo regional el contrato rechaza la coordenada.
+- La superficie authored de Region A conserva sus cuatro aserciones.
+- La región no reemplaza el terreno: el patch del antípoda es idéntico con región y sin ella.
+
+`Khepri.RegionAOnThePlanet` suma dos cosas. La ubicación resuelta desde cero coincide con la del
+caché, y la definición de Khepri lleva el relieve de esa ubicación.
+
+Caminata de 90 s en `L_Khepri`: RESULTADO=OK, 0 frames con suelo desalineado, 0 frames sin
+colisión. La carga de patches es la de P3.1: media 0,179 ms, 923 frames sobre 2 ms contra 945.
+
 ## 2026-09-10 — Fase 3, P3.1: Khepri y Region A sobre la esfera
 
 ```powershell

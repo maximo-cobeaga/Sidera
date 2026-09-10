@@ -21,18 +21,25 @@ struct ASTRAEON_API FAstraeonPlanetRegionPlan
 	static FAstraeonPlanetRegionPlan FromFlatRegion(int32 ContentSeed, const FVector& ItacaOriginCm);
 };
 
+struct ASTRAEON_API FAstraeonPlanetRegionSample
+{
+	double HeightCm = 0.0;
+	FVector Normal = FVector::UpVector;
+	bool bIsValid = false;
+};
+
 // The plan placed on a planet: region centre at `Anchor`, flat +X/+Y along a tangent basis, and
 // a flat point maps to the direction at the same arc distance (exponential map).
 struct ASTRAEON_API FAstraeonPlanetRegionSurface
 {
+	// The body with this region placed on it: its `RegionRelief` is `Relief`, so asking the body
+	// for a height is asking the region.
 	FAstraeonPlanetDefinition Planet;
 	FAstraeonPlanetRegionPlan Plan;
 	FVector Anchor = FVector(0, 0, 1);
 	FVector East = FVector(1, 0, 0);
 	FVector North = FVector(0, 1, 0);
-	TArray<FVector> FlatSpots;
-	TArray<FVector> MountainKeepOut;
-	FVector ItacaDirection = FVector(0, 0, 1);
+	TSharedPtr<const FAstraeonPlanetRegionRelief> Relief;
 
 	static FAstraeonPlanetRegionSurface Place(const FAstraeonPlanetDefinition& Planet, const FVector& Anchor, const FAstraeonPlanetRegionPlan& Plan);
 	FVector ToDirection(const FVector2D& PlanCm) const;
@@ -43,8 +50,11 @@ struct ASTRAEON_API FAstraeonPlanetRegionSurface
 	// heading on the sphere.
 	FQuat PlanRotationAt(const FVector& Direction) const;
 	// The same rule as the flat field: Itaca's rigid footprint is a plateau, the ground is cleared
-	// around flat spots, and mountains rise everywhere except near a playable point.
+	// around flat spots, and mountains rise everywhere except near a playable point. It is the
+	// body's height at that point: the patches the player stands on are built from the same call.
 	double HeightCm(const FVector2D& PlanCm) const;
+	// The regional contract: plan coordinates exist only inside the region.
+	FAstraeonPlanetRegionSample SampleSurface(const FVector2D& PlanCm) const;
 };
 
 struct ASTRAEON_API FAstraeonPlanetRegionResolution

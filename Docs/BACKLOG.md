@@ -6,13 +6,13 @@ La Fase 2 cerró con la etiqueta `fase-2-patches-lod-cerrada` (`PHASE_STATUS.md`
 
 - [x] P3.1 — Khepri como cuerpo (500 km, por decisión del propietario) y Region A como región
       planetaria en un lugar fijo, validado transitable; mapa `L_Khepri`.
-- [ ] P3.2 — Relieve regional dentro de los patches (meseta de Ítaca, exclusiones de montaña) y una
-      sola consulta de altura; recuperar `Terrain.SurfaceContract`.
+- [x] P3.2 — Relieve regional dentro de los patches (meseta de Ítaca, exclusiones de montaña) y una
+      sola consulta de altura; `Terrain.SurfaceContract` recuperada sobre la esfera.
 - [ ] P3.3 — Contenido sobre la esfera: Ítaca, estaciones, escotilla, recursos, señal, anomalía,
       nidos y obras; rutas críticas antes que decoración.
 - [ ] P3.4 — Escáner, mapa y bitácora en coordenadas planetarias.
 - [ ] P3.5 — Llegada controlada: nueva partida y continuar sobre Khepri.
-- [ ] P3.6 — Vaciar la cuarentena (13 pruebas) sobre la esfera.
+- [ ] P3.6 — Vaciar la cuarentena (quedan 11 pruebas) sobre la esfera.
 - [ ] P3.7 — Rendimiento, build empaquetada, tres recorridos completos y prueba humana.
 
 Arte: la Fase 3 no está bloqueada por Blender ni Higgsfield; los seis assets que pide existen en Q1.

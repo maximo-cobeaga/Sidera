@@ -104,10 +104,11 @@ if ($Check -eq 'Automation') {
         'Astraeon.Persistence.SaveGame.V3PlanetaryLocation',
         'Astraeon.WorldGen.Terrain.Connectivity',
         'Astraeon.WorldGen.Terrain.TraversalDetectsWalls',
-        'Astraeon.WorldGen.Khepri.RegionAOnThePlanet'
+        'Astraeon.WorldGen.Khepri.RegionAOnThePlanet',
+        'Astraeon.WorldGen.Terrain.SurfaceContract'
     )) {
         if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
-            throw "Missing required Phase 2 test: $required"
+            throw "Missing required planet test: $required"
         }
     }
 }

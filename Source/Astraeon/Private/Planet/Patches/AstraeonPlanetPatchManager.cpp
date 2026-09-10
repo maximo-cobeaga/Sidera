@@ -10,7 +10,8 @@ namespace
 	{
 		return A.BodyId == B.BodyId && A.RadiusCm == B.RadiusCm && A.MassKg == B.MassKg
 			&& A.SurfaceGravityMS2 == B.SurfaceGravityMS2 && A.SeaLevelAltitudeCm == B.SeaLevelAltitudeCm
-			&& A.WorldSeed == B.WorldSeed && A.BodySeed == B.BodySeed && A.GeneratorVersion == B.GeneratorVersion;
+			&& A.WorldSeed == B.WorldSeed && A.BodySeed == B.BodySeed && A.GeneratorVersion == B.GeneratorVersion
+			&& A.RegionRelief == B.RegionRelief;
 	}
 
 	TArray<FAddress> Sorted(const TArray<FAddress>& Keys)

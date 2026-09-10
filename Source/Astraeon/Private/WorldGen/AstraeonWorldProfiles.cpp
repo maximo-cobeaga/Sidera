@@ -8,6 +8,43 @@ namespace AstraeonMvpWorld
 {
 	const FName PlanetKhepri(TEXT("planet_khepri"));
 	const FName RegionFirstSignalBasin(TEXT("region_first_signal_basin"));
+
+	// The body alone, before any region is placed on it.
+	bool TryGetBareBody(FName PlanetProfileId, FAstraeonPlanetDefinition& OutDefinition)
+	{
+		if (PlanetProfileId != PlanetKhepri) return false;
+		const FAstraeonPlanetProfile Profile = UAstraeonWorldProfiles::GetMvpPlanetProfile();
+		OutDefinition = FAstraeonPlanetDefinition();
+		OutDefinition.BodyId = Profile.PlanetProfileId;
+		OutDefinition.RadiusCm = Profile.RadiusCm;
+		OutDefinition.SurfaceGravityMS2 = Profile.Environment.GravityMS2;
+		// Mass follows gravity and radius (g = GM/R^2), so the two can never contradict each other.
+		OutDefinition.MassKg = Profile.Environment.GravityMS2 * FMath::Square(Profile.RadiusCm / 100.0) / 6.67430e-11;
+		OutDefinition.BodySeed = Profile.BodySeed;
+		OutDefinition.WorldSeed = Profile.BodySeed;
+		return OutDefinition.IsValid();
+	}
+
+	// A region is a place: resolved once per process, and every definition of its body shares
+	// the result. A region that cannot be placed stays unplaced; it is not retried per query.
+	TSharedPtr<const FAstraeonPlanetRegionSurface> PlacedRegion(FName RegionProfileId)
+	{
+		static FCriticalSection Lock;
+		static TMap<FName, TSharedPtr<const FAstraeonPlanetRegionSurface>> Placed;
+		FScopeLock Scope(&Lock);
+		if (const TSharedPtr<const FAstraeonPlanetRegionSurface>* Found = Placed.Find(RegionProfileId)) return *Found;
+		TSharedPtr<const FAstraeonPlanetRegionSurface>& Slot = Placed.Add(RegionProfileId);
+		FAstraeonRegionProfile Region;
+		FAstraeonPlanetDefinition Body;
+		if (!UAstraeonWorldProfiles::TryGetRegionProfile(RegionProfileId, Region) || !TryGetBareBody(Region.PlanetProfileId, Body)) return Slot;
+		// The region's own seed: sessions never move it.
+		const int32 RegionSeed = UAstraeonWorldProfiles::GetPlanetRegionSeed(RegionProfileId);
+		// Its content is fixed too: any content seed yields the same plan, with Itaca at the landing zone.
+		const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(RegionSeed, FVector(Region.LandingZoneMeters * 100.0, 0.0));
+		const FAstraeonPlanetRegionResolution Resolution = FAstraeonPlanetTraversal::ResolveRegion(Body, RegionSeed, Plan);
+		if (Resolution.Report.bPassed) Slot = MakeShared<FAstraeonPlanetRegionSurface>(FAstraeonPlanetRegionSurface::Place(Body, Resolution.Anchor, Plan));
+		return Slot;
+	}
 }
 
 FName UAstraeonWorldProfiles::GetMvpPlanetProfileId()
@@ -47,34 +84,26 @@ FAstraeonPlanetProfile UAstraeonWorldProfiles::GetMvpPlanetProfile()
 
 bool UAstraeonWorldProfiles::TryGetPlanetDefinition(FName PlanetProfileId, FAstraeonPlanetDefinition& OutDefinition)
 {
-	if (PlanetProfileId != GetMvpPlanetProfileId()) return false;
-	const FAstraeonPlanetProfile Profile = GetMvpPlanetProfile();
-	OutDefinition = FAstraeonPlanetDefinition();
-	OutDefinition.BodyId = Profile.PlanetProfileId;
-	OutDefinition.RadiusCm = Profile.RadiusCm;
-	OutDefinition.SurfaceGravityMS2 = Profile.Environment.GravityMS2;
-	// Mass follows gravity and radius (g = GM/R^2), so the two can never contradict each other.
-	OutDefinition.MassKg = Profile.Environment.GravityMS2 * FMath::Square(Profile.RadiusCm / 100.0) / 6.67430e-11;
-	OutDefinition.BodySeed = Profile.BodySeed;
-	OutDefinition.WorldSeed = Profile.BodySeed;
-	return OutDefinition.IsValid();
+	if (!AstraeonMvpWorld::TryGetBareBody(PlanetProfileId, OutDefinition)) return false;
+	// Region A's plateau and keep-outs are part of Khepri's relief for everyone who asks.
+	const TSharedPtr<const FAstraeonPlanetRegionSurface> Region = AstraeonMvpWorld::PlacedRegion(GetRegionAProfileId());
+	if (Region.IsValid() && Region->Planet.BodyId == OutDefinition.BodyId) OutDefinition.RegionRelief = Region->Relief;
+	return true;
 }
 
 bool UAstraeonWorldProfiles::ResolvePlanetRegion(FName RegionProfileId, FAstraeonPlanetRegionSurface& OutRegion)
 {
-	FAstraeonRegionProfile Region;
-	FAstraeonPlanetDefinition Planet;
-	if (!TryGetRegionProfile(RegionProfileId, Region) || !TryGetPlanetDefinition(Region.PlanetProfileId, Planet)) return false;
-	// The region's own seed, from its id through the stable hash: sessions never move it.
+	const TSharedPtr<const FAstraeonPlanetRegionSurface> Region = AstraeonMvpWorld::PlacedRegion(RegionProfileId);
+	if (!Region.IsValid()) return false;
+	OutRegion = *Region;
+	return true;
+}
+
+int32 UAstraeonWorldProfiles::GetPlanetRegionSeed(FName RegionProfileId)
+{
 	const FString Id = RegionProfileId.ToString().ToLower();
 	const FTCHARToUTF8 Utf8(*Id);
-	const int32 RegionSeed = int32(FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Utf8.Get()), Utf8.Length())) & 0x7fffffff);
-	// Its content is fixed too: any content seed yields the same plan, with Itaca at the landing zone.
-	const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(RegionSeed, FVector(Region.LandingZoneMeters * 100.0, 0.0));
-	const FAstraeonPlanetRegionResolution Resolution = FAstraeonPlanetTraversal::ResolveRegion(Planet, RegionSeed, Plan);
-	if (!Resolution.Report.bPassed) return false;
-	OutRegion = FAstraeonPlanetRegionSurface::Place(Planet, Resolution.Anchor, Plan);
-	return true;
+	return int32(FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Utf8.Get()), Utf8.Length())) & 0x7fffffff);
 }
 
 FAstraeonRegionProfile UAstraeonWorldProfiles::GetRegionAProfile()

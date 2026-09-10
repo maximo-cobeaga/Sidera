@@ -25,8 +25,12 @@ public:
 	static bool IsPointInsideRegion(const FAstraeonRegionProfile& Profile, const FVector2D& PointMeters);
 
 	// Phase 3: Khepri as a body, and Region A as a place on it. False for a profile without a body.
+	// The definition carries Region A's relief: every height asked of Khepri includes it.
 	static bool TryGetPlanetDefinition(FName PlanetProfileId, FAstraeonPlanetDefinition& OutDefinition);
-	// Region A is fixed by design, so its place is too: resolved once from the region's own id
-	// against its plan, never from a session's content seed. Deterministic and traversable.
+	// Region A is fixed by design, so its place is too: resolved once per process from the
+	// region's own id against its plan, never from a session's content seed. Deterministic and
+	// traversable.
 	static bool ResolvePlanetRegion(FName RegionProfileId, FAstraeonPlanetRegionSurface& OutRegion);
+	// The seed the region is resolved with: its id through the stable hash.
+	static int32 GetPlanetRegionSeed(FName RegionProfileId);
 };

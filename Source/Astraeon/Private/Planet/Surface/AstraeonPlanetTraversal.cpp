@@ -1,5 +1,4 @@
 #include "Planet/Surface/AstraeonPlanetTraversal.h"
-#include "Environment/AstraeonItacaInterior.h"
 #include "Planet/LOD/AstraeonPlanetLODManager.h"
 #include "Planet/Patches/AstraeonPlanetPatchAddress.h"
 #include "Planet/Surface/AstraeonPlanetSurface.h"
@@ -32,9 +31,16 @@ FAstraeonPlanetRegionSurface FAstraeonPlanetRegionSurface::Place(const FAstraeon
 	const FVector Reference = FMath::Abs(Surface.Anchor.Z) < 0.9 ? FVector(0, 0, 1) : FVector(1, 0, 0);
 	Surface.East = FVector::CrossProduct(Reference, Surface.Anchor).GetSafeNormal();
 	Surface.North = FVector::CrossProduct(Surface.Anchor, Surface.East);
-	for (const FVector2D& Spot : Plan.FlatSpotsCm) Surface.FlatSpots.Add(Surface.ToDirection(Spot));
-	for (const FVector2D& Spot : Plan.MountainKeepOutCm) Surface.MountainKeepOut.Add(Surface.ToDirection(Spot));
-	Surface.ItacaDirection = Surface.ToDirection(Plan.ItacaOriginCm);
+	const TSharedRef<FAstraeonPlanetRegionRelief> Relief = MakeShared<FAstraeonPlanetRegionRelief>();
+	for (const FVector2D& Spot : Plan.FlatSpotsCm) Relief->FlatSpots.Add(Surface.ToDirection(Spot));
+	for (const FVector2D& Spot : Plan.MountainKeepOutCm) Relief->MountainKeepOut.Add(Surface.ToDirection(Spot));
+	Relief->ItacaDirection = Surface.ToDirection(Plan.ItacaOriginCm);
+	const FQuat ItacaFrame = Surface.PlanRotationAt(Relief->ItacaDirection);
+	Relief->ItacaAxisX = ItacaFrame.GetAxisX(); Relief->ItacaAxisY = ItacaFrame.GetAxisY();
+	Relief->Center = Surface.Anchor;
+	Relief->FinishInfluence(Planet.RadiusCm);
+	Surface.Relief = Relief;
+	Surface.Planet.RegionRelief = Relief;
 	return Surface;
 }
 
@@ -50,11 +56,13 @@ FVector FAstraeonPlanetRegionSurface::ToDirection(const FVector2D& PlanCm) const
 FVector2D FAstraeonPlanetRegionSurface::ToPlan(const FVector& Direction) const
 {
 	const FVector Unit = Direction.GetSafeNormal();
-	const double Angle = FMath::Acos(FMath::Clamp(FVector::DotProduct(Unit, Anchor), -1.0, 1.0));
-	const FVector Tangent = Unit - Anchor * FVector::DotProduct(Unit, Anchor);
-	if (Tangent.SizeSquared() < UE_DOUBLE_SMALL_NUMBER) return Plan.CenterCm;
-	const FVector Bearing = Tangent.GetSafeNormal();
-	return Plan.CenterCm + FVector2D(FVector::DotProduct(Bearing, East), FVector::DotProduct(Bearing, North)) * (Angle * Planet.RadiusCm);
+	const double Cosine = FVector::DotProduct(Unit, Anchor);
+	const FVector Tangent = Unit - Anchor * Cosine;
+	const double Sine = Tangent.Size();
+	if (Sine < UE_DOUBLE_SMALL_NUMBER) return Plan.CenterCm;
+	// atan2, not acos: acos of a cosine this close to 1 loses centimetres near the anchor.
+	const double ArcCm = FMath::Atan2(Sine, Cosine) * Planet.RadiusCm;
+	return Plan.CenterCm + FVector2D(FVector::DotProduct(Tangent, East), FVector::DotProduct(Tangent, North)) * (ArcCm / Sine);
 }
 
 FQuat FAstraeonPlanetRegionSurface::PlanRotationAt(const FVector& Direction) const
@@ -66,12 +74,18 @@ FQuat FAstraeonPlanetRegionSurface::PlanRotationAt(const FVector& Direction) con
 
 double FAstraeonPlanetRegionSurface::HeightCm(const FVector2D& PlanCm) const
 {
-	if (AAstraeonItacaInterior::IsInsideFootprint(PlanCm - Plan.ItacaOriginCm))
-		return FAstraeonPlanetSurface::SampleGroundHeightCm(Planet, ItacaDirection);
+	return FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, ToDirection(PlanCm));
+}
+
+FAstraeonPlanetRegionSample FAstraeonPlanetRegionSurface::SampleSurface(const FVector2D& PlanCm) const
+{
+	FAstraeonPlanetRegionSample Sample;
+	if (FVector2D::DistSquared(PlanCm, Plan.CenterCm) > FMath::Square(Plan.RadiusCm)) return Sample;
 	const FVector Direction = ToDirection(PlanCm);
-	const double Ground = FAstraeonPlanetSurface::SampleClearedGroundHeightCm(Planet, Direction, FlatSpots);
-	const bool bMountainAllowed = !FAstraeonPlanetSurface::IsWithinAnySpot(Planet, Direction, MountainKeepOut, FAstraeonPlanetSurface::MountainClearanceCm);
-	return Ground + (bMountainAllowed ? FAstraeonPlanetSurface::SampleMountainHeightCm(Planet, Direction) : 0.0);
+	Sample.HeightCm = FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
+	Sample.Normal = FAstraeonPlanetSurface::SampleRadialNormal(Planet, Direction);
+	Sample.bIsValid = FMath::IsFinite(Sample.HeightCm) && !Sample.Normal.ContainsNaN();
+	return Sample;
 }
 
 double FAstraeonPlanetTraversal::MeshSpacingCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction)

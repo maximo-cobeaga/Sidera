@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Planet/AstraeonPlanetDefinition.h"
+#include "Planet/Surface/AstraeonPlanetRegionRelief.h"
 
 // Consulta pura de la superficie de referencia. La entrada geometrica es una direccion
 // planetaria global, no una UV local: dos caras que comparten borde reciben el mismo valor.
@@ -49,7 +50,13 @@ struct ASTRAEON_API FAstraeonPlanetSurface
 	// devuelven NaN, nunca suelo liso: un cero silencioso se lee como terreno valido.
 	static double SampleGroundHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction);
 	static double SampleMountainHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction);
+	// LA altura del cuerpo: las dos capas, mas el relieve de su region si la definicion lo trae.
+	// Malla, colision, validador y consultas de juego pasan todas por aqui.
 	static double SampleRadialHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction);
+	// Las dos capas editadas por una region: meseta bajo Itaca, claros y exclusiones. Fuera del
+	// cono de influencia devuelve exactamente las capas del cuerpo.
+	static double SampleRegionHeightCm(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetRegionRelief& Relief,
+		const FVector& Direction);
 
 	// Claro para estructuras rigidas que no pueden seguir el relieve. Es una MESETA a la
 	// altura del suelo LOCAL, no un pozo excavado hasta el nivel del mar: cavar dejaba un

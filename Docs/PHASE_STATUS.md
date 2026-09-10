@@ -39,6 +39,12 @@ Khepri es un cuerpo de 500 km (decisión del propietario) y Region A tiene un lu
 validado transitable. `L_Khepri` se camina desde la salida de Ítaca de la región. Orden completo en
 `BACKLOG.md`. Puerta de la fase sin casillas marcadas todavía.
 
+### Avance 2026-09-10 — P3.2
+
+El relieve de Region A (meseta bajo Ítaca, claros, exclusiones de montaña) es parte del relieve de
+Khepri: una sola función de altura para malla, colisión, validador y juego.
+`Terrain.SurfaceContract` salió de cuarentena sobre la esfera; quedan 11 pruebas en la tabla.
+
 ---
 
 ## Histórico: **2 — Patches, LOD, precisión y estado mutable** — puerta PASADA
@@ -281,7 +287,7 @@ sigue verde sobre el mapa plano y la tabla es el inventario de lo que va a entra
 | Prueba | Vuelve en | Estado |
 |---|---|---|
 | `Astraeon.WorldGen.Terrain.Relief` | Fase 1 | **RECUPERADA** el 2026-09-10 |
-| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3 | movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) |
+| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3 ([ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md)) | **RECUPERADA** el 2026-09-10, sobre la esfera (P3.2) |
 | `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 | **RECUPERADA** el 2026-09-10, sobre la esfera |
 | `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 | **RECUPERADA** el 2026-09-10, sobre la esfera |
 | `Astraeon.WorldGen.Itaca.DeckRestsOnTerrain` | Fase 3 | verde |

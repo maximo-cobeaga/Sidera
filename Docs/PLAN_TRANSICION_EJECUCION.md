@@ -96,7 +96,7 @@ inventario de la deuda abierta por el corte.
 | Prueba | Vuelve en |
 |---|---|
 | `Astraeon.WorldGen.Terrain.Relief` | Fase 1 — **recuperada el 2026-09-10** |
-| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3, movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) |
+| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3, movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) — **recuperada el 2026-09-10** |
 | `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 — **recuperada el 2026-09-10** |
 | `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 — **recuperada el 2026-09-10** |
 | `Astraeon.WorldGen.Itaca.DeckRestsOnTerrain` | Fase 3 |

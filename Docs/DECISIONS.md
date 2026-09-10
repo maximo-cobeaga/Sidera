@@ -1,5 +1,22 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P3.2: el relieve de la región viaja con la definición del cuerpo
+
+La meseta bajo Ítaca, los claros del suelo y las exclusiones de montaña de Region A son parte del
+relieve de Khepri. `FAstraeonPlanetDefinition` lleva un `FAstraeonPlanetRegionRelief` inmutable y
+compartido, y `FAstraeonPlanetSurface::SampleRadialHeightCm` lo aplica. Así la malla, la colisión,
+el validador de tránsito, `GetSurfacePointCm`, el HUD y los smokes leen la misma función sin que
+nadie tenga que acordarse de pasar la región. La copia que recibe cada worker cuesta un contador.
+
+- Fuera del cono de influencia de la región, la altura es la del cuerpo **bit a bit**: los mismos
+  llamados sobre la misma entrada. `SurfaceContract` lo verifica sobre un patch del antípoda.
+- La huella de Ítaca se mide en el marco propio de la nave (los ejes del plan llevados a su
+  origen), el mismo con el que P3.3 la va a apoyar. Así la meseta queda justo debajo del casco.
+- Las pruebas de distancia usan cosenos en vez de un `acos` por punto. Con eso el costo de los
+  patches no se movió: 923 frames sobre 2 ms en la caminata de 90 s, contra 945 antes.
+- La ubicación de Region A se resuelve una vez por proceso y queda en caché. La prueba de Khepri
+  la vuelve a resolver desde cero para que el caché no esconda un no determinismo.
+
 ## 2026-09-10 — P3.1: Khepri mide 500 km; Region A tiene un lugar fijo
 
 **Radio de Khepri: 500 km**, elegido por el propietario entre 50, 500 y 2.500 km. Es el tier Target

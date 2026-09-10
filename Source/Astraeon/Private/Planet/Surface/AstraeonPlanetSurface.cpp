@@ -1,5 +1,6 @@
 #include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "Planet/Coordinates/AstraeonPlanetCoordinates.h"
+#include "Environment/AstraeonItacaInterior.h"
 #include <limits>
 
 namespace AstraeonPlanetSurfaceLocal
@@ -104,9 +105,69 @@ double FAstraeonPlanetSurface::SampleMountainHeightCm(const FAstraeonPlanetDefin
 
 double FAstraeonPlanetSurface::SampleRadialHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction)
 {
+	if (Planet.RegionRelief.IsValid()) return SampleRegionHeightCm(Planet, *Planet.RegionRelief, Direction);
 	const double Ground = SampleGroundHeightCm(Planet, Direction);
 	if (!FMath::IsFinite(Ground)) return Ground;
 	return Ground + SampleMountainHeightCm(Planet, Direction);
+}
+
+FVector2D FAstraeonPlanetRegionRelief::ToItacaLocal(double PlanetRadiusCm, const FVector& Unit) const
+{
+	const double Cosine = FVector::DotProduct(Unit, ItacaDirection);
+	const FVector Tangent = Unit - ItacaDirection * Cosine;
+	const double Sine = Tangent.Size();
+	if (Sine < UE_DOUBLE_SMALL_NUMBER) return FVector2D::ZeroVector;
+	// atan2 keeps centimetre accuracy next to the origin, where acos of a cosine near 1 does not.
+	const double ArcCm = FMath::Atan2(Sine, Cosine) * PlanetRadiusCm;
+	return FVector2D(FVector::DotProduct(Tangent, ItacaAxisX), FVector::DotProduct(Tangent, ItacaAxisY)) * (ArcCm / Sine);
+}
+
+void FAstraeonPlanetRegionRelief::FinishInfluence(double PlanetRadiusCm)
+{
+	const auto Arc = [this, PlanetRadiusCm](const FVector& Direction)
+	{
+		return FMath::Acos(FMath::Clamp(FVector::DotProduct(Center, Direction), -1.0, 1.0)) * PlanetRadiusCm;
+	};
+	// Itaca's footprint reaches under 7 m from its origin; 20 m is a margin, not a measurement.
+	double ReachCm = Arc(ItacaDirection) + 2000.0;
+	for (const FVector& Spot : FlatSpots) ReachCm = FMath::Max(ReachCm, Arc(Spot) + FAstraeonPlanetSurface::FlatSpotRadiusCm);
+	for (const FVector& Spot : MountainKeepOut) ReachCm = FMath::Max(ReachCm, Arc(Spot) + FAstraeonPlanetSurface::MountainClearanceCm);
+	InfluenceCosine = FMath::Cos(FMath::Min(PI, ReachCm / PlanetRadiusCm));
+}
+
+double FAstraeonPlanetSurface::SampleRegionHeightCm(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetRegionRelief& Relief,
+	const FVector& Direction)
+{
+	using namespace AstraeonPlanetSurfaceLocal;
+	FVector Unit;
+	if (!Prepare(Planet, Direction, Unit)) return NaN();
+	// Same calls on the same input as the bare body: outside the cone the relief changes no bit.
+	if (FVector::DotProduct(Unit, Relief.Center) < Relief.InfluenceCosine)
+		return SampleGroundHeightCm(Planet, Direction) + SampleMountainHeightCm(Planet, Direction);
+
+	// Itaca's rigid hull stands on a plateau at the ground under its origin, as in the flat field.
+	constexpr double ItacaReachCm = 2000.0;
+	if (FVector::DotProduct(Unit, Relief.ItacaDirection) > FMath::Cos(ItacaReachCm / Planet.RadiusCm)
+		&& AAstraeonItacaInterior::IsInsideFootprint(Relief.ToItacaLocal(Planet.RadiusCm, Unit)))
+		return SampleGroundHeightCm(Planet, Relief.ItacaDirection);
+
+	// Cosines instead of arc lengths: the same "closer than" test without an acos per spot.
+	double Height = SampleGroundHeightCm(Planet, Unit);
+	const double FlatCosine = FMath::Cos(FlatSpotRadiusCm / Planet.RadiusCm);
+	for (const FVector& Spot : Relief.FlatSpots)
+	{
+		if (FVector::DotProduct(Unit, Spot) <= FlatCosine) continue;
+		const double DistanceCm = ArcDistanceCm(Planet, Unit, Spot);
+		// Scaling instead of clipping turns the clearing's edge into a ramp, never a cliff.
+		Height = FMath::Lerp(SampleGroundHeightCm(Planet, Spot), Height, FMath::SmoothStep(0.0, FlatSpotRadiusCm, DistanceCm));
+	}
+	const double Mountain = SampleMountainHeightCm(Planet, Unit);
+	if (Mountain <= 0.0) return Height;
+	// No mountain rises on a playable point. The cut is abrupt on purpose: a mountain is a wall.
+	const double KeepOutCosine = FMath::Cos(MountainClearanceCm / Planet.RadiusCm);
+	for (const FVector& Spot : Relief.MountainKeepOut)
+		if (FVector::DotProduct(Unit, Spot) > KeepOutCosine) return Height;
+	return Height + Mountain;
 }
 
 double FAstraeonPlanetSurface::ArcDistanceCm(const FAstraeonPlanetDefinition& Planet, const FVector& A, const FVector& B)

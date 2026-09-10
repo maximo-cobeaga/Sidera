@@ -21,11 +21,16 @@ bool FAstraeonKhepriRegionTest::RunTest(const FString& Parameters)
 	FAstraeonPlanetDefinition None;
 	TestFalse(TEXT("A profile without a body has none"), UAstraeonWorldProfiles::TryGetPlanetDefinition(TEXT("planet_unknown"), None));
 
-	FAstraeonPlanetRegionSurface Region, Again;
+	FAstraeonPlanetRegionSurface Region;
 	if (!TestTrue(TEXT("Region A is placed on Khepri"), UAstraeonWorldProfiles::ResolvePlanetRegion(UAstraeonWorldProfiles::GetRegionAProfileId(), Region))) return false;
-	UAstraeonWorldProfiles::ResolvePlanetRegion(UAstraeonWorldProfiles::GetRegionAProfileId(), Again);
-	TestTrue(TEXT("Always the same place"), Region.Anchor == Again.Anchor);
+	// The profile caches the place; resolving again from scratch proves it is not luck of order.
+	FAstraeonPlanetDefinition Bare = Khepri;
+	Bare.RegionRelief.Reset();
+	const FAstraeonPlanetRegionResolution Fresh = FAstraeonPlanetTraversal::ResolveRegion(Bare,
+		UAstraeonWorldProfiles::GetPlanetRegionSeed(UAstraeonWorldProfiles::GetRegionAProfileId()), Region.Plan);
+	TestTrue(TEXT("Always the same place"), Fresh.Report.bPassed && Fresh.Anchor == Region.Anchor);
 	TestEqual(TEXT("On Khepri"), Region.Planet.BodyId, Khepri.BodyId);
+	TestTrue(TEXT("Khepri's relief is the one of Region A's place"), Khepri.RegionRelief.IsValid() && Khepri.RegionRelief == Region.Relief);
 	TestTrue(TEXT("Every goal of Region A is reachable there"), FAstraeonPlanetTraversal::Evaluate(Region).bPassed);
 
 	// Plan <-> sphere: the designed metres survive the trip, and headings stay on the tangent plane.
