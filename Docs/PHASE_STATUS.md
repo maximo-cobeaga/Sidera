@@ -1,6 +1,50 @@
 # Estado de fases — ASTRAEON
 
-## Actualización 2026-09-10 — Fase 1: núcleo técnico verificado, puerta aún abierta
+## Actualización 2026-09-10 — Fase 1: la puerta está cumplida, falta declararla
+
+Todos los criterios de la puerta de la Fase 1 tienen evidencia, y la lista de cierre de
+`AGENTS.md` §15.1 está completa. **Falta una sola formalidad, y es una decisión del propietario**:
+aceptar por escrito que `Planet.Gravity.CardinalPoints` no existe con ese nombre y que lo cubre el
+smoke cardinal de 26 direcciones. Es desvío de nomenclatura, no hueco de cobertura.
+
+### Criterios de la puerta
+
+| Criterio | Evidencia |
+|---|---|
+| Vuelta lógica completa sin perder orientación | confirmado a mano por el propietario el 2026-09-10 |
+| Sin costura abierta entre caras | confirmado a mano; `Planet.Topology.FaceEdgesMatch` en verde |
+| Saltar y caer en polos, ecuador y bordes | confirmado a mano; smoke cardinal en 26 direcciones |
+| La cámara no da tirones | confirmado a mano, en primera y tercera persona |
+| `Terrain.Relief` fuera de cuarentena | recuperada el 2026-09-10 sobre el contrato radial, con una aserción más |
+
+### Evidencia de cierre (`AGENTS.md` §15.1)
+
+| | |
+|---|---|
+| Commit o diff identificable | rama `fase-1-nucleo-planetario`, 5 commits |
+| Comando de build | recompilación completa del módulo, `Succeeded` |
+| Resultado de pruebas | `Automation` 75/75, `Cardinals` PASS, `Walk` 250 s `RESULTADO=OK` |
+| Captura | `PlanetWalkLab.png`, `PlanetCardinalLab.png` |
+| Perfil de rendimiento | 205,3 FPS medios, p99 6,99 ms, 1 hitch de arranque |
+| Warnings nuevos | cero |
+| Limitaciones y próximo paso | registradas abajo |
+| Ninguna prueba propia en cuarentena | cumplido: `Relief` volvió, `SurfaceContract` pasó a Fase 3 por ADR 0005 |
+
+### Limitaciones conocidas al cerrar
+
+- El parche de colisión abarca ~37 m pero se rehace cada 3,1 m: doce veces más seguido de lo que
+  su tamaño exige, recorriendo las 6.144 celdas de las seis caras y recociendo cada vez. Ya no se
+  ve —el doble búfer quitó el corte— pero es trabajo desperdiciado. Es de la **Fase 2**, dueña del
+  anillo de colisión.
+- El p99 pasó de 5,41 ms el 2026-09-09 a 6,99 ms. Dentro del presupuesto de §8 con más de 3× de
+  margen: el objetivo del percentil 1 % es 45 FPS y esto son 143.
+- El contrato de superficie con contexto de región sigue en `FVector2D`. Es de la **Fase 3**.
+
+### Próximo paso
+
+Fase 2 — patches, LOD, precisión y estado mutable persistente.
+
+## Histórico: 2026-09-10 — Fase 1: núcleo técnico verificado, puerta aún abierta
 
 La Fase 0 está cerrada y la fase activa es **Fase 1 — Núcleo planetario**. Ya están completos
 el contrato de definición, las coordenadas globales, la altura radial determinista, el runtime
