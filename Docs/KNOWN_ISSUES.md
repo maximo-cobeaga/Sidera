@@ -1,5 +1,45 @@
 # Problemas conocidos — ASTRAEON
 
+## 2026-09-09 — Resuelto: el salto se trababa al moverse en el aire
+
+Segunda prueba manual del harness. La cámara y la vuelta al mundo quedaron bien; el propietario
+reportó que **al saltar y desplazarse en el aire la animación de salto se trababa y el personaje
+patinaba**.
+
+**No era animación: el personaje nunca aterrizaba.** Medido con `-AstraeonSmokePlanetWalk`:
+en caída el **98,3 % del tiempo**, racha continua de **116 segundos**, a altitud constante de
+96 cm y con velocidad puramente tangencial. El clip de salto se quedaba puesto porque el estado
+de movimiento seguía siendo `Falling`.
+
+**Causa.** Al desplazarse tangencialmente sobre una superficie **convexa**, el contacto con la
+esfera es rasante: el impacto cae en el borde de la semiesfera inferior de la cápsula y
+`IsValidLandingSpot` lo descarta —correctamente para su propósito original— como roce de pared y
+no como aterrizaje. El personaje quedaba deslizándose con la velocidad radial recortada contra la
+superficie, sin volver nunca a `Walking`.
+
+El experimento que lo aisló: **saltando quieto aterriza siempre** (racha máxima 1,01 s);
+**saltando en movimiento no aterriza nunca**. Todo lo demás estaba bien y se descartó midiendo:
+gravedad −980 con dirección radial exacta, colisión presente (un barrido propio encontraba la
+esfera a 54 cm con normal 1,000), y el orden de tick no influía (A/B con `TG_PostPhysics` dio el
+mismo 97,7 %).
+
+- **Corregido**: `UAstraeonPlanetGravityComponent::GroundIfRestingOnSurface()` re-apoya al
+  personaje cuando está sobre suelo caminable pero el motor lo tiene por en el aire. Sólo actúa si
+  no está subiendo, si hay superficie dentro del margen bajo los pies y si su pendiente es
+  caminable según el propio umbral del motor.
+- **Medido después**: racha máxima en el aire **1,02 s**, caída 25,6 % con 37 saltos en 148 s
+  —justo lo que suman los saltos—, y el clip de salto acompaña.
+
+**Dos suposiciones de Z corregidas de paso**, ambas prohibidas por el ADR 0004 §4.1:
+
+- `FAstraeonBodyAnimationState::SpeedCms` usaba `Velocity.Size2D()`, o sea el plano XY del mundo.
+  En el ecuador el arriba local es X, así que esa cuenta metía la velocidad vertical dentro de la
+  horizontal. Ahora es la velocidad **tangencial** proyectada contra el arriba del actor, que da
+  el mismo resultado en el mapa plano. Igual en la selección de clip de las manos.
+- `RescueFromVoidIfNeeded` comparaba `Z` de mundo para decidir si el jugador se había caído. En el
+  hemisferio sur "abajo" es Z creciente, así que el rescate quedaba ciego justo en media esfera.
+  Ahora mide la caída a lo largo del arriba local.
+
 ## 2026-09-09 — Resuelto: los cuatro defectos de la primera prueba manual del harness
 
 El propietario probó `TL_10_RadialGravity` a mano y reportó cuatro cosas. Las cuatro tenían

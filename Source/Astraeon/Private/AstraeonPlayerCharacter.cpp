@@ -11,6 +11,7 @@
 #include "Environment/AstraeonItacaInterior.h"
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 #include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
+#include "Planet/Coordinates/AstraeonPlanetFrame.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -1510,14 +1511,23 @@ void AAstraeonPlayerCharacter::RescueFromVoidIfNeeded()
 		return;
 	}
 
-	if (GetActorLocation().Z < LastSafeGroundLocationCm.Z - AstraeonPlayerCharacterRescue::RescueFallDistanceCm)
+	// Cuánto ha caído, medido a lo largo del arriba LOCAL y no del Z del mundo.
+	//
+	// Comparar `Z` funciona sólo mientras arriba sea el Z global. Sobre una esfera, en el
+	// hemisferio sur "abajo" es Z creciente, así que la comparación anterior quedaba ciega a
+	// una caída real justo en la mitad del planeta donde el rescate hace más falta. En el mapa
+	// plano el arriba del actor es el Z global y el resultado es idéntico al de antes.
+	const FVector Up = GetActorUpVector();
+	const double FallenAlongUpCm = FVector::DotProduct(LastSafeGroundLocationCm - GetActorLocation(), Up);
+
+	if (FallenAlongUpCm > AstraeonPlayerCharacterRescue::RescueFallDistanceCm)
 	{
 		// Siempre, no sólo con -AstraeonDiag: un rescate es un síntoma, y sin registro no
 		// se puede saber desde dónde se cayó el jugador.
 		UE_LOG(LogAstraeonDiag, Warning, TEXT("RESCUE from=(%.0f,%.0f,%.1f) to=(%.0f,%.0f,%.1f) fell=%.0fcm %s"),
 			GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z,
 			LastSafeGroundLocationCm.X, LastSafeGroundLocationCm.Y, LastSafeGroundLocationCm.Z,
-			LastSafeGroundLocationCm.Z - GetActorLocation().Z,
+			FallenAlongUpCm,
 			*AstraeonDiagnostics::DescribeGroundUnder(*this, 60000.0f));
 
 		SetActorLocation(LastSafeGroundLocationCm, false, nullptr, ETeleportType::TeleportPhysics);

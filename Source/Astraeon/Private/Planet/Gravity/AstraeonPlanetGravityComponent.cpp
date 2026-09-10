@@ -2,6 +2,8 @@
 
 #include "AstraeonDiagnostics.h"
 #include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
@@ -15,6 +17,14 @@ namespace AstraeonPlanetGravity
 	// planeta de 500 km, el arriba local cambia muy despacio: sin este umbral se reescribiría
 	// cada frame por ruido de coma flotante.
 	constexpr double GravityDirectionEpsilon = 1.0e-4;
+
+	// Margen bajo los pies dentro del cual se considera que el personaje esta apoyado. Es del
+	// orden del MAX_FLOOR_DIST del motor: suficiente para el contacto rasante, poco para no
+	// re-apoyar a alguien que de verdad esta cayendo.
+	constexpr float GroundToleranceCms = 4.0f;
+
+	// Velocidad radial por encima de la cual el personaje esta subiendo y no hay que tocarlo.
+	constexpr float RestingRadialSpeedCms = 1.0f;
 }
 
 UAstraeonPlanetGravityComponent::UAstraeonPlanetGravityComponent()
@@ -114,6 +124,55 @@ void UAstraeonPlanetGravityComponent::TickComponent(float DeltaSeconds, ELevelTi
 
 	ApplyGravityDirection();
 	AlignOwnerToUp(DeltaSeconds);
+	GroundIfRestingOnSurface();
+}
+
+void UAstraeonPlanetGravityComponent::GroundIfRestingOnSurface()
+{
+	ACharacter* Character = GetOwnerCharacter();
+	if (!Character)
+	{
+		return;
+	}
+
+	UCharacterMovementComponent* Movement = Character->GetCharacterMovement();
+	const UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
+	if (!Movement || !Capsule || !Movement->IsFalling())
+	{
+		return;
+	}
+
+	const FVector Up = GetUpVector();
+
+	// Subiendo todavía: es el tramo de ascenso de un salto y no hay nada que re-apoyar.
+	if (FVector::DotProduct(Movement->Velocity, Up) > AstraeonPlanetGravity::RestingRadialSpeedCms)
+	{
+		return;
+	}
+
+	const float HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+	const float Radius = Capsule->GetScaledCapsuleRadius();
+	const FVector Center = Character->GetActorLocation();
+
+	// Esfera del radio de la cápsula barrida hacia el centro del planeta. Reproduce lo que
+	// buscaría el motor, sin el rechazo por contacto rasante que es el defecto que evitamos.
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(AstraeonPlanetGround), false, Character);
+	const float SweepLength = (HalfHeight - Radius) + AstraeonPlanetGravity::GroundToleranceCms;
+
+	if (!GetWorld()->SweepSingleByChannel(Hit, Center, Center - Up * SweepLength, FQuat::Identity,
+		Capsule->GetCollisionObjectType(), FCollisionShape::MakeSphere(Radius), Params))
+	{
+		return;
+	}
+
+	// Sólo cuenta como suelo lo que el propio motor consideraría caminable por su pendiente.
+	if (FVector::DotProduct(Hit.ImpactNormal, Up) < Movement->GetWalkableFloorZ())
+	{
+		return;
+	}
+
+	Movement->SetMovementMode(MOVE_Walking);
 }
 
 void UAstraeonPlanetGravityComponent::ApplyGravityDirection()

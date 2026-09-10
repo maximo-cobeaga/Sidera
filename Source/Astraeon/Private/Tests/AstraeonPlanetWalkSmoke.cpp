@@ -2,11 +2,15 @@
 
 #include "AstraeonPlayerCharacter.h"
 #include "AstraeonPlayerController.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformMisc.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Presentation/AstraeonBodyAnimation.h"
+#include "Presentation/AstraeonFirstPersonRigComponent.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
 #include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
 
@@ -63,12 +67,28 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	}
 
 	// Caminar de frente sin tocar la mirada, que es exactamente lo que se hizo a mano.
-	Character->AddMovementInput(Character->GetActorForwardVector(), 1.0f);
-
-	if (!bJumped && Elapsed >= JumpAtSeconds)
+	// `-AstraeonJumpOnly` lo deja quieto: sirve para separar "no aterriza" de "no aterriza
+	// mientras la direccion de gravedad cambia por moverse".
+	if (!FParse::Param(FCommandLine::Get(), TEXT("AstraeonJumpOnly")))
 	{
-		bJumped = true;
+		Character->AddMovementInput(Character->GetActorForwardVector(), 1.0f);
+	}
+
+	// Saltos repetidos mientras camina, que es la acción que reportó el propietario: "al saltar
+	// y moverme en el aire". Un salto único no lo reproducía: hay que insistir para que la
+	// racha de caída, si se atasca, se acumule y se vea.
+	if (Elapsed - LastJumpSeconds >= JumpEverySeconds)
+	{
+		LastJumpSeconds = Elapsed;
+		++JumpsRequested;
 		Character->Jump();
+	}
+	// Soltar la tecla, como hace una persona. `Jump()` deja `bPressedJump` en true y sin esto
+	// el personaje volvería a saltar en el instante en que toca el suelo, para siempre: seria
+	// un defecto del smoke disfrazado de defecto del juego.
+	else if (Elapsed - LastJumpSeconds >= 0.2f)
+	{
+		Character->StopJumping();
 	}
 
 	const FVector Location = Character->GetActorLocation();
@@ -102,6 +122,32 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 		if (Movement->MovementMode == MOVE_Falling)
 		{
 			++FramesFalling;
+			CurrentFallSeconds += DeltaSeconds;
+			// La racha más larga es lo que distingue "saltó" de "se quedó atascado en el aire".
+			// Un porcentaje agregado no: veinte saltos cortos y un atasco largo dan el mismo.
+			LongestFallSeconds = FMath::Max(LongestFallSeconds, CurrentFallSeconds);
+		}
+		else
+		{
+			CurrentFallSeconds = 0.0f;
+		}
+	}
+
+	// Qué clip elegiría la presentación en este frame. Es lo que el propietario ve trabado, y
+	// medirlo aquí separa "la animación no cambia" de "la física no aterriza".
+	if (const UAstraeonFirstPersonRigComponent* Rig = Character->FindComponentByClass<UAstraeonFirstPersonRigComponent>())
+	{
+		FAstraeonBodyAnimationState AnimState;
+		if (const UCharacterMovementComponent* Movement = Character->GetCharacterMovement())
+		{
+			AnimState.SpeedCms = FAstraeonPlanetFrame::ProjectToTangent(
+				Movement->Velocity, Character->GetActorUpVector()).Size();
+			AnimState.bFalling = Movement->IsFalling();
+		}
+		const FName Clip = FAstraeonBodyAnimation::Choose(AnimState).ClipId;
+		if (Clip == FName(TEXT("Jump_Loop")) || Clip == FName(TEXT("Jump_Start")))
+		{
+			++FramesJumpClip;
 		}
 	}
 
@@ -128,17 +174,20 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	const double FallingRatio = FramesSampled > 0 ? double(FramesFalling) / FramesSampled : 1.0;
 	const double OutOfAltitudeRatio = FramesSampled > 0 ? double(FramesOutOfAltitude) / FramesSampled : 1.0;
 
+	const double JumpClipRatio = FramesSampled > 0 ? double(FramesJumpClip) / FramesSampled : 1.0;
+
 	UE_LOG(LogTemp, Display,
-		TEXT("AstraeonPlanetWalk: frames=%d recorrido=%.0f cm | desalineado=%.1f%% (peor cos=%.3f) | cayendo=%.1f%% | fuera de altitud=%.1f%% (peor=%.0f cm)"),
-		FramesSampled, DistanceTravelledCm,
+		TEXT("AstraeonPlanetWalk: frames=%d recorrido=%.0f cm saltos=%d | desalineado=%.1f%% (peor cos=%.3f) | cayendo=%.1f%% (racha mas larga %.2f s) | clip de salto=%.1f%% | fuera de altitud=%.1f%% (peor=%.0f cm)"),
+		FramesSampled, DistanceTravelledCm, JumpsRequested,
 		MisalignedRatio * 100.0, WorstAlignment,
-		FallingRatio * 100.0,
+		FallingRatio * 100.0, LongestFallSeconds,
+		JumpClipRatio * 100.0,
 		OutOfAltitudeRatio * 100.0, WorstAltitudeCm);
 
 	// Umbrales generosos a propósito: no se pide perfección, se pide que los tres defectos
 	// reportados hayan dejado de ocurrir de forma sostenida.
 	FString Failures;
-	if (DistanceTravelledCm < 10000.0)
+	if (DistanceTravelledCm < 10000.0 && !FParse::Param(FCommandLine::Get(), TEXT("AstraeonJumpOnly")))
 	{
 		Failures += FString::Printf(TEXT("apenas se movio (%.0f cm); "), DistanceTravelledCm);
 	}
@@ -146,9 +195,15 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	{
 		Failures += FString::Printf(TEXT("volcado el %.1f%% del tiempo; "), MisalignedRatio * 100.0);
 	}
-	if (FallingRatio > 0.25)
+	if (FallingRatio > 0.60)
 	{
 		Failures += FString::Printf(TEXT("en caida el %.1f%% del tiempo; "), FallingRatio * 100.0);
+	}
+	// Lo que de verdad importa del salto: que termine. Un salto normal dura menos de 1,5 s;
+	// una racha de 3 s es quedarse atascado en el aire, que es el defecto reportado.
+	if (LongestFallSeconds > 3.0f)
+	{
+		Failures += FString::Printf(TEXT("racha en el aire de %.2f s; "), LongestFallSeconds);
 	}
 	if (OutOfAltitudeRatio > 0.05)
 	{

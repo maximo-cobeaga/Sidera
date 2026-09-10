@@ -39,7 +39,7 @@ private:
 
 	// El salto va en mitad del recorrido: el deslizamiento reportado aparecía al saltar y
 	// desplazarse en el aire.
-	static constexpr float JumpAtSeconds = 30.0f;
+	static constexpr float JumpEverySeconds = 4.0f;
 
 	// Margen de altitud tolerado sobre la superficie. Por debajo, el personaje atravesó la
 	// esfera; muy por encima, salió despedido.
@@ -55,7 +55,11 @@ private:
 	float Elapsed = 0.0f;
 	bool bStartedGame = false;
 	float LastProgressLogSeconds = 0.0f;
-	bool bJumped = false;
+	float LastJumpSeconds = 0.0f;
+	int32 JumpsRequested = 0;
+	float CurrentFallSeconds = 0.0f;
+	float LongestFallSeconds = 0.0f;
+	int32 FramesJumpClip = 0;
 	bool bFinished = false;
 
 	// Se acumulan en vez de abortar al primer frame malo: un frame aislado no es un defecto, y

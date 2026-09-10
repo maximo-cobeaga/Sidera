@@ -98,6 +98,16 @@ private:
 	bool TryBindHarness();
 
 	void ApplyGravityDirection();
+
+	// Re-apoya al personaje cuando esta sobre suelo caminable pero el motor lo sigue teniendo
+	// por en el aire.
+	//
+	// Por que hace falta: al desplazarse tangencialmente sobre una superficie CONVEXA, el
+	// contacto con la esfera es rasante y `IsValidLandingSpot` lo descarta como roce de pared,
+	// no como aterrizaje. Medido: saltando quieto aterriza siempre -racha maxima 1,01 s-, y
+	// saltando en movimiento no aterriza nunca -racha de 86 s deslizandose-. Es el defecto que
+	// se reporto como "la animacion de salto se traba mientras patina".
+	void GroundIfRestingOnSurface();
 	void AlignOwnerToUp(float DeltaSeconds);
 
 	ACharacter* GetOwnerCharacter() const;

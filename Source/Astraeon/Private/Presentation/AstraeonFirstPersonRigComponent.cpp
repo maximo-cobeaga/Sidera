@@ -1,5 +1,7 @@
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 
+#include "Planet/Coordinates/AstraeonPlanetFrame.h"
+
 #include "AstraeonGameInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimSingleNodeInstance.h"
@@ -275,7 +277,10 @@ UAnimSequence* UAstraeonFirstPersonRigComponent::SelectLocomotionSequence() cons
 		return LandSequence;
 	}
 
-	const float SpeedCms = Movement->Velocity.Size2D();
+	// Tangencial contra el arriba del personaje, no el plano XY del mundo. Misma razon que en
+	// UpdateBodyAnimation: sobre una esfera, Size2D mezcla vertical con horizontal.
+	const float SpeedCms = FAstraeonPlanetFrame::ProjectToTangent(
+		Movement->Velocity, OwningCharacter->GetActorUpVector()).Size();
 	if (SpeedCms >= RunSpeedThresholdCms && RunSequence)
 	{
 		return RunSequence;
@@ -313,7 +318,18 @@ void UAstraeonFirstPersonRigComponent::UpdateBodyLocomotion()
 	if (Movement)
 	{
 		const FVector Velocity = Movement->Velocity;
-		State.SpeedCms = Velocity.Size2D();
+		// Velocidad TANGENCIAL, proyectada contra el arriba del propio personaje.
+		//
+		// Antes era `Velocity.Size2D()`, o sea sqrt(X²+Y²): el plano XY del MUNDO. Funciona
+		// mientras arriba sea el Z global, y eso es exactamente lo que el ADR 0004 prohíbe
+		// asumir. Sobre una esfera, en el ecuador el arriba local es X, así que esa cuenta metía
+		// la velocidad vertical dentro de la horizontal y dejaba fuera una de las horizontales:
+		// el clip elegido dejaba de corresponder al movimiento real.
+		//
+		// Usar el arriba del actor y no el del planeta hace que la fórmula valga en los dos
+		// mundos: en el mapa plano la cápsula está vertical, el arriba del actor es el Z global
+		// y el resultado es idéntico a Size2D().
+		State.SpeedCms = FAstraeonPlanetFrame::ProjectToTangent(Velocity, OwningCharacter->GetActorUpVector()).Size();
 		// La velocidad al espacio del actor: X hacia donde mira, Y a su derecha. Sin esto,
 		// caminar de lado se veía con el clip de caminar de frente.
 		const FVector Local = OwningCharacter->GetActorRotation().UnrotateVector(Velocity);
