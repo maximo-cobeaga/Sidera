@@ -1,3 +1,21 @@
+## Estado vigente 2026-09-10 — Fase 1 cerrada; comienza la ejecución de Fase 2
+
+El cierre humano y técnico de Fase 1 está registrado en `PHASE_STATUS.md` y en la etiqueta
+`fase-1-nucleo-planetario-cerrada`. Las entradas inferiores son históricas: sus pendientes de
+locomoción y cuarentena no reabren esa puerta. `SurfaceContract` vuelve en Fase 3 por ADR 0005.
+
+Primera capacidad de Fase 2 implementada: patches direccionables y reproducibles, constructor
+independiente con skirts y servicio de generación cancelable fuera del game thread. Siete
+pruebas nuevas; **82/82 Automation**. `TL_11` consume el constructor del patch raíz; su runtime
+todavía conserva seis caras fijas y el doble búfer de colisión heredado.
+
+Verificación de integración: editor y juego Development compilan, cardinales 26/26 y
+caminata de 250 s pasan; 141.224 cm, 62 saltos y cero cortes de locomoción. Captura revisada.
+Perfil de regresión: 209,3 FPS, p99 5,56 ms y un pico aislado de 400 ms; detalle en `TEST_REPORT.md`.
+
+Siguiente paso: P2.3, selector quadtree/LOD balanceado y backend que conecte los workers al
+runtime en `TL_12_PatchLOD`. Los límites de dos trabajos y 64 direcciones son provisionales;
+deben medirse junto al planificador. La puerta de Fase 2 permanece abierta; P2.3–P2.8 pendientes.
 
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 

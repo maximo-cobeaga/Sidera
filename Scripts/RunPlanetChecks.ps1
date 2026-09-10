@@ -35,5 +35,23 @@ $expected=switch($Check) {
 }
 if ($content -notmatch [regex]::Escape($expected)) { throw "Missing completion marker: $label" }
 $successes=[regex]::Matches($content,'Test Completed. Result=\{Success\}').Count
-if ($Check -eq 'Automation' -and $successes -lt 75) { throw "Incomplete queue: $successes tests" }
+if ($Check -eq 'Automation') {
+    $discovered=[regex]::Match($content,"Found (\d+) automation tests based on 'Astraeon'")
+    if (-not $discovered.Success -or $successes -lt 82 -or $successes -ne [int]$discovered.Groups[1].Value) {
+        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 82"
+    }
+    foreach ($required in @(
+        'Astraeon.Planet.Patches.AddressHierarchy',
+        'Astraeon.Planet.Patches.StableHashGoldenVectors',
+        'Astraeon.Planet.Patches.MeshBudgetAndPrecision',
+        'Astraeon.Planet.Patches.SharedEdgesAndLodSamples',
+        'Astraeon.Planet.Patches.InvalidAndCancelledBuilds',
+        'Astraeon.Planet.Streaming.RevisionsCancellationAndBackpressure',
+        'Astraeon.Planet.Streaming.SubmissionOrderDeterminism'
+    )) {
+        if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
+            throw "Missing required Phase 2 test: $required"
+        }
+    }
+}
 Write-Output "PLANET_CHECK $Check PASS tests=$successes log=$log"

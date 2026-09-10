@@ -1,3 +1,53 @@
+## 2026-09-10 — Fase 2, P2.1/P2.2: patches independientes y workers
+
+Implementación identificable en `Planet/Patches/`, `Planet/Streaming/` y
+`Tests/AstraeonPlanetPatchTests.cpp`; integración del constructor mediante `BuildFace`.
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' Astraeon Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Profile
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+```
+
+Resultados: editor y target de juego Development **`Succeeded`**, sin warnings de compilación;
+**82/82 Automation**, cero fallos; caminata de 250 s `RESULTADO=OK`; **Cardinals PASS en las
+26 direcciones**, salto y aterrizaje comprobados. Se repitió Automation para verificar el
+guardián actualizado: ahora exige todas las pruebas descubiertas y las siete nuevas por nombre.
+No aparecieron warnings nuevos de proyecto. Persisten los dos avisos del motor sobre iconos
+VisionOS en los smokes y `EditorPerf`/sección `Compile` en Automation, presentes en el baseline.
+
+Las siete pruebas nuevas cubren jerarquía y bordes de dirección, vector fijo de hash,
+separación de canales/versiones/seed, presupuesto de malla, faldones radiales separados de
+colisión, precisión de conversión local float a los tres tiers, coincidencia de normales y
+posiciones entre caras y muestras de LOD consecutivo, entradas inválidas, cancelación,
+presión de cola, revisión obsoleta tras descarga y determinismo con orden de solicitud invertido.
+Las 75 anteriores siguen pasando; ninguna sale de cuarentena en esta iteración.
+
+Regresión de `TL_11`: **141.224 cm**, 62 saltos, 0,0% desalineado, 0,0% fuera de altitud,
+racha máxima de caída 1,04 s, **cero frames en Idle mientras camina**. Continúan 434
+reconstrucciones de colisión en 250 s; esa deuda heredada se paga en P2.4.
+
+Perfil: [perf_baseline_20260910_021547.json](evidencia/perf_baseline_20260910_021547.json),
+1920×1080, 10 s de calentamiento y 30 s de muestra, **209,3 FPS medios**, p99 **5,56 ms**,
+memoria 2.256→2.282 MB. Un pico aislado de 400 ms; no se atribuye causalmente ni se oculta.
+El baseline previo tenía también un pico de 400 ms. Esta es evidencia de regresión del mapa
+de seis caras, **no** perfil de LOD ni de workers materializando en gameplay.
+
+Captura inspeccionada: `Saved/Screenshots/WindowsEditor/PlanetWalkLab.png`, generada a las
+02:15:37: terreno y horizonte presentes, orientación coherente y herramienta visible. No
+reemplaza la futura inspección visual de `TL_12`/`TL_13`/`TL_14`.
+
+Fallos encontrados y corregidos durante esta iteración: copia implícita del manager de
+futures al exportar la clase (C2280); assert de `TArray::Add` por argumento dentro del mismo
+array al construir faldones. Se resolvieron con propietario no copiable y copias locales,
+respectivamente, manteniendo todas las pruebas. Un intento de build Game fue bloqueado al
+rotar el log de UBT en AppData; se reejecutó con la autorización de sandbox requerida.
+
+La Fase 2 **no cierra**: faltan quadtree/LOD y backend, integración de workers, anillo de
+colisión, marcos locales en vivo, deltas y save v3, recuperación de dos pruebas, Insights y
+build empaquetada. Estado detallado en `PHASE_STATUS.md` y `BACKLOG.md` P2.3–P2.8.
 
 ## Estado actualizado 2026-09-10 — `Terrain.Relief` recuperada sobre el contrato radial
 

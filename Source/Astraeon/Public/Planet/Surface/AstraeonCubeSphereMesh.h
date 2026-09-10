@@ -10,7 +10,8 @@ struct ASTRAEON_API FAstraeonCubeSphereMesh
 	TArray<FVector> Normals;
 	TArray<FVector2D> UVs;
 	TArray<int32> Indices;
-	// Pure data builder. Origin is subtracted in double before PMC converts local vertices.
+	// Compatibility adapter: a whole face is a Lod-0 patch without skirts. Quads must
+	// be a power of two in [4,128]. Origin is subtracted in double before PMC conversion.
 	static bool BuildFace(const FAstraeonPlanetDefinition& Planet, EAstraeonPlanetFace Face,
 		int32 Quads, FAstraeonCubeSphereMesh& Out);
 };

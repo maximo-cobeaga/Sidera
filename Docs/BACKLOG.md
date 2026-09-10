@@ -1,6 +1,22 @@
 # Backlog — ASTRAEON
 
-## Estado vigente 2026-09-10 — Fase 1 en curso
+## Estado vigente 2026-09-10 — Fase 2 en curso
+
+La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
+`fase-1-nucleo-planetario-cerrada`. Orden de ejecución de la Fase 2:
+
+- [x] P2.1 — Dirección de patch, hash estable versionado y constructor independiente con skirts.
+      Integrado como constructor del patch raíz en `TL_11`; cinco pruebas de contrato nuevas.
+- [x] P2.2 — Servicio de workers acotados, cancelación y rechazo de resultados obsoletos por revisión.
+      Dos pruebas nuevas con tareas reales; conexión al runtime mediante el selector en P2.3.
+- [ ] P2.3 — Quadtree/LOD balanceado, backend de malla e integración de streaming en `TL_12`.
+- [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
+- [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
+- [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.
+- [ ] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
+- [ ] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.
+
+## Histórico 2026-09-10 — Trabajo de Fase 1 y pulido pendiente
 
 - [x] Contrato C++ `FAstraeonPlanetDefinition` validable.
 - [x] `FAstraeonPlanetCoordinates`: dirección unitaria ↔ cara/UV de cube-sphere.
@@ -24,8 +40,7 @@
 - [x] Corregido el corte de locomoción: la colisión cercana se rehacía con un solo componente y
       dejaba al jugador sin suelo dos frames cada 312 cm. Doble búfer; de 53 cortes en 40 s a 0 y
       24 % más de distancia recorrida. Guardián permanente en el smoke (`KNOWN_ISSUES`).
-- [ ] **Que el propietario vuelva a mirar la locomoción ya corregida.** Con eso el criterio humano
-      de la puerta queda entero, y recién ahí tiene sentido juzgar los codos.
+- [x] Locomoción corregida confirmada por el propietario al cerrar Fase 1 (`PHASE_STATUS.md`).
 - [x] Pulido Bridge de brazos/salto guardado en Blender, importado como variante
       `/Optimized_Polished` y verificado en editor y build Development.
 - [x] Pose A abierta en `Idle`, `Walk_*` y `Run_*`; histeresis y continuidad de fase en el
@@ -43,8 +58,8 @@
 Nota de corrección visual: el set FP anterior estaba congelado en la pose del escáner; la variante
 `PolishedFP` ya está conectada y validada con movimiento angular real.
 
-Este bloque vigente complementa las listas históricas inferiores; no se considera cerrada la
-Fase 1 hasta completar sus pruebas y su puerta de salida.
+Este bloque conserva el trabajo de Fase 1. Su puerta está cerrada; el pulido artístico pendiente
+no reabre esa puerta ni desplaza los entregables de Fase 2.
 
 ## Fase 5 — Protagonista, Ítaca y vuelo: diferido a propósito
 
@@ -106,9 +121,8 @@ arriba y marcaba como abierto trabajo ya entregado. Un agente que la leyera cree
 - [x] `FAstraeonPlanetCoordinates`: `DirectionFaceUvRoundTrip` cubre una dirección por cada una de
       las seis caras y comprueba UV válida e identidad; `Topology.FaceEdgesMatch` cubre las
       aristas; `Surface.ContinuityAndInvalidInput`, las entradas inválidas.
-- [ ] **Migrar `AstraeonTerrainField` al dominio radial.** Es el trabajo grande y el más
-      preparado: `GetHeightCm` ya es estática y pura de `(seed, x, y)`, escrita para que la
-      generación planetaria la consultara antes de que el terreno existiera.
+- [x] Relieve migrado a `FAstraeonPlanetSurface`, dos capas y consulta por dirección global.
+      El contexto regional vuelve en Fase 3 por ADR 0005.
 - [x] `APlanetRuntime` con las seis caras a LOD bajo, y `TL_11_CubeSphereClosed`.
 - [x] Tiers Lab / Target / Stress, cubiertos por `Planet.Topology.MeshAtEngineeringTiers`. El radio
       es un dato (`RadiusCm`), no un `Scale`.
@@ -122,7 +136,7 @@ arriba y marcaba como abierto trabajo ya entregado. Un agente que la leyera cree
 
 *Criterio de salida:* vuelta lógica completa sin perder orientación, sin costura abierta entre
 caras, salto y caída correctos en polos y bordes, misma seed = mismo relieve. Al cerrarla salen de
-cuarentena `Terrain.Relief` y `Terrain.SurfaceContract`.
+cuarentena `Terrain.Relief`; `Terrain.SurfaceContract` vuelve en Fase 3 por ADR 0005.
 
 ## 2026-09-07 — Protagonista completo solicitado mediante Bridge
 

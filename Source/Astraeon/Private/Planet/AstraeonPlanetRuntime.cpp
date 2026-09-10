@@ -59,7 +59,7 @@ void AAstraeonPlanetRuntime::OnConstruction(const FTransform& Transform)
 
 bool AAstraeonPlanetRuntime::Rebuild()
 {
-	if (!GetDefinition().IsValid() || FaceQuads<4 || FaceQuads>128
+	if (!GetDefinition().IsValid() || FaceQuads<4 || FaceQuads>128 || !FMath::IsPowerOfTwo(FaceQuads)
 		|| !GetActorScale3D().Equals(FVector::OneVector) || !GetActorQuat().Equals(FQuat::Identity))
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlanetRuntime: invalid definition/grid/transform; radius is data, body axes fixed"));

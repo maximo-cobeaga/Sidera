@@ -1,5 +1,36 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — Primer incremento de Fase 2: identidad y generación de patches
+
+La dirección de patch usa `BodyId` del contrato existente, cara, nivel y coordenadas enteras.
+LOD 0 es una cara; cada nivel duplica la resolución por eje, hasta 24. La identidad de una
+entidad persistente sigue siendo planetaria, independiente de esa dirección de representación.
+
+`StableHash64` es FNV-1a sobre bytes explícitos, con formato propio 1: `ASTPATCH`, byte 1,
+BodyId ASCII en minúsculas terminado en cero y ocho enteros LE32 (WorldSeed, BodySeed, canal,
+cara, LOD, X, Y, versión de generador). Se rechazan identificadores fuera de letras ASCII,
+dígitos, `_`, `-`, `.`. No se usan índices internos de FName ni memoria nativa de structs.
+El vector fijo de referencia es `15f6d44ed0533175`; la prueba fija sus entradas.
+
+La altura y las normales siguen consultándose por dirección global y BodySeed. **PatchSeed no
+alimenta la altura**, porque eso rompería la coincidencia de dos patches vecinos. El relieve
+sigue en versión 3: no se modifica la geografía aprobada en Fase 1.
+
+Rejilla predeterminada 33×33, potencias de dos entre 4 y 128 quads. Los índices de superficie
+se separan de los faldones radiales para que la colisión no incluya paredes artificiales.
+El constructor mantiene el origen y la resta en double/cm. El faldón predeterminado de 100 cm
+es una entrada provisional; su cobertura entre LODs debe medirse al integrar el selector.
+
+`BuildFace` pasa a ser el adaptador del patch raíz sin faldones; `TL_11` consume el constructor
+nuevo conservando sus seis caras y su relevo de colisión. El generador asíncrono se verifica
+por separado antes de conectar el runtime al planificador LOD. Acepta dos trabajos pendientes
+y hasta 64 direcciones registradas; devuelve `AtCapacity` explícito y requiere `Release` al
+descargar. Son límites iniciales de la infraestructura, no un presupuesto de producción
+aprobado. Las revisiones no se reinician al descargar; cada resultado debe seguir vigente
+en el instante de commit. Los workers sólo capturan copias y un token de cancelación.
+
+No se elige backend de producción ni se cierra la puerta de Fase 2 con esta evidencia.
+
 ## 2026-09-10 — Pose A y continuidad de locomoción
 
 La captura del propietario mostró que la pose base de `Idle` y locomoción cerraba los brazos

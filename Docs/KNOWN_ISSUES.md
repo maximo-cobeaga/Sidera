@@ -1,3 +1,17 @@
+## 2026-09-10 — Deuda de integración de Fase 2 tras P2.1/P2.2
+
+- **Alta, abierta:** el runtime continúa con seis caras fijas; el servicio de workers todavía
+  no está conectado a un selector quadtree/LOD. El constructor sí se comparte con `TL_11`.
+  No usar esta iteración como evidencia de streaming jugable a 500 km.
+- **Media, abierta:** faldón predeterminado de 100 cm sin dimensionamiento frente al error de
+  LOD. Las muestras compartidas coinciden, pero eso no demuestra que el borde interpolado
+  fino/grueso quede cubierto en una ruta visible. Medir en P2.3 antes de ajustar o hacer stitching.
+- **Media, heredada:** sigue pendiente el coste excesivo de reconstrucción de colisión
+  documentado abajo. Corresponde a P2.4; no se altera el relevo validado de Fase 1.
+- **Resueltos durante desarrollo:** exportar una clase propietaria de `TFuture` instanciaba
+  copia implícita incompatible; se prohíbe copiar el manager. El primer test de skirts detectó
+  un assert de `TArray::Add` al copiar desde el mismo array; se toman copias locales antes de
+  añadir. Build posterior y las 82 pruebas pasan, sin desactivar aserciones.
 
 ## 2026-09-10 — Resuelto: la locomoción se cortaba 1,3 veces por segundo, y no era animación
 
