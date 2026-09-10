@@ -1,5 +1,19 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P3.1: Khepri mide 500 km; Region A tiene un lugar fijo
+
+**Radio de Khepri: 500 km**, elegido por el propietario entre 50, 500 y 2.500 km. Es el tier Target
+probado en la puerta de la Fase 2: el horizonte queda a ~1,3 km a la altura de los ojos y la
+curvatura sólo se nota desde altura. El perfil del planeta gana radio y seed de cuerpo, y de ahí
+sale su `FAstraeonPlanetDefinition`. La masa se deriva de la gravedad authored (8,05 m/s²) para
+que no puedan contradecirse. El relieve pertenece al planeta: toda sesión camina el mismo Khepri.
+
+**Region A es un lugar, no una seed.** Su diseño es fijo ("Region A fija", 2026-09-06), así que su
+posición sobre Khepri también: la resuelve `FAstraeonPlanetTraversal` una vez, con una seed derivada
+del id de la región, contra el plan de la región con Ítaca en la zona de aterrizaje. La seed de
+contenido de la sesión no la mueve. El plan en metros se lleva a la esfera por mapa exponencial y
+de vuelta; a 500 km la región de 500 m se desvía del plano tangente menos de 7 cm en su borde.
+
 ## 2026-09-10 — P2.7: tránsito validado sobre la esfera
 
 El validador plano resolvía una sub-seed de relieve para que la región fuese transitable. En un

@@ -36,6 +36,12 @@ struct ASTRAEON_API FAstraeonPlanetRegionSurface
 
 	static FAstraeonPlanetRegionSurface Place(const FAstraeonPlanetDefinition& Planet, const FVector& Anchor, const FAstraeonPlanetRegionPlan& Plan);
 	FVector ToDirection(const FVector2D& PlanCm) const;
+	// Inverse of ToDirection: where a direction falls on the plan. Exact on the region.
+	FVector2D ToPlan(const FVector& Direction) const;
+	// Takes the plan's axes (+X, +Y, up) to the tangent frame at `Direction`: the plan's axes at
+	// the anchor, carried along the great circle. A rigid thing authored on the plan keeps its
+	// heading on the sphere.
+	FQuat PlanRotationAt(const FVector& Direction) const;
 	// The same rule as the flat field: Itaca's rigid footprint is a plateau, the ground is cleared
 	// around flat spots, and mountains rise everywhere except near a playable point.
 	double HeightCm(const FVector2D& PlanCm) const;

@@ -1,7 +1,7 @@
 param(
     [ValidateSet('Map','Walk','Cardinals','Automation','Critical','PatchLODMap','PatchLOD','Observer','LabMap','State')][string]$Check='Automation',
     # Walk, Cardinals and LabMap: which planet lab. Each map carries its radius as data.
-    [ValidateSet('TL_11_CubeSphereClosed','TL_13_CollisionRing','TL_14_FrameTransition')][string]$Map='TL_11_CubeSphereClosed',
+    [ValidateSet('TL_11_CubeSphereClosed','TL_13_CollisionRing','TL_14_FrameTransition','L_Khepri')][string]$Map='TL_11_CubeSphereClosed',
     [double]$RadiusCm=20000,
     [int]$Seconds=250,
     [switch]$Profile,
@@ -77,8 +77,8 @@ if ($content -notmatch [regex]::Escape($expected)) { throw "Missing completion m
 $successes=[regex]::Matches($content,'Test Completed. Result=\{Success\}').Count
 if ($Check -eq 'Automation') {
     $discovered=[regex]::Match($content,"Found (\d+) automation tests based on 'Astraeon'")
-    if (-not $discovered.Success -or $successes -lt 96 -or $successes -ne [int]$discovered.Groups[1].Value) {
-        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 96"
+    if (-not $discovered.Success -or $successes -lt 97 -or $successes -ne [int]$discovered.Groups[1].Value) {
+        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 97"
     }
     foreach ($required in @(
         'Astraeon.Planet.Patches.AddressHierarchy',
@@ -103,7 +103,8 @@ if ($Check -eq 'Automation') {
         'Astraeon.Planet.State.DefeatSurvivesUnloadReloadAndSave',
         'Astraeon.Persistence.SaveGame.V3PlanetaryLocation',
         'Astraeon.WorldGen.Terrain.Connectivity',
-        'Astraeon.WorldGen.Terrain.TraversalDetectsWalls'
+        'Astraeon.WorldGen.Terrain.TraversalDetectsWalls',
+        'Astraeon.WorldGen.Khepri.RegionAOnThePlanet'
     )) {
         if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
             throw "Missing required Phase 2 test: $required"

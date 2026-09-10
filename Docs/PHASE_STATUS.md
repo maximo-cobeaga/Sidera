@@ -33,6 +33,12 @@ cuarentena vacía** como puerta. Lo que la Fase 2 deja preparado para ella: vali
 esférico (`FAstraeonPlanetTraversal`), identidad y estado de entidades, save v3 y la fauna
 planetaria apagada a la espera de su contenido.
 
+### Avance 2026-09-10 — P3.1
+
+Khepri es un cuerpo de 500 km (decisión del propietario) y Region A tiene un lugar fijo sobre él,
+validado transitable. `L_Khepri` se camina desde la salida de Ítaca de la región. Orden completo en
+`BACKLOG.md`. Puerta de la fase sin casillas marcadas todavía.
+
 ---
 
 ## Histórico: **2 — Patches, LOD, precisión y estado mutable** — puerta PASADA

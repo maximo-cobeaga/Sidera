@@ -13,6 +13,10 @@ LABS = {
     # Target tier, 500 km, walkable: local frames keep physics and rendering near the origin.
     # The Stress tier (2500 km) is the same map with -AstraeonPlanetRadiusCm=250000000.
     'TL_14_FrameTransition': dict(radius_cm=50000000.0, near_collision=True, spawn=(1.0, 0.0, 1.0)),
+    # Phase 3 game map: Khepri from its profile (500 km) and Region A on it. The radius here only
+    # checks what the profile sets; the spawn is replaced at BeginPlay by the region's Itaca exit.
+    'L_Khepri': dict(radius_cm=50000000.0, near_collision=True, spawn=(0.0, 0.0, 1.0),
+                     planet_profile='planet_khepri', region_profile='region_first_signal_basin'),
 }
 
 
@@ -48,6 +52,8 @@ def main():
         planet.set_actor_label('Planet_' + name)
         sun = u.EditorLevelLibrary.spawn_actor_from_class(u.DirectionalLight, u.Vector(0, 0, 0), u.Rotator(-45, 0, 0))
         sun.light_component.set_mobility(u.ComponentMobility.MOVABLE)
+    planet.set_editor_property('planet_profile_id', u.Name(lab.get('planet_profile', 'None')))
+    planet.set_editor_property('region_profile_id', u.Name(lab.get('region_profile', 'None')))
     planet.set_editor_property('radius_cm', lab['radius_cm'])
     planet.set_editor_property('near_collision', lab['near_collision'])
     planet.set_editor_property('spawn_direction', spawn)

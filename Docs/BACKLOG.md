@@ -1,9 +1,23 @@
 # Backlog — ASTRAEON
 
-## Estado vigente 2026-09-10 — Fase 2 cerrada; Fase 3 abierta
+## Estado vigente 2026-09-10 — Fase 3 en curso: La primera señal esférica
 
-La Fase 2 cerró con la etiqueta `fase-2-patches-lod-cerrada` (`PHASE_STATUS.md`). Sigue la Fase 3,
-*La primera señal esférica*, con su orden en `PLAN_TRANSICION_EJECUCION.md` §4.
+La Fase 2 cerró con la etiqueta `fase-2-patches-lod-cerrada` (`PHASE_STATUS.md`). Orden de la Fase 3:
+
+- [x] P3.1 — Khepri como cuerpo (500 km, por decisión del propietario) y Region A como región
+      planetaria en un lugar fijo, validado transitable; mapa `L_Khepri`.
+- [ ] P3.2 — Relieve regional dentro de los patches (meseta de Ítaca, exclusiones de montaña) y una
+      sola consulta de altura; recuperar `Terrain.SurfaceContract`.
+- [ ] P3.3 — Contenido sobre la esfera: Ítaca, estaciones, escotilla, recursos, señal, anomalía,
+      nidos y obras; rutas críticas antes que decoración.
+- [ ] P3.4 — Escáner, mapa y bitácora en coordenadas planetarias.
+- [ ] P3.5 — Llegada controlada: nueva partida y continuar sobre Khepri.
+- [ ] P3.6 — Vaciar la cuarentena (13 pruebas) sobre la esfera.
+- [ ] P3.7 — Rendimiento, build empaquetada, tres recorridos completos y prueba humana.
+
+Arte: la Fase 3 no está bloqueada por Blender ni Higgsfield; los seis assets que pide existen en Q1.
+Subirlos a Q2 es trabajo paralelo del propietario (emisor de la señal primero). Los créditos de
+Higgsfield del plan free están agotados.
 
 Orden de ejecución de la Fase 2, cumplido:
 

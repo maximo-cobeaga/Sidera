@@ -1,6 +1,8 @@
 #include "WorldGen/AstraeonWorldProfiles.h"
 
 #include "WorldGen/AstraeonWorldGenerator.h"
+#include "Planet/Patches/AstraeonPlanetPatchAddress.h"
+#include "Planet/Surface/AstraeonPlanetTraversal.h"
 
 namespace AstraeonMvpWorld
 {
@@ -37,7 +39,42 @@ FAstraeonPlanetProfile UAstraeonWorldProfiles::GetMvpPlanetProfile()
 	Profile.Environment.Atmosphere.Argon = 0.04f;
 	Profile.Environment.bBreathable = UAstraeonWorldGenerator::IsBreathable(Profile.Environment);
 	Profile.Environment.EnvironmentalRisk01 = UAstraeonWorldGenerator::ComputeEnvironmentalRisk01(Profile.Environment);
+	// 500 km: the Target tier proven at the Phase 2 gate, chosen by the owner on 2026-09-10.
+	Profile.RadiusCm = 50000000.0;
+	Profile.BodySeed = 4242;
 	return Profile;
+}
+
+bool UAstraeonWorldProfiles::TryGetPlanetDefinition(FName PlanetProfileId, FAstraeonPlanetDefinition& OutDefinition)
+{
+	if (PlanetProfileId != GetMvpPlanetProfileId()) return false;
+	const FAstraeonPlanetProfile Profile = GetMvpPlanetProfile();
+	OutDefinition = FAstraeonPlanetDefinition();
+	OutDefinition.BodyId = Profile.PlanetProfileId;
+	OutDefinition.RadiusCm = Profile.RadiusCm;
+	OutDefinition.SurfaceGravityMS2 = Profile.Environment.GravityMS2;
+	// Mass follows gravity and radius (g = GM/R^2), so the two can never contradict each other.
+	OutDefinition.MassKg = Profile.Environment.GravityMS2 * FMath::Square(Profile.RadiusCm / 100.0) / 6.67430e-11;
+	OutDefinition.BodySeed = Profile.BodySeed;
+	OutDefinition.WorldSeed = Profile.BodySeed;
+	return OutDefinition.IsValid();
+}
+
+bool UAstraeonWorldProfiles::ResolvePlanetRegion(FName RegionProfileId, FAstraeonPlanetRegionSurface& OutRegion)
+{
+	FAstraeonRegionProfile Region;
+	FAstraeonPlanetDefinition Planet;
+	if (!TryGetRegionProfile(RegionProfileId, Region) || !TryGetPlanetDefinition(Region.PlanetProfileId, Planet)) return false;
+	// The region's own seed, from its id through the stable hash: sessions never move it.
+	const FString Id = RegionProfileId.ToString().ToLower();
+	const FTCHARToUTF8 Utf8(*Id);
+	const int32 RegionSeed = int32(FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Utf8.Get()), Utf8.Length())) & 0x7fffffff);
+	// Its content is fixed too: any content seed yields the same plan, with Itaca at the landing zone.
+	const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(RegionSeed, FVector(Region.LandingZoneMeters * 100.0, 0.0));
+	const FAstraeonPlanetRegionResolution Resolution = FAstraeonPlanetTraversal::ResolveRegion(Planet, RegionSeed, Plan);
+	if (!Resolution.Report.bPassed) return false;
+	OutRegion = FAstraeonPlanetRegionSurface::Place(Planet, Resolution.Anchor, Plan);
+	return true;
 }
 
 FAstraeonRegionProfile UAstraeonWorldProfiles::GetRegionAProfile()

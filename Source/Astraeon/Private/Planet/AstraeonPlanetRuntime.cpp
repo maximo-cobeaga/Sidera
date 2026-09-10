@@ -1,6 +1,7 @@
 #include "Planet/AstraeonPlanetRuntime.h"
 #include "Planet/Collision/AstraeonPlanetCollisionRing.h"
 #include "Planet/State/AstraeonPlanetEntities.h"
+#include "WorldGen/AstraeonWorldProfiles.h"
 #include "Planet/State/AstraeonRuntimeStateManager.h"
 #include "AstraeonGameInstance.h"
 #include "Creatures/AstraeonCreatureActor.h"
@@ -48,6 +49,7 @@ AAstraeonPlanetRuntime::AAstraeonPlanetRuntime()
 FAstraeonPlanetDefinition AAstraeonPlanetRuntime::GetDefinition() const
 {
 	FAstraeonPlanetDefinition P;
+	if (!PlanetProfileId.IsNone() && UAstraeonWorldProfiles::TryGetPlanetDefinition(PlanetProfileId, P)) return P;
 	P.BodyId = TEXT("planet_cube_sphere_lab"); P.RadiusCm=RadiusCm;
 	P.SurfaceGravityMS2=GravityMS2;
 	// Lab mass is derived to avoid contradictory mass/gravity data. Not Khepri canon.
@@ -64,6 +66,13 @@ void AAstraeonPlanetRuntime::OnConstruction(const FTransform& Transform)
 
 bool AAstraeonPlanetRuntime::Rebuild()
 {
+	// A profiled planet's radius, gravity and seed are its profile's: the properties mirror it so
+	// code that reads them directly sees the same body the definition describes.
+	FAstraeonPlanetDefinition Profiled;
+	if (!PlanetProfileId.IsNone() && UAstraeonWorldProfiles::TryGetPlanetDefinition(PlanetProfileId, Profiled))
+	{
+		RadiusCm=Profiled.RadiusCm; GravityMS2=Profiled.SurfaceGravityMS2; BodySeed=Profiled.BodySeed;
+	}
 	const auto P=GetDefinition();
 	if (!P.IsValid() || FaceQuads<4 || FaceQuads>MaxBuilderQuads || !FMath::IsPowerOfTwo(FaceQuads)
 		|| !GetActorScale3D().Equals(FVector::OneVector) || !GetActorQuat().Equals(FQuat::Identity))
@@ -243,8 +252,16 @@ void AAstraeonPlanetRuntime::BeginPlay()
 	if (bNearCollision) CollisionStreaming=MakeUnique<FAstraeonPlanetStreamingManager>();
 	bSpawnFauna|=FParse::Param(FCommandLine::Get(),TEXT("AstraeonPlanetFauna"));
 	if (!Rebuild()) return;
-	UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: Ready radius_cm=%.0f seed=%d finest_lod=%d near_collision=%d"),
-		RadiusCm,BodySeed,FAstraeonPlanetLODManager::FinestAllowedLod(GetDefinition(),LODSettings),bNearCollision);
+	if (!RegionProfileId.IsNone())
+	{
+		// The region must belong to this very body; a mismatch is a broken map, not a fallback.
+		bHasRegion=UAstraeonWorldProfiles::ResolvePlanetRegion(RegionProfileId,Region) && Region.Planet.BodyId==GetDefinition().BodyId;
+		if (bHasRegion) SpawnDirection=Region.ToDirection(Region.Plan.StartCm);
+		else UE_LOG(LogTemp,Error,TEXT("PlanetRuntime: region %s could not be placed on %s"),*RegionProfileId.ToString(),*GetDefinition().BodyId.ToString());
+	}
+	UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: Ready body=%s radius_cm=%.0f seed=%d finest_lod=%d near_collision=%d region=%s anchor=%s"),
+		*GetDefinition().BodyId.ToString(),RadiusCm,BodySeed,FAstraeonPlanetLODManager::FinestAllowedLod(GetDefinition(),LODSettings),bNearCollision,
+		bHasRegion ? *RegionProfileId.ToString() : TEXT("none"),bHasRegion ? *Region.Anchor.ToString() : TEXT("-"));
 }
 
 void AAstraeonPlanetRuntime::EndPlay(const EEndPlayReason::Type Reason)

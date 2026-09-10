@@ -47,6 +47,23 @@ FVector FAstraeonPlanetRegionSurface::ToDirection(const FVector2D& PlanCm) const
 	return (Anchor * FMath::Cos(Angle) + (East * Offset.X + North * Offset.Y) / Distance * FMath::Sin(Angle)).GetSafeNormal();
 }
 
+FVector2D FAstraeonPlanetRegionSurface::ToPlan(const FVector& Direction) const
+{
+	const FVector Unit = Direction.GetSafeNormal();
+	const double Angle = FMath::Acos(FMath::Clamp(FVector::DotProduct(Unit, Anchor), -1.0, 1.0));
+	const FVector Tangent = Unit - Anchor * FVector::DotProduct(Unit, Anchor);
+	if (Tangent.SizeSquared() < UE_DOUBLE_SMALL_NUMBER) return Plan.CenterCm;
+	const FVector Bearing = Tangent.GetSafeNormal();
+	return Plan.CenterCm + FVector2D(FVector::DotProduct(Bearing, East), FVector::DotProduct(Bearing, North)) * (Angle * Planet.RadiusCm);
+}
+
+FQuat FAstraeonPlanetRegionSurface::PlanRotationAt(const FVector& Direction) const
+{
+	// East x North = Anchor, so this basis is a proper rotation.
+	const FQuat AtAnchor = FMatrix(FPlane(East, 0.0), FPlane(North, 0.0), FPlane(Anchor, 0.0), FPlane(0, 0, 0, 1)).ToQuat();
+	return FQuat::FindBetweenNormals(Anchor, Direction.GetSafeNormal()) * AtAnchor;
+}
+
 double FAstraeonPlanetRegionSurface::HeightCm(const FVector2D& PlanCm) const
 {
 	if (AAstraeonItacaInterior::IsInsideFootprint(PlanCm - Plan.ItacaOriginCm))

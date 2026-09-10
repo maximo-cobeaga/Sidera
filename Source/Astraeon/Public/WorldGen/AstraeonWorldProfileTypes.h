@@ -50,6 +50,14 @@ struct ASTRAEON_API FAstraeonPlanetProfile
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldProfile")
 	TArray<EAstraeonBiomeId> Biomes;
+
+	// The body itself (Phase 3). The radius is data, never a Scale; the relief seed belongs to
+	// the planet, not to a session: every session walks the same Khepri.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldProfile")
+	double RadiusCm = 0.0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Astraeon|WorldProfile")
+	int32 BodySeed = 0;
 };
 
 USTRUCT(BlueprintType)

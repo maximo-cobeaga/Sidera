@@ -1,3 +1,21 @@
+## 2026-09-10 — Fase 3, P3.1: Khepri y Region A sobre la esfera
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check LabMap -Map L_Khepri
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Map L_Khepri -Seconds 90 -Extra '-AstraeonWalkStillSeconds=5'
+```
+
+**97/97 Automation.** `WorldGen.Khepri.RegionAOnThePlanet`: Khepri de 500 km con masa y gravedad
+coherentes y capa de montañas; Region A ubicada siempre en el mismo sitio y con todos sus
+objetivos alcanzables; ida y vuelta plan → esfera → plan exacta (peor 0,1 cm); la señal sigue a
+263 m de Ítaca como en el diseño.
+
+`L_Khepri` generado por script. El runtime lee Khepri de su perfil y ubica Region A en su ancla
+fija. Una partida nueva aparece en la salida de Ítaca de la región. Caminata de 90 s OK: 504 m y
+22 saltos, 0 frames con suelo desalineado, cámara quieta 0,0000 cm, 72 patches finos visibles.
+El contenido de la región todavía no se materializa (P3.3).
+
 ## 2026-09-10 — Prueba humana de `TL_13` y `TL_14`
 
 El propietario jugó `TL_13_CollisionRing` (50 km, anillo de colisión) y `TL_14_FrameTransition`

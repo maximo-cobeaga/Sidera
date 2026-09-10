@@ -6,6 +6,7 @@
 #include "Planet/Patches/AstraeonPlanetPatchManager.h"
 #include "Planet/Patches/AstraeonPlanetProceduralPatchBackend.h"
 #include "Planet/Surface/AstraeonCubeSphereMesh.h"
+#include "Planet/Surface/AstraeonPlanetTraversal.h"
 #include "AstraeonPlanetRuntime.generated.h"
 class UProceduralMeshComponent;
 class UMaterialInterface;
@@ -19,6 +20,12 @@ class ASTRAEON_API AAstraeonPlanetRuntime : public AActor
 	GENERATED_BODY()
 public:
 	AAstraeonPlanetRuntime();
+	// A game planet (Khepri) takes its whole definition from its profile; empty for the labs.
+	UPROPERTY(EditAnywhere, Category="Planet") FName PlanetProfileId;
+	// The designed region this map plays on that planet (Region A). Resolved to its fixed place
+	// at BeginPlay; a new session then starts at the region's Itaca exit.
+	UPROPERTY(EditAnywhere, Category="Planet") FName RegionProfileId;
+	const FAstraeonPlanetRegionSurface* GetRegion() const { return bHasRegion ? &Region : nullptr; }
 	UPROPERTY(EditAnywhere, Category="Planet") double RadiusCm = 20000.0;
 	UPROPERTY(EditAnywhere, Category="Planet") int32 BodySeed = 4242;
 	UPROPERTY(EditAnywhere, Category="Planet") int32 FaceQuads = 32;
@@ -109,6 +116,8 @@ private:
 	int32 CollisionRebuilds = 0;
 	int32 CollisionEmergencyBuilds = 0;
 	int32 CollisionMissingFrames = 0;
+	FAstraeonPlanetRegionSurface Region;
+	bool bHasRegion = false;
 	FAstraeonPlanetLODSettings LODSettings;
 	TUniquePtr<FAstraeonPlanetStreamingManager> Streaming;
 	TUniquePtr<FAstraeonPlanetProceduralPatchBackend> Backend;
