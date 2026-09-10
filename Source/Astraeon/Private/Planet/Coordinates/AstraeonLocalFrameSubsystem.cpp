@@ -1,6 +1,9 @@
 #include "Planet/Coordinates/AstraeonLocalFrameSubsystem.h"
 #include "Planet/AstraeonPlanetRuntime.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/LightComponentBase.h"
+#include "Misc/CoreDelegates.h"
+#include "UObject/UObjectIterator.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -21,7 +24,21 @@ void UAstraeonLocalFrameSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		&& !FParse::Param(FCommandLine::Get(), TEXT("AstraeonNoFrameShift"));
 	FParse::Value(FCommandLine::Get(), TEXT("AstraeonFrameShiftCm="), ShiftThresholdCm);
 	ShiftThresholdCm = FMath::Max(ShiftThresholdCm, 1000.0);
+	if (bEnabled) ShiftHandle = FCoreDelegates::PostWorldOriginOffset.AddUObject(this, &UAstraeonLocalFrameSubsystem::RefreshLightsAfterShift);
 	UE_LOG(LogTemp, Display, TEXT("LocalFrame: %s threshold_cm=%.0f"), bEnabled ? TEXT("enabled") : TEXT("disabled"), ShiftThresholdCm);
+}
+
+void UAstraeonLocalFrameSubsystem::Deinitialize()
+{
+	FCoreDelegates::PostWorldOriginOffset.Remove(ShiftHandle);
+	Super::Deinitialize();
+}
+
+void UAstraeonLocalFrameSubsystem::RefreshLightsAfterShift(UWorld* ShiftedWorld, FIntVector From, FIntVector To)
+{
+	if (ShiftedWorld != GetWorld()) return;
+	for (TObjectIterator<ULightComponentBase> It; It; ++It)
+		if (It->GetWorld() == ShiftedWorld && It->IsRegistered()) It->MarkRenderStateDirty();
 }
 
 TStatId UAstraeonLocalFrameSubsystem::GetStatId() const

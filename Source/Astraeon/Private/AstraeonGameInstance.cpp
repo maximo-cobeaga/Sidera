@@ -11,6 +11,12 @@
 #include "WorldGen/AstraeonTerrainField.h"
 #include "WorldGen/AstraeonWorldGenerator.h"
 #include "WorldGen/AstraeonWorldProfiles.h"
+#include "Creatures/AstraeonCreatureActor.h"
+#include "Persistence/AstraeonSaveMigration.h"
+#include "Planet/AstraeonPlanetRuntime.h"
+#include "Planet/State/AstraeonRuntimeStateManager.h"
+#include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 namespace AstraeonSession
 {
@@ -73,6 +79,8 @@ void UAstraeonGameInstance::StartNewGame(int32 RequestedWorldSeed)
 	HandItemId = NAME_None;
 	HungerPercent = 100.0f;
 	CreatureRespawnTimers.Reset();
+	GetPlanetState()->Reset();
+	bHasLoadedPlanetLocation = false;
 	LastFeedbackMessage = TEXT("Nueva expedición iniciada. Interactúa con la consola ARGOS para comenzar.");
 
 	FAstraeonLogbookEntry InitialEnvironmentEntry;
@@ -543,6 +551,43 @@ void UAstraeonGameInstance::RecordCreatureDeath(FName SpawnPointId)
 	CreatureRespawnTimers.Add(SpawnPointId, AstraeonSession::CreatureRespawnSeconds);
 }
 
+bool UAstraeonGameInstance::RecordCreatureDefeat(const AAstraeonCreatureActor* Creature)
+{
+	if (!Creature || Creature->GetSpawnPointId().IsNone())
+	{
+		return false;
+	}
+	if (Creature->IsPlanetary())
+	{
+		const AAstraeonPlanetRuntime* Planet = AAstraeonPlanetRuntime::FindActive(GetWorld());
+		return Planet && GetPlanetState()->RecordCreatureDefeat(Planet->GetDefinition(), Creature->GetSpawnPointId(),
+			Creature->GetPlanetDirection(), 0.0, AstraeonSession::CreatureRespawnSeconds);
+	}
+	RecordCreatureDeath(Creature->GetSpawnPointId());
+	return true;
+}
+
+UAstraeonRuntimeStateManager* UAstraeonGameInstance::GetPlanetState()
+{
+	if (!PlanetState)
+	{
+		PlanetState = NewObject<UAstraeonRuntimeStateManager>(this);
+	}
+	return PlanetState;
+}
+
+const UAstraeonRuntimeStateManager* UAstraeonGameInstance::GetPlanetState() const
+{
+	return const_cast<UAstraeonGameInstance*>(this)->GetPlanetState();
+}
+
+bool UAstraeonGameInstance::GetLoadedPlanetLocation(FName& OutBodyId, FVector& OutDirection, double& OutAltitudeCm, FVector& OutForward) const
+{
+	OutBodyId = LoadedPlanetBodyId; OutDirection = LoadedPlayerDirection;
+	OutAltitudeCm = LoadedPlayerAltitudeCm; OutForward = LoadedPlayerForward;
+	return bHasLoadedPlanetLocation;
+}
+
 bool UAstraeonGameInstance::IsCreatureSpawnPopulated(FName SpawnPointId) const
 {
 	return !CreatureRespawnTimers.Contains(SpawnPointId);
@@ -550,6 +595,8 @@ bool UAstraeonGameInstance::IsCreatureSpawnPopulated(FName SpawnPointId) const
 
 TArray<FName> UAstraeonGameInstance::AdvanceCreatureRespawns(float DeltaSeconds)
 {
+	// Planetary nests run on the same clock; the streamer repopulates them when they lapse.
+	GetPlanetState()->Advance(DeltaSeconds);
 	TArray<FName> RepopulatedSpawnPoints;
 	if (DeltaSeconds <= 0.0f || CreatureRespawnTimers.IsEmpty())
 	{
@@ -939,41 +986,47 @@ bool UAstraeonGameInstance::SaveCurrentGame(const FString& SlotName, int32 UserI
 
 bool UAstraeonGameInstance::LoadSavedGame(const FString& SlotName, int32 UserIndex)
 {
-	USaveGame* LoadedObject = UGameplayStatics::LoadGameFromSlot(SlotName, UserIndex);
-	const UAstraeonSaveGame* LoadedSave = Cast<UAstraeonSaveGame>(LoadedObject);
-	if (!LoadedSave)
+	UAstraeonSaveGame* LoadedSave = Cast<UAstraeonSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, UserIndex));
+	// Every older format is brought to v3 first, so what follows reads one format only. A v1
+	// save keeps its world exactly as saved, labelled as legacy, without teleports or new POIs.
+	if (!LoadedSave || !FAstraeonSaveMigration::Upgrade(*LoadedSave))
 	{
 		return false;
 	}
 
-	CurrentWorldSeed = LoadedSave->SaveGameVersion >= 2 ? LoadedSave->ContentSeed : LoadedSave->WorldSeed;
+	CurrentWorldSeed = LoadedSave->ContentSeed;
 	CurrentEnvironment = LoadedSave->Environment;
 	CurrentRegionLayout = LoadedSave->RegionLayout;
-	if (LoadedSave->SaveGameVersion >= 2)
-	{
-		CurrentRegionLayout.PlanetProfileId = LoadedSave->PlanetProfileId;
-		CurrentRegionLayout.RegionProfileId = LoadedSave->RegionProfileId;
-		CurrentRegionLayout.ContentSeed = LoadedSave->ContentSeed;
-	}
-	else
-	{
-		// Una partida anterior conserva su mundo tal como se guardó. Se etiqueta como legado
-		// y queda lista para regrabarse con versión 2, sin teletransportar ni regenerar POIs.
-		CurrentRegionLayout.PlanetProfileId = TEXT("legacy_generated_planet");
-		CurrentRegionLayout.RegionProfileId = TEXT("legacy_generated_region");
-		CurrentRegionLayout.ContentSeed = CurrentWorldSeed;
-	}
+	CurrentRegionLayout.PlanetProfileId = LoadedSave->PlanetProfileId;
+	CurrentRegionLayout.RegionProfileId = LoadedSave->RegionProfileId;
+	CurrentRegionLayout.ContentSeed = LoadedSave->ContentSeed;
 	RevealedMap = LoadedSave->RevealedMap;
 	Inventory = LoadedSave->Inventory;
 	ObjectiveState = AstraeonSession::FromSavedObjectiveState(LoadedSave->ObjectiveState);
 	RuntimeLogbookEntries = LoadedSave->LogbookEntries;
 	EquippedProtection = LoadedSave->EquippedProtection;
-	ItacaOriginCm = LoadedSave->ItacaOriginCm;
+	const bool bFlatRegion = LoadedSave->PlanetBodyId == FAstraeonLegacyFlatProjection::BodyId();
+	// The flat build still runs on flat coordinates: its planetary location maps back exactly.
+	ItacaOriginCm = bFlatRegion ? FAstraeonLegacyFlatProjection::ToFlat(LoadedSave->ItacaDirection, LoadedSave->ItacaAltitudeCm)
+		: FVector::ZeroVector;
 	InvalidateTerrainSurface();
 	PlacedStructures = LoadedSave->PlacedStructures;
 	HandItemId = LoadedSave->HandItemId;
 	HungerPercent = LoadedSave->HungerPercent;
-	CreatureRespawnTimers = LoadedSave->CreatureRespawnTimers;
+	// Flat nests go back to their clocks; every other delta belongs to a planet.
+	CreatureRespawnTimers.Reset();
+	TArray<FAstraeonPlanetDelta> PlanetDeltas;
+	for (const FAstraeonPlanetDelta& Delta : LoadedSave->PlanetDeltas)
+	{
+		if (Delta.BodyId == FAstraeonLegacyFlatProjection::BodyId()) CreatureRespawnTimers.Add(Delta.EntityId, Delta.RemainingSeconds);
+		else PlanetDeltas.Add(Delta);
+	}
+	GetPlanetState()->Restore(PlanetDeltas);
+	bHasLoadedPlanetLocation = true;
+	LoadedPlanetBodyId = LoadedSave->PlanetBodyId;
+	LoadedPlayerDirection = LoadedSave->PlayerDirection;
+	LoadedPlayerAltitudeCm = LoadedSave->PlayerAltitudeCm;
+	LoadedPlayerForward = LoadedSave->PlayerForwardTangent;
 	bHasStartedGame = true;
 	return true;
 }
@@ -990,7 +1043,7 @@ UAstraeonSaveGame* UAstraeonGameInstance::CreateSaveSnapshot() const
 	SaveSnapshot->ContentSeed = CurrentWorldSeed;
 	SaveSnapshot->PlanetProfileId = CurrentRegionLayout.PlanetProfileId;
 	SaveSnapshot->RegionProfileId = CurrentRegionLayout.RegionProfileId;
-	SaveSnapshot->SaveGameVersion = 2;
+	SaveSnapshot->SaveGameVersion = FAstraeonSaveMigration::CurrentVersion;
 	SaveSnapshot->GeneratorVersion = CurrentEnvironment.GeneratorVersion;
 	SaveSnapshot->Environment = CurrentEnvironment;
 	SaveSnapshot->RegionLayout = CurrentRegionLayout;
@@ -999,23 +1052,37 @@ UAstraeonSaveGame* UAstraeonGameInstance::CreateSaveSnapshot() const
 	SaveSnapshot->ObjectiveState = AstraeonSession::ToSavedObjectiveState(ObjectiveState);
 	SaveSnapshot->LogbookEntries = RuntimeLogbookEntries;
 	SaveSnapshot->EquippedProtection = EquippedProtection;
-	SaveSnapshot->ItacaOriginCm = ItacaOriginCm;
 	SaveSnapshot->PlacedStructures = PlacedStructures;
 	SaveSnapshot->HandItemId = HandItemId;
 	SaveSnapshot->HungerPercent = HungerPercent;
-	SaveSnapshot->CreatureRespawnTimers = CreatureRespawnTimers;
 
-	if (const UWorld* World = GetWorld())
+	// v3: location is body + direction + altitude + heading, never a world transform. On a planet
+	// it is read off the planet; in the flat region it goes through the legacy projection.
+	const UWorld* World = GetWorld();
+	const APlayerController* PlayerController = World ? World->GetFirstPlayerController() : nullptr;
+	const APawn* Pawn = PlayerController ? PlayerController->GetPawn() : nullptr;
+	if (const AAstraeonPlanetRuntime* Planet = World ? AAstraeonPlanetRuntime::FindActive(World) : nullptr)
 	{
-		if (const APlayerController* PlayerController = World->GetFirstPlayerController())
+		SaveSnapshot->PlanetBodyId = Planet->GetDefinition().BodyId;
+		if (Pawn)
 		{
-			if (const APawn* Pawn = PlayerController->GetPawn())
-			{
-				SaveSnapshot->PlayerTransform = Pawn->GetActorTransform();
-			}
+			const FVector Relative = Pawn->GetActorLocation() - Planet->GetActorLocation();
+			SaveSnapshot->PlayerDirection = Relative.GetSafeNormal();
+			SaveSnapshot->PlayerAltitudeCm = Relative.Size() - Planet->RadiusCm;
+			const FVector Forward = Pawn->GetActorForwardVector();
+			SaveSnapshot->PlayerForwardTangent = (Forward - SaveSnapshot->PlayerDirection * FVector::DotProduct(Forward, SaveSnapshot->PlayerDirection)).GetSafeNormal();
 		}
 	}
-
+	else
+	{
+		SaveSnapshot->PlanetBodyId = FAstraeonLegacyFlatProjection::BodyId();
+		const FTransform Flat = Pawn ? Pawn->GetActorTransform() : FTransform::Identity;
+		FAstraeonLegacyFlatProjection::ToPlanet(Flat.GetLocation(), SaveSnapshot->PlayerDirection, SaveSnapshot->PlayerAltitudeCm);
+		SaveSnapshot->PlayerForwardTangent = FAstraeonLegacyFlatProjection::HeadingToPlanet(Flat.GetRotation().GetForwardVector(), SaveSnapshot->PlayerDirection);
+		FAstraeonLegacyFlatProjection::ToPlanet(ItacaOriginCm, SaveSnapshot->ItacaDirection, SaveSnapshot->ItacaAltitudeCm);
+	}
+	FAstraeonLegacyFlatProjection::AppendNestDeltas(CurrentRegionLayout, CurrentWorldSeed, CreatureRespawnTimers, SaveSnapshot->PlanetDeltas);
+	SaveSnapshot->PlanetDeltas.Append(GetPlanetState()->GetDeltas());
 	return SaveSnapshot;
 }
 

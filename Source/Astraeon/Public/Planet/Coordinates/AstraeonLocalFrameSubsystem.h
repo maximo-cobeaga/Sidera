@@ -24,6 +24,7 @@ public:
 
 	virtual bool DoesSupportWorldType(const EWorldType::Type WorldType) const override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual TStatId GetStatId() const override;
 
@@ -36,6 +37,11 @@ public:
 	double GetMaxViewDistanceCm() const { return MaxViewDistanceCm; }
 
 private:
+	// UE 5.7 moves lights in the renderer scene on a shift but does not queue their GPU Scene
+	// upload: the data goes stale (engine ensure in GPUScene.cpp, "Data ... is stale"). Local
+	// lights would light the wrong place afterwards. Recreating their render state fixes it.
+	void RefreshLightsAfterShift(UWorld* ShiftedWorld, FIntVector From, FIntVector To);
+	FDelegateHandle ShiftHandle;
 	bool bEnabled = false;
 	double ShiftThresholdCm = DefaultShiftThresholdCm;
 	int32 ShiftCount = 0;

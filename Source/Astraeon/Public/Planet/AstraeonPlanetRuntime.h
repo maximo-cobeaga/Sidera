@@ -28,6 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, Category="Planet") bool bNearCollision = true;
 	// Where a new session puts the player. A direction, not a location: the radius is data.
 	UPROPERTY(EditAnywhere, Category="Planet") FVector SpawnDirection = FVector(0, 0, 1);
+	// Planetary fauna. Off in the Phase 2 labs: populating a planet is Phase 3 content, and a
+	// grazer chasing the player would pollute the locomotion benches. The persistence it relies
+	// on is Phase 2 and is proven with `-AstraeonPlanetFauna`.
+	UPROPERTY(EditAnywhere, Category="Planet") bool bSpawnFauna = false;
 	UFUNCTION(BlueprintCallable, Category="Planet") bool Rebuild();
 	UFUNCTION(BlueprintPure, Category="Planet") FVector GetSurfacePointCm(FVector Direction, double AltitudeCm=0.0) const;
 	static AAstraeonPlanetRuntime* FindActive(const UWorld* World);
@@ -57,6 +61,17 @@ public:
 	double GetMaxPatchWorkMs() const { return MaxPatchWorkMs; }
 	double GetMeanPatchWorkMs() const { return PatchWorkFrames>0 ? SumPatchWorkMs/PatchWorkFrames : 0.0; }
 	int32 GetPatchWorkFramesOverBudget() const { return PatchWorkFramesOverBudget; }
+	// Planetary entities (creatures) near the player, materialized from the seed and filtered by
+	// the planet state. The actors are representation: unloading one never loses what happened
+	// to it, because that lives in the state manager, keyed by entity id and place.
+	static constexpr double EntityRadiusCm = 30000.0;
+	static constexpr double EntityKeepRadiusCm = 45000.0;
+	int32 GetEntityActorCount() const;
+	int32 GetEntitySpawnCount() const { return EntitySpawns; }
+	int32 GetEntityDespawnCount() const { return EntityDespawns; }
+	class AAstraeonCreatureActor* FindEntityActor(FName EntityId) const;
+	// For teleports: re-evaluate the entity ring in this frame instead of within 0.25 s.
+	void RefreshEntitiesNow() { SinceEntityUpdate = TNumericLimits<float>::Max(); }
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -65,6 +80,12 @@ protected:
 private:
 	using FAddress = FAstraeonPlanetPatchAddress;
 	void UpdatePatches(float DeltaSeconds);
+	void UpdateEntities(float DeltaSeconds, const FVector& PawnBodyCm);
+	struct FEntityActor { TWeakObjectPtr<class AAstraeonCreatureActor> Actor; FAddress Cell; };
+	TMap<FName, FEntityActor> EntityActors;
+	float SinceEntityUpdate = TNumericLimits<float>::Max();
+	int32 EntitySpawns = 0;
+	int32 EntityDespawns = 0;
 	void UpdateCollision(const FVector& PawnBodyCm);
 	bool BuildCollisionNow(const FAddress& Address);
 	void CommitCollision(const FAstraeonPlanetPatchBuildResult& Mesh);

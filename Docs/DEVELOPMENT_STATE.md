@@ -33,6 +33,12 @@ suficiente también para delta 2. Insights mostró un selector cuadrático de 19
 ahora es 1,1 ms con resultado idéntico y el p99 del vuelo pasó de 33,6 a 5,2 ms. El observador
 del LOD es la cámara. **91/91 Automation.**
 
+**P2.6 cerrado.** Estado mutable planetario por identidad de entidad y lugar; la criatura abatida
+sigue abatida tras descargar, recargar, guardar y cargar, hasta que vence su reloj de nido. Save
+v3 con ubicación planetaria y migración exacta desde v1/v2. Se corrigió un `ensure` del renderer
+que el cambio de marco de P2.5 provocaba. 96/96 Automation. Sigue P2.7: `Terrain.Connectivity` y
+`TraversalDetectsWalls` sobre la esfera.
+
 **P2.5 cerrado.** Marco local por cambio de origen del mundo; `TL_14` se camina a 500 km (Target)
 y a 2.500 km (Stress) sin jitter, sin frames sin suelo y con 48 patches al nivel más fino en los
 dos. Sigue P2.6: estado mutable, criatura abatida persistente y save v3.

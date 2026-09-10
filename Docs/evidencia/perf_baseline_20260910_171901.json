@@ -1,0 +1,18 @@
+{
+	"timestamp": "2026-09-10T17:19:01.758Z",
+	"map": "TL_14_FrameTransition",
+	"warmup_seconds": 10,
+	"sample_seconds": 30,
+	"frame_count": 5958,
+	"mean_fps": 198.57312177594238,
+	"median_frame_ms": 4.9498993903398514,
+	"p99_frame_ms": 5.7066597044467926,
+	"worst_frame_ms": 400.00000596046448,
+	"hitches_over_50ms": 1,
+	"memory_start_mb": 2355.97265625,
+	"memory_end_mb": 2414.16015625,
+	"command_line": "-unattended -nosplash -nop4 -abslog=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Logs\\Planet_Walk_TL_14_FrameTransition_AstraeonWalkStillSeconds=5.log /Game/Maps/TL_14_FrameTransition -game -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -AstraeonSmokePlanetWalk -AstraeonWalkSeconds=250 -AstraeonPerfBaseline -AstraeonPerfWarmup=10 -AstraeonPerfSeconds=30 -AstraeonPerfKeepRunning -AstraeonWalkStillSeconds=5",
+	"build_configuration": "Development",
+	"viewport_width": 1920,
+	"viewport_height": 1080
+}

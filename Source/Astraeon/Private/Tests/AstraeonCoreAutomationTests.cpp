@@ -1,6 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Misc/AutomationTest.h"
+#include "Persistence/AstraeonSaveMigration.h"
 #include "AstraeonGameInstance.h"
 #include "AstraeonGameModeBase.h"
 #include "AstraeonHUD.h"
@@ -1434,10 +1435,11 @@ bool FAstraeonSaveGameV1MigrationTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Legacy inventory is preserved"), LoadedGame->GetInventoryItemCount(TEXT("silicate_fiber")), 2);
 
 	const UAstraeonSaveGame* MigratedSnapshot = LoadedGame->CreateSaveSnapshot();
-	TestNotNull(TEXT("Migrated session creates a version 2 snapshot"), MigratedSnapshot);
+	TestNotNull(TEXT("Migrated session creates a current-version snapshot"), MigratedSnapshot);
 	if (MigratedSnapshot)
 	{
-		TestEqual(TEXT("Migration writes save version 2"), MigratedSnapshot->SaveGameVersion, 2);
+		// Was "version 2" while v2 was current; since P2.6 a v1 save migrates all the way to v3.
+		TestEqual(TEXT("Migration writes the current save version"), MigratedSnapshot->SaveGameVersion, FAstraeonSaveMigration::CurrentVersion);
 		TestEqual(TEXT("Migration retains legacy region id"), MigratedSnapshot->RegionProfileId, FName(TEXT("legacy_generated_region")));
 	}
 

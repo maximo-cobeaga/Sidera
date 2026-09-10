@@ -11,6 +11,7 @@
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "WorldGen/AstraeonTerrainField.h"
+#include "Planet/AstraeonPlanetRuntime.h"
 
 namespace AstraeonCreature
 {
@@ -95,7 +96,21 @@ AAstraeonCreatureActor::AAstraeonCreatureActor()
 
 FVector AAstraeonCreatureActor::GetBodyCenterCm() const
 {
-	return GetActorLocation() + FVector(0.0f, 0.0f, AstraeonCreature::BodyCentreHeightCm);
+	// Along the actor's own up: world Z in the flat region, the local vertical on a planet.
+	return GetActorLocation() + GetActorUpVector() * AstraeonCreature::BodyCentreHeightCm;
+}
+
+void AAstraeonCreatureActor::SetPlanetaryIdentity(FName EntityId, const FVector& InHomeDirection)
+{
+	bPlanetary = true;
+	HomeDirection = InHomeDirection.GetSafeNormal();
+	SetSpawnPointId(EntityId);
+}
+
+FVector AAstraeonCreatureActor::GetPlanetDirection() const
+{
+	const AAstraeonPlanetRuntime* Planet = bPlanetary ? AAstraeonPlanetRuntime::FindActive(GetWorld()) : nullptr;
+	return Planet ? (GetActorLocation() - Planet->GetActorLocation()).GetSafeNormal() : HomeDirection;
 }
 
 bool AAstraeonCreatureActor::IsGrazingAtPhase(float PhaseSeconds)
@@ -123,6 +138,12 @@ void AAstraeonCreatureActor::SetSpawnPointId(FName NewSpawnPointId)
 void AAstraeonCreatureActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (bPlanetary)
+	{
+		TickOnPlanet(FMath::Max(DeltaSeconds, 0.0f));
+		return;
+	}
 
 	if (!bHasPatrolOrigin)
 	{
@@ -195,7 +216,69 @@ void AAstraeonCreatureActor::Tick(float DeltaSeconds)
 	// montaña permitida, el suelo pelado queda metros por debajo de lo que se ve.
 	NextLocation.Z = AstraeonGameInstance ? AstraeonGameInstance->GetSurfaceHeightCm(FVector2D(NextLocation.X, NextLocation.Y)) : NextLocation.Z;
 	SetActorLocation(NextLocation);
+	UpdatePresentationAndContact(PlayerPawn, bGrazing, SafeDelta);
+}
 
+void AAstraeonCreatureActor::TickOnPlanet(float SafeDelta)
+{
+	const AAstraeonPlanetRuntime* Planet = AAstraeonPlanetRuntime::FindActive(GetWorld());
+	if (!Planet) return;
+	PatrolPhaseSeconds += SafeDelta;
+	OneShotSecondsRemaining = FMath::Max(0.0f, OneShotSecondsRemaining - SafeDelta);
+	FVector Up = (GetActorLocation() - Planet->GetActorLocation()).GetSafeNormal();
+	if (Up.IsNearlyZero()) Up = HomeDirection;
+	if (IsDead())
+	{
+		SetActorLocation(Planet->GetSurfacePointCm(Up, 0.0));
+		return;
+	}
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (PlayerPawn)
+	{
+		UpdateAwarenessFromPlayerDistanceMeters(FVector::Distance(PlayerPawn->GetActorLocation(), GetBodyCenterCm()) / 100.0f);
+	}
+	const bool bGrazing = AwarenessState == EAstraeonCreatureAwarenessState::Patrolling && IsGrazingAtPhase(PatrolPhaseSeconds);
+
+	// Same behaviour as in the flat region, with "the plane" replaced by the tangent plane.
+	FVector Target = GetActorLocation();
+	float SpeedCms = 0.0f;
+	if (PlayerPawn && AwarenessState == EAstraeonCreatureAwarenessState::Threatening)
+	{
+		Target = PlayerPawn->GetActorLocation(); SpeedCms = AstraeonCreature::ChaseSpeedCms;
+	}
+	else if (PlayerPawn && AwarenessState == EAstraeonCreatureAwarenessState::Disengaging)
+	{
+		Target = GetActorLocation() * 2.0 - PlayerPawn->GetActorLocation(); SpeedCms = AstraeonCreature::FleeSpeedCms;
+	}
+	else if (!bGrazing)
+	{
+		// The patrol circle lives on the tangent plane of the home direction, so it stays put.
+		const FVector Reference = FMath::Abs(HomeDirection.Z) < 0.9 ? FVector(0, 0, 1) : FVector(1, 0, 0);
+		const FVector A = FVector::CrossProduct(Reference, HomeDirection).GetSafeNormal(), B = FVector::CrossProduct(HomeDirection, A);
+		const FVector Offset = ComputePatrolOffsetCm(PatrolPhaseSeconds, Profile.PatrolRadiusMeters);
+		Target = Planet->GetSurfacePointCm((HomeDirection + (A * Offset.X + B * Offset.Y) / Planet->RadiusCm).GetSafeNormal(), 0.0);
+		SpeedCms = AstraeonCreature::PatrolSpeedCms;
+	}
+	FVector Along = Target - GetActorLocation();
+	Along -= Up * FVector::DotProduct(Along, Up);
+	FVector Forward = GetActorForwardVector();
+	if (SpeedCms > 0.0f && Along.SizeSquared() > 1.0)
+	{
+		const double Step = FMath::Min<double>(SpeedCms * SafeDelta, Along.Size());
+		Forward = Along.GetSafeNormal();
+		Up = (Up + Forward * (Step / Planet->RadiusCm)).GetSafeNormal();
+	}
+	// Feet on the surface, body along the local vertical, facing where it goes.
+	SetActorLocation(Planet->GetSurfacePointCm(Up, 0.0));
+	Forward -= Up * FVector::DotProduct(Forward, Up);
+	if (Forward.IsNearlyZero()) Forward = FVector::CrossProduct(Up, FMath::Abs(Up.Z) < 0.9 ? FVector(0, 0, 1) : FVector(1, 0, 0));
+	SetActorRotation(FRotationMatrix::MakeFromXZ(Forward.GetSafeNormal(), Up).ToQuat());
+	UpdatePresentationAndContact(PlayerPawn, bGrazing, SafeDelta);
+}
+
+void AAstraeonCreatureActor::UpdatePresentationAndContact(APawn* PlayerPawn, bool bGrazing, float SafeDelta)
+{
 	if (OneShotSecondsRemaining <= 0.0f)
 	{
 		PlaySequence(SelectStateSequence(bGrazing), true);

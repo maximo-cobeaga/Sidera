@@ -138,11 +138,6 @@ void AAstraeonPlayerController::StartSelectedNewGame()
 
 void AAstraeonPlayerController::ContinueSavedGame()
 {
-	if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
-	{
-		UE_LOG(LogTemp,Display,TEXT("Planet lab: save v3 is pending in Phase 2; start a lab session with Enter."));
-		return;
-	}
 	if (!bMenuVisible)
 	{
 		return;
@@ -157,17 +152,50 @@ void AAstraeonPlayerController::ContinueSavedGame()
 	if (AstraeonGameInstance->LoadSavedGame())
 	{
 		bMenuVisible = false;
+		if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
+		{
+			SetInputMode(FInputModeGameOnly());
+			RestorePlanetLocation();
+			return;
+		}
 		ApplySessionToRuntime();
 	}
 }
 
+bool AAstraeonPlayerController::RestorePlanetLocation()
+{
+	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
+	AAstraeonPlanetRuntime* Planet = AAstraeonPlanetRuntime::FindActive(GetWorld());
+	auto* Explorer = Cast<AAstraeonPlayerCharacter>(GetPawn());
+	FName BodyId; FVector Direction, Forward; double AltitudeCm = 0.0;
+	if (!AstraeonGameInstance || !Planet || !Explorer
+		|| !AstraeonGameInstance->GetLoadedPlanetLocation(BodyId, Direction, AltitudeCm, Forward)) return false;
+	// A location is only meaningful on the body it was taken on: a flat-region save or another
+	// planet's save keeps its state, but the player starts at this planet's spawn.
+	const bool bSameBody = BodyId == Planet->GetDefinition().BodyId;
+	if (!bSameBody)
+	{
+		AstraeonGameInstance->SetLastFeedbackMessage(TEXT("La partida guardada es de otro cuerpo: se comienza en el punto de llegada."));
+		Direction = Planet->SpawnDirection.GetSafeNormal();
+		AltitudeCm = (Planet->GetSurfacePointCm(Direction, 150.0) - Planet->GetActorLocation()).Size() - Planet->RadiusCm;
+	}
+	Direction = Direction.GetSafeNormal();
+	Forward = (Forward - Direction * FVector::DotProduct(Forward, Direction)).GetSafeNormal();
+	if (Forward.IsNearlyZero()) Forward = FVector::CrossProduct(Direction, FMath::Abs(Direction.Z) < 0.9 ? FVector(0, 0, 1) : FVector(1, 0, 0)).GetSafeNormal();
+	// Ground first, then the player.
+	Planet->PrepareCollision(Direction, true);
+	Explorer->SetActorLocationAndRotation(Planet->GetActorLocation() + Direction * (Planet->RadiusCm + AltitudeCm),
+		FRotationMatrix::MakeFromXZ(Forward, Direction).ToQuat(), false, nullptr, ETeleportType::TeleportPhysics);
+	Explorer->GetCharacterMovement()->StopMovementImmediately();
+	Explorer->FindComponentByClass<UAstraeonPlanetGravityComponent>()->SetPlanetBody(
+		Planet->GetActorLocation(), Planet->RadiusCm, float(Planet->GravityMS2));
+	Planet->RefreshEntitiesNow();
+	if (bSameBody) AstraeonGameInstance->SetLastFeedbackMessage(TEXT("Partida continuada."));
+	return bSameBody;
+}
+
 void AAstraeonPlayerController::SaveCurrentGame()
 {
-	if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
-	{
-		UE_LOG(LogTemp,Display,TEXT("Planet lab: saving unavailable until planetary save v3 (Phase 2)."));
-		return;
-	}
 	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	const bool bSaved = !bMenuVisible && AstraeonGameInstance && AstraeonGameInstance->SaveCurrentGame();
 	if (AstraeonGameInstance)

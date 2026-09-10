@@ -8,6 +8,7 @@
 #include "Survival/AstraeonProtectionTypes.h"
 #include "WorldGen/AstraeonEnvironmentTypes.h"
 #include "WorldGen/AstraeonRegionTypes.h"
+#include "Planet/State/AstraeonPlanetStateTypes.h"
 #include "AstraeonSaveGame.generated.h"
 
 UENUM(BlueprintType)
@@ -26,8 +27,37 @@ class ASTRAEON_API UAstraeonSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
+	// Written as `FAstraeonSaveMigration::CurrentVersion` (3). The class default stays 2 on
+	// purpose: tagged serialization can omit values equal to the default, and raising it would
+	// make an old v2 file read back as v3 and skip its migration.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
 	int32 SaveGameVersion = 2;
+
+	// --- v3: planetary location (ADR 0004). Replaces PlayerTransform and ItacaOriginCm, which
+	// remain only so older files can be read and migrated. ---
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FName PlanetBodyId;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FVector PlayerDirection = FVector(0, 0, 1);
+
+	// Above the body's reference radius, not above the terrain: terrain is derived data.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	double PlayerAltitudeCm = 0.0;
+
+	// Local coordinates: the heading on the tangent plane at PlayerDirection.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FVector PlayerForwardTangent = FVector(1, 0, 0);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	FVector ItacaDirection = FVector(0, 0, 1);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	double ItacaAltitudeCm = 0.0;
+
+	// Persistent changes on top of the seed, indexed by place on the body.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
+	TArray<FAstraeonPlanetDelta> PlanetDeltas;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Astraeon|Persistence")
 	FName PlanetProfileId;

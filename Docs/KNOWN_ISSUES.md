@@ -1,3 +1,17 @@
+## 2026-09-10 — P2.6: estado y guardado
+
+- **Resuelto:** criaturas abatidas que reaparecían (MV4). El reloj de nido nunca arrancaba porque
+  nada llamaba a `RecordCreatureDeath`.
+- **Resuelto:** `ensure` del renderer en cada sesión con cambio de marco (`GPUScene.cpp`, datos de
+  luces viejos). Las luces se rehacen tras el cambio; los smokes fallan ante cualquier `ensure`.
+- **Baja, abierta:** la fauna planetaria está apagada en los laboratorios (`bSpawnFauna`). Encenderla
+  en `TL_11`/`TL_13`/`TL_14` haría que los pastadores persigan al jugador durante los bancos de
+  locomoción. Poblar planetas es de la Fase 3.
+- **Baja, abierta:** las estructuras colocadas del mundo plano siguen guardándose en coordenadas
+  planas dentro del save v3; su proyección a la esfera llega con la Fase 3.
+- **Baja, abierta:** la criatura planetaria se apoya en la superficie analítica, no en el triángulo
+  dibujado; en suelo caminable la diferencia es de centímetros.
+
 ## 2026-09-10 — P2.4: anillo de colisión
 
 - **Resuelto:** la colisión se rehacía cada 3,1 m recorriendo las 6.144 celdas del planeta (434

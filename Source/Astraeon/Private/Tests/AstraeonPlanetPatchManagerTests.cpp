@@ -94,9 +94,24 @@ namespace AstraeonPatchManagerTests
 		TMap<FAddress, bool> Meshes; // Committed patches and whether they are on screen.
 		TArray<FString> Log;
 		int32 Violations = 0;
+		// Every mesh ever received, by address: a patch that comes back must come back the same.
+		TMap<FAddress, uint64> FirstHash;
+		int32 Returns = 0;
+		int32 ReturnMismatches = 0;
+
+		static uint64 Hash(const FAstraeonPlanetPatchBuildResult& Mesh)
+		{
+			uint64 H = FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Mesh.Vertices.GetData()), Mesh.Vertices.Num() * sizeof(FVector)));
+			H = FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Mesh.Normals.GetData()), Mesh.Normals.Num() * sizeof(FVector)), H);
+			H = FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(Mesh.Indices.GetData()), Mesh.Indices.Num() * sizeof(int32)), H);
+			return FAstraeonStableHash64::Bytes(TConstArrayView<uint8>(reinterpret_cast<const uint8*>(&Mesh.OriginBodyCm), sizeof(FVector)), H);
+		}
 
 		virtual bool CommitHidden(const FAstraeonPlanetPatchBuildResult& Mesh) override
 		{
+			const uint64 H = Hash(Mesh);
+			if (const uint64* Seen = FirstHash.Find(Mesh.Address)) { ++Returns; ReturnMismatches += *Seen != H; }
+			else FirstHash.Add(Mesh.Address, H);
 			if (!Mesh.IsValid() || Meshes.Contains(Mesh.Address)) ++Violations;
 			Meshes.Add(Mesh.Address, false);
 			Log.Add(TEXT("commit ") + Name(Mesh.Address));
@@ -201,6 +216,35 @@ bool FAstraeonPatchManagerRelayTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Reset empties the backend"), Backend.Meshes.IsEmpty());
 	TestTrue(TEXT("Reset releases the queue registry"), Queue.Current.IsEmpty());
 	TestEqual(TEXT("Backend never saw an invalid operation"), Backend.Violations, 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPatchManagerRoundTripTest, "Astraeon.Planet.PatchManager.RoundTripRegeneratesSamePatch",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonPatchManagerRoundTripTest::RunTest(const FString& Parameters)
+{
+	// Phase 2 gate: going away and coming back regenerates the same patch. Out to the far side,
+	// back again, twice, on the real worker pool: every patch built again is byte-identical.
+	using namespace AstraeonPatchManagerTests;
+	const auto P = Planet();
+	FAstraeonPlanetLODSettings Settings; Settings.Quads = Quads;
+	FAstraeonPlanetStreamingManager Workers;
+	FFakeBackend Backend;
+	FAstraeonPlanetPatchManager Manager(Workers, Backend);
+	const double Deadline = FPlatformTime::Seconds() + 30.0;
+	for (const FVector Stop : {FVector(1, 0.2, 0.1), FVector(-1, -0.3, 0.2), FVector(1, 0.2, 0.1), FVector(-1, -0.3, 0.2), FVector(1, 0.2, 0.1)})
+	{
+		FAstraeonPlanetLODView View; View.ObserverBodyCm = Observer(Stop);
+		FAstraeonPlanetLODSelection Selection;
+		FAstraeonPlanetLODManager::Select(P, View, Settings, Selection);
+		Manager.SetTarget(P, Selection.Leaves, Quads, View.ObserverBodyCm);
+		while (!Manager.IsSettled() && FPlatformTime::Seconds() < Deadline) { Manager.Update(4); FPlatformProcess::Sleep(0.0005f); }
+		if (!TestTrue(TEXT("Each stop settles"), Manager.IsSettled())) return false;
+	}
+	TestTrue(TEXT("Patches were unloaded and built again"), Backend.Returns > 10 && Manager.GetStats().Removals > 10);
+	TestEqual(TEXT("Every rebuilt patch is identical to its first build"), Backend.ReturnMismatches, 0);
+	AddInfo(FString::Printf(TEXT("PatchRoundTrip returns=%d mismatches=%d removals=%d"), Backend.Returns, Backend.ReturnMismatches, Manager.GetStats().Removals));
+	Manager.Reset();
 	return true;
 }
 

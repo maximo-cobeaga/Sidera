@@ -75,7 +75,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Creatures")
 	FName GetSpawnPointId() const { return SpawnPointId; }
 
+	// A creature of a planet: its id is its entity id and its home is a direction on the body.
+	// It walks the tangent plane and stands on the surface along the local vertical; the flat
+	// region behaviour is untouched.
+	void SetPlanetaryIdentity(FName EntityId, const FVector& HomeDirection);
+	bool IsPlanetary() const { return bPlanetary; }
+	FVector GetPlanetDirection() const;
+
 private:
+	void TickOnPlanet(float SafeDelta);
+	void UpdatePresentationAndContact(APawn* PlayerPawn, bool bGrazing, float SafeDelta);
+	bool bPlanetary = false;
+	FVector HomeDirection = FVector(0, 0, 1);
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Creatures")
 	FName SpawnPointId;
 

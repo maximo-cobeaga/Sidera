@@ -1,3 +1,57 @@
+## 2026-09-10 — Fase 2, P2.6: estado mutable, criatura abatida persistente y save v3
+
+Implementación en `Planet/State/` (colocación determinista de entidades, `UAstraeonRuntimeStateManager`
+y tipos de delta), `Persistence/AstraeonSaveMigration.*`, criatura planetaria en
+`AstraeonCreatureActor`, streaming de entidades en el runtime y smoke `AstraeonPlanetStateSmoke`.
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check State      # TL_13 con -AstraeonPlanetFauna
+.\Scripts\RunPlanetChecks.ps1 -Check Critical   # recorrido plano con guardado y carga v3
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **96/96 Automation**; `State`
+OK; recorrido crítico plano OK (`Saved=true Loaded=true LoadedResolved=true`); regresión completa
+de `TL_11`, `TL_12`, `TL_13`, `TL_14` Target y Stress, y observador en verde.
+
+**Smoke de estado en `TL_13`**, el criterio de la puerta en un mundo vivo:
+
+| Paso | Resultado |
+|---|---|
+| Presa más cercana a la aparición | `creature.planet_cube_sphere_lab.0.7.127.127.0`, a 167 m |
+| Abatida por el camino del arma | delta registrado, reloj de repoblado 240 s |
+| 5 km lejos y de vuelta (su celda se descarga y recarga) | **no revive**; 2 criaturas vecinas sí vuelven |
+| Guardar, borrar el estado, cargar, restaurar | jugador a **0,0 cm** del lugar guardado; **sigue abatida** |
+| Vence el reloj | vuelve a aparecer |
+
+Pruebas nuevas:
+
+- `Planet.Entities.DeterministicPlacement`: 4 criaturas en el banco de 200 m, 185 en 5 km a
+  50 km de radio y 104 a 500 km. Mismo id y lugar al recargar, ninguna sobre montaña, otra seed
+  otra fauna.
+- `Planet.State.DefeatSurvivesUnloadReloadAndSave`: la derrota sobrevive a tres recargas de su
+  celda y a serializar y deserializar el save; el índice espacial se reconstruye del save solo;
+  el nido se repuebla cuando vence su reloj.
+- `Persistence.SaveGame.V3PlanetaryLocation`: v2 → v3 con ubicación, rumbo, Ítaca y relojes de
+  nido proyectados, y vuelta exacta al plano (0,01 cm); v1 → v3 conserva la regla v1 → v2; una
+  versión futura se rechaza; sesión plana guardada y cargada por el slot real.
+- `PatchManager.RoundTripRegeneratesSamePatch`: ida y vuelta dos veces sobre workers reales:
+  **1.104 patches reconstruidos, los 1.104 idénticos byte a byte** a su primera construcción.
+
+`Persistence.SaveGame.V1Migration` pedía "versión 2" porque era la vigente; ahora pide la versión
+actual, con la misma exigencia.
+
+**Defecto de P2.5 encontrado y corregido.** El log del smoke de estado traía un `ensure` del
+motor: `GPUScene.cpp:820, Data for Id = N in GPU Scene Lights is stale`. Todas las corridas con
+cambio de marco tenían exactamente uno y todas las demás cero: el cambio de origen mueve las luces
+en la escena del renderer sin encargar su subida a GPU Scene. Con un sol no se ve; con luces
+locales, iluminarían otro sitio. Se rehace el estado de render de las luces tras cada cambio, y
+`RunPlanetChecks.ps1` ahora **falla ante cualquier `ensure`**. Todo lo que usa cambio de marco se
+repitió con esa exigencia: vuelo de `TL_12`, caminata de `TL_13`, cardinales y caminata Stress
+(57 cambios), caminata Target con perfil
+([perf_baseline_20260910_171901.json](evidencia/perf_baseline_20260910_171901.json): 198,6 FPS,
+p99 5,71 ms). Cero `ensure`.
+
 ## 2026-09-10 — Fase 2, P2.5: marco local y `TL_14_FrameTransition`
 
 Implementación en `Planet/Coordinates/AstraeonLocalFrameSubsystem.*`, con `ApplyWorldOffset` en la

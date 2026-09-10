@@ -1,5 +1,34 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P2.6: estado mutable, identidad de entidad y save v3
+
+**Identidad de entidad.** Las criaturas planetarias se colocan por celdas de nivel fijo (~1 km),
+con la seed del canal `Entities` derivada por hash estable de la celda. El id es cuerpo + celda +
+índice; no depende del LOD ni del orden de carga. Un índice rechazado (montaña) no desplaza a los
+demás.
+
+**Estado.** `UAstraeonRuntimeStateManager` guarda deltas con dirección, altitud y celda. El
+streaming nunca es dueño de estado: materializa la seed menos los deltas. La criatura abatida
+lleva el mismo reloj de repoblado de 240 s que ya definía el diseño de fauna; "sigue abatida" es
+hasta que vence, también a través de descargas y guardados.
+
+**Hallazgo.** `RecordCreatureDeath` no tenía llamador: el reloj existía y se guardaba, pero ninguna
+muerte lo arrancaba, así que la limitación de MV4 seguía viva también en el mundo plano. El disparo
+ahora llama a `RecordCreatureDefeat`, que decide entre delta planetario y reloj de nido plano.
+
+**Fauna en los laboratorios: apagada por defecto** (`bSpawnFauna`). Poblar un planeta es contenido
+de la Fase 3, y un pastador persiguiendo al jugador contaminaría los bancos de locomoción. El
+mecanismo de persistencia es de la Fase 2 y se prueba con `-AstraeonPlanetFauna`.
+
+**Save v3.** La ubicación es cuerpo + dirección + altitud sobre el radio de referencia + rumbo
+tangente; más los deltas. `PlayerTransform` e `ItacaOriginCm` quedan sólo para leer y migrar
+archivos viejos. El mundo plano de v1/v2 vive sobre el plano tangente del ancla (0,0,1) de un
+cuerpo documentado, `legacy_flat_region` de 10 km, por mapa exponencial: conserva distancias y
+rumbos desde el ancla y se invierte exacto, así la build plana sigue cargando sus partidas. La
+versión por defecto de la clase queda en 2 a propósito: la serialización puede omitir valores
+iguales al defecto, y subirla haría leer un v2 como v3. Las estructuras colocadas del mundo plano
+siguen en coordenadas planas: su proyección es contenido de la Fase 3.
+
 ## 2026-09-10 — P2.5: marco local por cambio de origen del mundo
 
 `UAstraeonLocalFrameSubsystem` pide un nuevo origen de mundo cuando la cámara se aleja más de

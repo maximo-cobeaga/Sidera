@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Map','Walk','Cardinals','Automation','Critical','PatchLODMap','PatchLOD','Observer','LabMap')][string]$Check='Automation',
+    [ValidateSet('Map','Walk','Cardinals','Automation','Critical','PatchLODMap','PatchLOD','Observer','LabMap','State')][string]$Check='Automation',
     # Walk, Cardinals and LabMap: which planet lab. Each map carries its radius as data.
     [ValidateSet('TL_11_CubeSphereClosed','TL_13_CollisionRing','TL_14_FrameTransition')][string]$Map='TL_11_CubeSphereClosed',
     [double]$RadiusCm=20000,
@@ -18,6 +18,7 @@ $suffix=($Extra | ForEach-Object { $_.TrimStart('-') }) -join '_'
 $label=switch -Wildcard ($Check) {
     'PatchLOD*' { "Planet_$Check" }
     'Observer' { "Planet_$Check" }
+    'State' { "Planet_$Check" }
     default { "Planet_${Check}_${Map}$(if ($radiusArg) {"_$RadiusCm"})$(if ($suffix) {"_$suffix"})" }
 }
 $log=Join-Path $repo "Saved\Logs\$label.log"
@@ -35,6 +36,7 @@ switch ($Check) {
         if ($Profile) { $arguments+=@('-AstraeonPerfBaseline','-AstraeonPerfWarmup=5','-AstraeonPerfSeconds=170','-AstraeonPerfKeepRunning') }
     }
     'Observer' { $arguments+=@('/Game/Maps/TL_12_PatchLOD')+$render+'-AstraeonSmokePlanetObserver' }
+    'State' { $arguments+=@('/Game/Maps/TL_13_CollisionRing')+$render+@('-AstraeonSmokePlanetState','-AstraeonPlanetFauna') }
     default {
         $arguments+=@("/Game/Maps/$Map")+$render
         if ($radiusArg) { $arguments+=$radiusArg }
@@ -56,7 +58,9 @@ $p=Start-Process -FilePath $editor -ArgumentList $arguments -WorkingDirectory $r
 $handle=$p.Handle
 if (-not $p.WaitForExit(600000)) { Stop-Process -Id $p.Id; throw "Timeout: $label (only owned process stopped)" }
 $content=Get-Content -Raw -LiteralPath $log
-if ($p.ExitCode -ne 0 -or $content -match 'Result=\{Fail|Fatal error:|LogPython: Error:') { throw "Failed: $label exit=$($p.ExitCode); $log" }
+# An engine ensure fails the run: a handled ensure is still broken engine state (P2.6 found one
+# per session with every local frame shift, invisible to smokes that only check behaviour).
+if ($p.ExitCode -ne 0 -or $content -match 'Result=\{Fail|Fatal error:|LogPython: Error:|Ensure condition failed') { throw "Failed: $label exit=$($p.ExitCode); $log" }
 $expected=switch($Check) {
     'Map' {'ASTRAEON_CUBE_SPHERE_MAP: PASS'}
     'PatchLODMap' {'ASTRAEON_PATCH_LOD_MAP: PASS'}
@@ -65,6 +69,7 @@ $expected=switch($Check) {
     'Cardinals' {'PlanetCardinals: PASS'}
     'PatchLOD' {'PlanetPatchLOD: RESULTADO=OK'}
     'Observer' {'PlanetObserver: RESULTADO=OK'}
+    'State' {'PlanetState: RESULTADO=OK'}
     'Critical' {'Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true'}
     'Automation' {'Astraeon.Planet.Surface.ContinuityAndInvalidInput'}
 }
@@ -72,8 +77,8 @@ if ($content -notmatch [regex]::Escape($expected)) { throw "Missing completion m
 $successes=[regex]::Matches($content,'Test Completed. Result=\{Success\}').Count
 if ($Check -eq 'Automation') {
     $discovered=[regex]::Match($content,"Found (\d+) automation tests based on 'Astraeon'")
-    if (-not $discovered.Success -or $successes -lt 92 -or $successes -ne [int]$discovered.Groups[1].Value) {
-        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 92"
+    if (-not $discovered.Success -or $successes -lt 96 -or $successes -ne [int]$discovered.Groups[1].Value) {
+        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 96"
     }
     foreach ($required in @(
         'Astraeon.Planet.Patches.AddressHierarchy',
@@ -92,7 +97,11 @@ if ($Check -eq 'Automation') {
         'Astraeon.Planet.PatchManager.RejectsStaleFailedAndInvalid',
         'Astraeon.Planet.PatchManager.DeterministicRouteWithWorkers',
         'Astraeon.Planet.Collision.MatchesRenderedSurface',
-        'Astraeon.Planet.Collision.RingCoversCap'
+        'Astraeon.Planet.Collision.RingCoversCap',
+        'Astraeon.Planet.PatchManager.RoundTripRegeneratesSamePatch',
+        'Astraeon.Planet.Entities.DeterministicPlacement',
+        'Astraeon.Planet.State.DefeatSurvivesUnloadReloadAndSave',
+        'Astraeon.Persistence.SaveGame.V3PlanetaryLocation'
     )) {
         if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
             throw "Missing required Phase 2 test: $required"

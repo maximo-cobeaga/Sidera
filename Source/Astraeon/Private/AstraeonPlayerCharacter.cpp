@@ -1198,6 +1198,8 @@ void AAstraeonPlayerCharacter::FireWeapon()
 	if (Creature->ApplyWeaponDamage(AstraeonPlayerCharacterCombat::WeaponDamage))
 	{
 		AstraeonGameInstance->RecordCreatureKill(Profile);
+		// Sin esto el mundo no recordaba la muerte y el nido volvía a estar lleno al rematerializar.
+		AstraeonGameInstance->RecordCreatureDefeat(Creature);
 		// El cadáver se queda a la vista mientras cae; destruirlo en este mismo frame hacía
 		// que matar fuese sólo una línea de texto.
 		Creature->BeginDeathSequence();

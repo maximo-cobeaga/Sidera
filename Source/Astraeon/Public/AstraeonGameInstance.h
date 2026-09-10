@@ -14,6 +14,9 @@
 #include "WorldGen/AstraeonTerrainTraversal.h"
 #include "AstraeonGameInstance.generated.h"
 
+class AAstraeonCreatureActor;
+class UAstraeonRuntimeStateManager;
+
 UENUM(BlueprintType)
 enum class EAstraeonObjectiveState : uint8
 {
@@ -124,6 +127,18 @@ public:
 	// pero el nido se repuebla solo pasado un rato.
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Creatures")
 	void RecordCreatureDeath(FName SpawnPointId);
+
+	// The one entry point for a creature that died by the player's hand: a planetary creature
+	// becomes a delta at its place on the body, a flat-region one starts its nest clock.
+	// Until P2.6 nothing called `RecordCreatureDeath`, so every nest was always repopulated.
+	bool RecordCreatureDefeat(const AAstraeonCreatureActor* Creature);
+
+	// Persistent changes to every planet. Created on first use; reset by a new session.
+	UAstraeonRuntimeStateManager* GetPlanetState();
+	const UAstraeonRuntimeStateManager* GetPlanetState() const;
+
+	// Where the last loaded save left the player, as body + direction + altitude + heading.
+	bool GetLoadedPlanetLocation(FName& OutBodyId, FVector& OutDirection, double& OutAltitudeCm, FVector& OutForward) const;
 
 	UFUNCTION(BlueprintPure, Category = "Astraeon|Creatures")
 	bool IsCreatureSpawnPopulated(FName SpawnPointId) const;
@@ -334,6 +349,15 @@ private:
 	// Nido -> segundos que faltan para que vuelva a haber una criatura ahí.
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Creatures")
 	TMap<FName, float> CreatureRespawnTimers;
+
+	UPROPERTY()
+	TObjectPtr<UAstraeonRuntimeStateManager> PlanetState;
+
+	bool bHasLoadedPlanetLocation = false;
+	FName LoadedPlanetBodyId;
+	FVector LoadedPlayerDirection = FVector(0, 0, 1);
+	double LoadedPlayerAltitudeCm = 0.0;
+	FVector LoadedPlayerForward = FVector(1, 0, 0);
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Astraeon|Hand")
 	FName HandItemId;

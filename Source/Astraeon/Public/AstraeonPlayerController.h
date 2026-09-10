@@ -61,6 +61,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Menu")
 	void ContinueSavedGame();
 
+	// On a planet: put the player back where the loaded save left them (body, direction,
+	// altitude, heading). False if the save belongs to another body; the player then starts at
+	// this planet's spawn and keeps the loaded state.
+	bool RestorePlanetLocation();
+
 	UFUNCTION(BlueprintCallable, Category = "Astraeon|Persistence")
 	void SaveCurrentGame();
 

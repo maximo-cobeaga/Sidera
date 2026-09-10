@@ -1,5 +1,9 @@
 #include "Planet/AstraeonPlanetRuntime.h"
 #include "Planet/Collision/AstraeonPlanetCollisionRing.h"
+#include "Planet/State/AstraeonPlanetEntities.h"
+#include "Planet/State/AstraeonRuntimeStateManager.h"
+#include "AstraeonGameInstance.h"
+#include "Creatures/AstraeonCreatureActor.h"
 #include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "Components/SceneComponent.h"
 #include "ProceduralMeshComponent.h"
@@ -237,6 +241,7 @@ void AAstraeonPlanetRuntime::BeginPlay()
 	Backend=MakeUnique<FAstraeonPlanetProceduralPatchBackend>(*GetRootComponent(),SurfaceMaterial);
 	Patches=MakeUnique<FAstraeonPlanetPatchManager>(*Streaming,*Backend);
 	if (bNearCollision) CollisionStreaming=MakeUnique<FAstraeonPlanetStreamingManager>();
+	bSpawnFauna|=FParse::Param(FCommandLine::Get(),TEXT("AstraeonPlanetFauna"));
 	if (!Rebuild()) return;
 	UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: Ready radius_cm=%.0f seed=%d finest_lod=%d near_collision=%d"),
 		RadiusCm,BodySeed,FAstraeonPlanetLODManager::FinestAllowedLod(GetDefinition(),LODSettings),bNearCollision);
@@ -270,11 +275,72 @@ void AAstraeonPlanetRuntime::Tick(float DeltaSeconds)
 		if (auto* Character=Cast<ACharacter>(PC->GetPawn()))
 			Character->GetCharacterMovement()->AddTickPrerequisiteActor(this);
 		if (bNearCollision && CollisionStreaming) UpdateCollision(PC->GetPawn()->GetActorLocation()-GetActorLocation());
+		// Creatures need ground: the LOD-only lab (TL_12) has none, so it has no fauna either.
+		if (bNearCollision && bSpawnFauna) UpdateEntities(DeltaSeconds,PC->GetPawn()->GetActorLocation()-GetActorLocation());
 	}
 	if (Patches.IsValid()) UpdatePatches(DeltaSeconds);
 	const double Ms=(FPlatformTime::Seconds()-Start)*1000.0;
 	MaxPatchWorkMs=FMath::Max(MaxPatchWorkMs,Ms); SumPatchWorkMs+=Ms; ++PatchWorkFrames;
 	PatchWorkFramesOverBudget+=Ms>PatchWorkBudgetMs;
+}
+
+int32 AAstraeonPlanetRuntime::GetEntityActorCount() const
+{
+	int32 Count=0;
+	for (const auto& Item:EntityActors) Count+=Item.Value.Actor.IsValid();
+	return Count;
+}
+
+AAstraeonCreatureActor* AAstraeonPlanetRuntime::FindEntityActor(FName EntityId) const
+{
+	const FEntityActor* Found=EntityActors.Find(EntityId);
+	return Found ? Found->Actor.Get() : nullptr;
+}
+
+void AAstraeonPlanetRuntime::UpdateEntities(float DeltaSeconds, const FVector& PawnBodyCm)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(Astraeon_PlanetEntities_Update);
+	UAstraeonGameInstance* Game=GetGameInstance<UAstraeonGameInstance>();
+	SinceEntityUpdate+=DeltaSeconds;
+	// A menu is not a session: nothing lives on the planet until one starts.
+	if (!Game || !Game->HasStartedGame() || SinceEntityUpdate<0.25f) return;
+	SinceEntityUpdate=0.f;
+	const auto P=GetDefinition();
+	TArray<FAddress> Load, Keep;
+	if (!FAstraeonPlanetEntities::CellsNear(P,PawnBodyCm,EntityRadiusCm,Load)
+		|| !FAstraeonPlanetEntities::CellsNear(P,PawnBodyCm,EntityKeepRadiusCm,Keep)) return;
+	const UAstraeonRuntimeStateManager* State=Game->GetPlanetState();
+	// Leaving: out of the keep ring, or gone (a corpse removes itself).
+	const TSet<FAddress> KeepSet(Keep);
+	for (auto It=EntityActors.CreateIterator(); It; ++It)
+	{
+		AAstraeonCreatureActor* Actor=It->Value.Actor.Get();
+		if (!Actor) { It.RemoveCurrent(); continue; }
+		if (!KeepSet.Contains(It->Value.Cell) && !Actor->IsDead())
+		{
+			Actor->Destroy(); ++EntityDespawns; It.RemoveCurrent();
+		}
+	}
+	// Arriving: what the seed places here, minus what the player changed.
+	TArray<FAstraeonPlanetEntitySpawn> Spawns;
+	for (const FAddress& Cell:Load)
+	{
+		FAstraeonPlanetEntities::CreaturesInCell(P,Cell,Spawns);
+		for (const FAstraeonPlanetEntitySpawn& Spawn:Spawns)
+		{
+			if (EntityActors.Contains(Spawn.EntityId) || State->IsDefeated(Spawn.EntityId)) continue;
+			const FVector Up=Spawn.Direction;
+			const FVector Forward=FVector::CrossProduct(Up,FMath::Abs(Up.Z)<0.9 ? FVector(0,0,1) : FVector(1,0,0)).GetSafeNormal();
+			FActorSpawnParameters Params;
+			Params.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			AAstraeonCreatureActor* Creature=GetWorld()->SpawnActor<AAstraeonCreatureActor>(AAstraeonCreatureActor::StaticClass(),
+				GetSurfacePointCm(Up,0.0),FRotationMatrix::MakeFromXZ(Forward,Up).Rotator(),Params);
+			if (!Creature) continue;
+			Creature->SetPlanetaryIdentity(Spawn.EntityId,Up);
+			EntityActors.Add(Spawn.EntityId,{Creature,Cell});
+			++EntitySpawns;
+		}
+	}
 }
 
 FVector AAstraeonPlanetRuntime::ObserverBodyCm() const
