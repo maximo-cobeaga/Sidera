@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
 #include "Planet/Gravity/AstraeonPlanetGravityHarness.h"
+#include "Planet/AstraeonPlanetRuntime.h"
 
 namespace AstraeonPlanetGravity
 {
@@ -61,6 +62,11 @@ void UAstraeonPlanetGravityComponent::BeginPlay()
 
 bool UAstraeonPlanetGravityComponent::TryBindHarness()
 {
+	if (AAstraeonPlanetRuntime* Runtime = AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		SetPlanetBody(Runtime->GetActorLocation(),Runtime->RadiusCm,float(Runtime->GravityMS2));
+		return true;
+	}
 	AAstraeonPlanetGravityHarness* Harness = AAstraeonPlanetGravityHarness::FindActiveHarness(GetWorld());
 	if (!Harness)
 	{

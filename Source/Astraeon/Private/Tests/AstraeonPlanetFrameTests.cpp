@@ -2,6 +2,11 @@
 
 #include "Misc/AutomationTest.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
+#include "Planet/Coordinates/AstraeonPlanetCoordinates.h"
+#include "Planet/AstraeonPlanetDefinition.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "Planet/Surface/AstraeonCubeSphereMesh.h"
+#include <limits>
 
 // Pruebas del marco de referencia planetario. Son funciones puras: no cargan mundo, no dependen
 // de tick y no pueden pasar por accidente porque el nivel de prueba estuviera bien colocado.
@@ -44,6 +49,109 @@ bool FAstraeonPlanetFrameUpIsRadialTest::RunTest(const FString& Parameters)
 			FAstraeonPlanetFrame::GravityDirectionAt(Center, Location).Equals(-Direction, 1.0e-4));
 	}
 
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetCoordinatesRoundTripTest,
+	"Astraeon.Planet.Coordinates.DirectionFaceUvRoundTrip",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetCoordinatesRoundTripTest::RunTest(const FString& Parameters)
+{
+	const TArray<FVector> Directions = {
+		FVector(1, 0.2, -0.4).GetSafeNormal(), FVector(-0.3, 1, 0.6).GetSafeNormal(),
+		FVector(0.2, -0.4, 1).GetSafeNormal(), FVector(-0.7, 0.4, -1).GetSafeNormal(),
+		FVector(-1, 0.2, 0.3).GetSafeNormal(), FVector(0.2, -1, 0.3).GetSafeNormal()
+	};
+
+	for (const FVector& Direction : Directions)
+	{
+		const FAstraeonPlanetFaceUv FaceUv = FAstraeonPlanetCoordinates::DirectionToFaceUv(Direction);
+		TestTrue(TEXT("UV dentro de la cara"), FAstraeonPlanetCoordinates::IsValidUv(FaceUv.Uv));
+		const FVector Reconstructed = FAstraeonPlanetCoordinates::FaceUvToDirection(FaceUv.Face, FaceUv.Uv);
+		TestTrue(TEXT("Direccion conserva identidad"), Reconstructed.Equals(Direction, 1.0e-6));
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetCoordinatesEdgesMatchTest,
+	"Astraeon.Planet.Topology.FaceEdgesMatch",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetCoordinatesEdgesMatchTest::RunTest(const FString& Parameters)
+{
+	FAstraeonPlanetDefinition Planet;
+	Planet.BodyId=TEXT("edges"); Planet.RadiusCm=1000000.0;
+	Planet.MassKg=1e16; Planet.SurfaceGravityMS2=9.81; Planet.BodySeed=4242;
+	struct FBoundary { int32 Face; FVector Dir; };
+	TArray<FBoundary> Samples;
+	for (int32 Face=0; Face<6; ++Face)
+	for (int32 Y=0; Y<=8; ++Y)
+	for (int32 X=0; X<=8; ++X)
+	{
+		if (X!=0 && X!=8 && Y!=0 && Y!=8) continue;
+		Samples.Add({Face,FAstraeonPlanetCoordinates::FaceUvToDirection(
+			EAstraeonPlanetFace(Face),FVector2D(-1.0+X/4.0,-1.0+Y/4.0))});
+	}
+	int32 MatchedPairs=0;
+	for (const auto& A:Samples)
+	{
+		int32 OtherFaces=0;
+		for (const auto& B:Samples)
+		{
+			if (A.Face==B.Face || !A.Dir.Equals(B.Dir,1e-12)) continue;
+			++OtherFaces; ++MatchedPairs;
+			TestTrue(TEXT("Two distinct faces sample identical height"),
+				FMath::IsNearlyEqual(FAstraeonPlanetSurface::SampleRadialHeightCm(Planet,A.Dir),
+					FAstraeonPlanetSurface::SampleRadialHeightCm(Planet,B.Dir),1e-8));
+			TestTrue(TEXT("Normals shared across faces"),
+				FAstraeonPlanetSurface::SampleRadialNormal(Planet,A.Dir).Equals(
+					FAstraeonPlanetSurface::SampleRadialNormal(Planet,B.Dir),1e-7));
+		}
+		TestTrue(TEXT("Every face boundary has one or two different neighbours"),OtherFaces>=1 && OtherFaces<=2);
+	}
+	TestEqual(TEXT("All 12 edges and 8 corners matched"),MatchedPairs,216);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetDefinitionValidationTest,
+	"Astraeon.Planet.Definition.Validation",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetDefinitionValidationTest::RunTest(const FString& Parameters)
+{
+	FAstraeonPlanetDefinition Definition;
+	Definition.BodyId = TEXT("planet_lab");
+	Definition.RadiusCm = 1000000.0;
+	Definition.MassKg = 1.0e16;
+	Definition.SurfaceGravityMS2 = 9.81;
+	Definition.GeneratorVersion = 1;
+	TestTrue(TEXT("Definicion valida"), Definition.IsValid());
+	Definition.RadiusCm = -1.0;
+	TestFalse(TEXT("Radio negativo invalida la definicion"), Definition.IsValid());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetHeightDeterminismTest,
+	"Astraeon.Planet.Height.Determinism",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FAstraeonPlanetHeightDeterminismTest::RunTest(const FString& Parameters)
+{
+	FAstraeonPlanetDefinition Planet;
+	Planet.BodyId = TEXT("planet_test"); Planet.RadiusCm = 1000000.0;
+	Planet.MassKg = 1.0e16; Planet.SurfaceGravityMS2 = 9.81;
+	Planet.BodySeed = 4242; Planet.GeneratorVersion = FAstraeonPlanetSurface::GeneratorVersion;
+	TestTrue(TEXT("Version 2 fixed fixture survives executions and builds"),
+		FMath::IsNearlyEqual(FAstraeonPlanetSurface::SampleRadialHeightCm(Planet,FVector(1,0,0)),-29.686772625538321,1e-9));
+	const TArray<FVector> Directions = { FVector(1, 2, 3).GetSafeNormal(), FVector(-2, 1, 0.5).GetSafeNormal() };
+	for (const FVector& Direction : Directions)
+	{
+		const double A = FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
+		const double B = FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
+		TestTrue(TEXT("La misma seed y direccion son deterministas"), FMath::IsNearlyEqual(A, B, 1.0e-9));
+		TestTrue(TEXT("El relieve queda dentro del rango de Fase 1"), FMath::Abs(A) <= 180.0);
+	}
 	return true;
 }
 
@@ -313,6 +421,70 @@ bool FAstraeonPlanetFrameYawTest::RunTest(const FString& Parameters)
 	const FVector AtNorth = FAstraeonPlanetFrame::YawTangent(Forward, FVector::UpVector, 90.0);
 	TestTrue(TEXT("El sentido depende del arriba local"), AtNorth.Equals(-Yawed, 1.0e-3));
 
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPlanetSurfaceContinuityTest,
+	"Astraeon.Planet.Surface.ContinuityAndInvalidInput",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonPlanetSurfaceContinuityTest::RunTest(const FString& Parameters)
+{
+	FAstraeonPlanetDefinition P;
+	P.BodyId=TEXT("smooth"); P.RadiusCm=1000000.0; P.MassKg=1e16; P.SurfaceGravityMS2=9.81;
+	double Variation=0;
+	for (const double Radius : {20000.0,1000000.0,50000000.0,250000000.0})
+	for (int32 Seed : {0,42,4242,-17})
+	{
+		P.RadiusCm=Radius; P.BodySeed=Seed;
+		for (int32 I=0; I<100; ++I)
+		{
+			const FVector D=FVector(1.0,I*0.02-1.0,0.31).GetSafeNormal();
+			const FVector T=FVector::CrossProduct(D,FVector(0,0,1)).GetSafeNormal();
+			const double H=FAstraeonPlanetSurface::SampleRadialHeightCm(P,D);
+			const double Near=FAstraeonPlanetSurface::SampleRadialHeightCm(P,(D+T/Radius).GetSafeNormal());
+			TestTrue(TEXT("One centimetre move changes height less than 0.1 cm"),FMath::Abs(H-Near)<0.1);
+			TestTrue(TEXT("Height stays within 1.8 m"),FMath::Abs(H)<=180.0);
+			const FVector N=FAstraeonPlanetSurface::SampleRadialNormal(P,D);
+			TestTrue(TEXT("Normal finite, unit, outward"),!N.ContainsNaN() && FMath::Abs(N.Size()-1.0)<1e-8 && FVector::DotProduct(N,D)>0.99);
+			auto Changed=P; ++Changed.BodySeed;
+			Variation+=FMath::Abs(H-FAstraeonPlanetSurface::SampleRadialHeightCm(Changed,D));
+		}
+	}
+	TestTrue(TEXT("Seed changes the terrain"),Variation>1.0);
+	TestFalse(TEXT("Zero direction rejected"),FAstraeonPlanetCoordinates::DirectionToFaceUv(FVector::ZeroVector).bIsValid);
+	TestTrue(TEXT("Out of range UV rejected"),FAstraeonPlanetCoordinates::FaceUvToDirection(EAstraeonPlanetFace::PositiveX,FVector2D(2,0)).ContainsNaN());
+	TestTrue(TEXT("Zero input cannot become flat ground"),!FMath::IsFinite(FAstraeonPlanetSurface::SampleRadialHeightCm(P,FVector::ZeroVector)));
+	P.GeneratorVersion=999;
+	TestFalse(TEXT("Unknown version rejected"),FMath::IsFinite(FAstraeonPlanetSurface::SampleRadialHeightCm(P,FVector(1,0,0))));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonCubeSphereMeshTest,
+	"Astraeon.Planet.Topology.MeshAtEngineeringTiers",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonCubeSphereMeshTest::RunTest(const FString& Parameters)
+{
+	FAstraeonPlanetDefinition P;
+	P.BodyId=TEXT("mesh"); P.MassKg=1e16; P.SurfaceGravityMS2=9.81;
+	for (double Radius:{20000.0,1000000.0,50000000.0,250000000.0})
+	{
+		P.RadiusCm=Radius;
+		for (int32 Face=0; Face<6; ++Face)
+		{
+			FAstraeonCubeSphereMesh D;
+			TestTrue(TEXT("Face builds"),FAstraeonCubeSphereMesh::BuildFace(P,EAstraeonPlanetFace(Face),32,D));
+			TestEqual(TEXT("Fixed vertex budget"),D.Vertices.Num(),1089);
+			TestEqual(TEXT("Fixed triangle budget"),D.Indices.Num(),6144);
+			for (int32 I=0; I<D.Indices.Num(); I+=3)
+			{
+				const FVector A=D.Vertices[D.Indices[I]],B=D.Vertices[D.Indices[I+1]],C=D.Vertices[D.Indices[I+2]];
+				const FVector Cross=FVector::CrossProduct(B-A,C-A);
+				TestTrue(TEXT("Nondegenerate outward-facing Unreal winding"),
+					Cross.SizeSquared()>1e-8 && FVector::DotProduct(Cross,A+D.OriginBodyCm)<0);
+			}
+		}
+	}
 	return true;
 }
 

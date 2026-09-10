@@ -1,4 +1,10 @@
 #include "WorldGen/AstraeonTerrainField.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
+
+double AAstraeonTerrainField::SampleRadialHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction)
+{
+	return FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
+}
 
 #include "Environment/AstraeonItacaInterior.h"
 

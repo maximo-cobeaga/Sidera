@@ -5,6 +5,7 @@
 #include "AstraeonPlayerCharacter.h"
 #include "AstraeonPlayerController.h"
 #include "Planet/Gravity/AstraeonPlanetGravityHarness.h"
+#include "Planet/AstraeonPlanetRuntime.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/LightComponent.h"
 #include "Components/SkyLightComponent.h"
@@ -23,6 +24,7 @@
 #include "Misc/Parse.h"
 #include "Tests/AstraeonItacaInputSmoke.h"
 #include "Tests/AstraeonPlanetWalkSmoke.h"
+#include "Tests/AstraeonPlanetCardinalSmoke.h"
 #include "Tests/AstraeonRegionArtSmoke.h"
 #include "Environment/AstraeonItacaInterior.h"
 #include "WorldGen/AstraeonRegionMarker.h"
@@ -58,7 +60,8 @@ void AAstraeonGameModeBase::BeginPlay()
 	// Un mapa con harness planetario es un banco de pruebas de gravedad, no el mundo del juego:
 	// la estancia de Ítaca nacería en el origen, que ahí es el centro de la esfera. La Ítaca
 	// sobre superficie esférica llega en la Fase 3.
-	const bool bPlanetaryTestLevel = AAstraeonPlanetGravityHarness::FindActiveHarness(GetWorld()) != nullptr;
+	const bool bPlanetaryTestLevel = AAstraeonPlanetGravityHarness::FindActiveHarness(GetWorld()) != nullptr
+		|| AAstraeonPlanetRuntime::FindActive(GetWorld()) != nullptr;
 
 	if (!bPlanetaryTestLevel)
 	{
@@ -84,6 +87,8 @@ void AAstraeonGameModeBase::BeginPlay()
 	{
 		GetWorld()->SpawnActor<AAstraeonPlanetWalkSmoke>();
 	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokePlanetCardinals")))
+		GetWorld()->SpawnActor<AAstraeonPlanetCardinalSmoke>();
 
 	// The MVP starts at a minimal C++ menu. Region materialization happens after
 	// StartSelectedNewGame or ContinueSavedGame in AAstraeonPlayerController.
@@ -299,7 +304,7 @@ void AAstraeonGameModeBase::MaterializeCurrentRegion()
 	// En un mapa planetario la región plana no es el mundo: se materializaría en el origen, que
 	// es el centro de la esfera, y enterraría al jugador bajo un terreno que no le corresponde.
 	// La región esférica llega en la Fase 3; hasta entonces un mapa con harness no materializa.
-	if (AAstraeonPlanetGravityHarness::FindActiveHarness(World))
+	if (AAstraeonPlanetGravityHarness::FindActiveHarness(World) || AAstraeonPlanetRuntime::FindActive(World))
 	{
 		UE_LOG(LogTemp, Display,
 			TEXT("Astraeon: mapa planetario detectado; no se materializa la region plana (ADR 0004)."));

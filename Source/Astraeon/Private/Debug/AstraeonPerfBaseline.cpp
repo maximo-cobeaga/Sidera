@@ -2,6 +2,8 @@
 
 #include "AstraeonPlayerController.h"
 #include "Engine/World.h"
+#include "Engine/GameViewportClient.h"
+#include "UnrealClient.h"
 #include "GenericPlatform/GenericPlatformMemory.h"
 #include "HAL/PlatformMemory.h"
 #include "Misc/CommandLine.h"
@@ -132,7 +134,9 @@ void UAstraeonPerfBaselineSubsystem::Tick(float DeltaSeconds)
 		Sample.FrameCount, Sample.MeanFps, Sample.MedianFrameMs, Sample.P99FrameMs, Sample.WorstFrameMs,
 		AstraeonPerf::HitchThresholdMs, Sample.HitchCount50Ms, Sample.PhysicalMemoryStartMb, Sample.PhysicalMemoryEndMb);
 
-	FPlatformMisc::RequestExit(false);
+	// A concurrent movement smoke owns its completion; recording must not terminate it early.
+	if (!FParse::Param(FCommandLine::Get(),TEXT("AstraeonPerfKeepRunning")))
+		FPlatformMisc::RequestExit(false);
 }
 
 FAstraeonPerfSample UAstraeonPerfBaselineSubsystem::Summarize(const TArray<double>& InFrameMillis,
@@ -195,6 +199,12 @@ void UAstraeonPerfBaselineSubsystem::WriteReport(const FAstraeonPerfSample& Samp
 	// comparar con nada: una medida sin sus condiciones es una anécdota.
 	Root->SetStringField(TEXT("command_line"), FCommandLine::Get());
 	Root->SetStringField(TEXT("build_configuration"), LexToString(FApp::GetBuildConfiguration()));
+	if (CurrentWorld && CurrentWorld->GetGameViewport() && CurrentWorld->GetGameViewport()->Viewport)
+	{
+		const FIntPoint Size=CurrentWorld->GetGameViewport()->Viewport->GetSizeXY();
+		Root->SetNumberField(TEXT("viewport_width"),Size.X);
+		Root->SetNumberField(TEXT("viewport_height"),Size.Y);
+	}
 
 	FString Json;
 	const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Json);

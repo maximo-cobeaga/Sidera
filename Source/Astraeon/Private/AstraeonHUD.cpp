@@ -1,4 +1,5 @@
 #include "AstraeonHUD.h"
+#include "Planet/AstraeonPlanetRuntime.h"
 
 #include "AstraeonGameInstance.h"
 #include "AstraeonPlayerController.h"
@@ -33,7 +34,7 @@ void AAstraeonHUD::DrawHUD()
 	const bool bFabricatorOpen = AstraeonPlayerController && !bMenuVisible && !bFlying && !bBuilding && AstraeonPlayerController->IsFabricatorOpen();
 	const bool bInventoryVisible = AstraeonPlayerController && !bMenuVisible && !bFlying && !bBuilding && !bFabricatorOpen && AstraeonPlayerController->IsInventoryVisible();
 	const bool bLogbookVisible = AstraeonPlayerController && !bMenuVisible && !bFlying && !bBuilding && !bFabricatorOpen && !bInventoryVisible && AstraeonPlayerController->IsLogbookVisible();
-	const TArray<FString> Lines = bMenuVisible
+	TArray<FString> Lines = bMenuVisible
 		? BuildMenuLines(AstraeonPlayerController)
 		: bFlying
 			? BuildFlightLines(AstraeonPlayerController->GetShipPawn(), AstraeonGameInstance)
@@ -47,6 +48,17 @@ void AAstraeonHUD::DrawHUD()
 						? BuildLogbookLines(AstraeonGameInstance)
 						: BuildStatusLines(AstraeonGameInstance);
 
+	if (!bMenuVisible && AstraeonCharacter)
+	if (const auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		const FVector D=(AstraeonCharacter->GetActorLocation()-Planet->GetActorLocation()).GetSafeNormal();
+		const auto Address=FAstraeonPlanetCoordinates::DirectionToFaceUv(D);
+		Lines={TEXT("TL_11 | Nucleo planetario - laboratorio"),
+			FString::Printf(TEXT("Radio %.2f km | Seed %d | Cara %d | UV %.3f %.3f"),Planet->RadiusCm/100000.0,Planet->BodySeed,int32(Address.Face),Address.Uv.X,Address.Uv.Y),
+			FString::Printf(TEXT("Direccion %s | Centro %s"),*D.ToString(),*Planet->GetActorLocation().ToString()),
+			FString::Printf(TEXT("Colision cercana: %d triangulos"),Planet->GetCollisionTriangleCount()),
+			TEXT("WASD caminar | Raton mirar | Espacio saltar | V camara")};
+	}
 	UFont* Font = GEngine->GetMediumFont() ? GEngine->GetMediumFont() : GEngine->GetSmallFont();
 	constexpr float X = 36.0f;
 	float Y = 36.0f;

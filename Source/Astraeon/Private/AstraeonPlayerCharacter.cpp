@@ -12,6 +12,7 @@
 #include "Presentation/AstraeonFirstPersonRigComponent.h"
 #include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
 #include "Planet/Coordinates/AstraeonPlanetFrame.h"
+#include "Planet/AstraeonPlanetRuntime.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -344,6 +345,12 @@ void AAstraeonPlayerCharacter::Tick(float DeltaSeconds)
 
 void AAstraeonPlayerCharacter::UpdateHavenAndRecall()
 {
+	// Isolated geometry lab has no Itaca or planetary survival content until Phase 3.
+	if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		if (SuitComponent) SuitComponent->SetInHaven(true);
+		return;
+	}
 	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	if (!AstraeonGameInstance || !SuitComponent || !AstraeonGameInstance->HasStartedGame())
 	{
@@ -1494,6 +1501,8 @@ void AAstraeonPlayerCharacter::LogDiagnosticState() const
 
 void AAstraeonPlayerCharacter::RescueFromVoidIfNeeded()
 {
+	// Lab failures must remain observable; old-region rescue cannot place a player on this body.
+	if (AAstraeonPlanetRuntime::FindActive(GetWorld())) return;
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (!MovementComponent)
 	{

@@ -1,4 +1,6 @@
 #include "AstraeonPlayerController.h"
+#include "Planet/AstraeonPlanetRuntime.h"
+#include "Planet/Gravity/AstraeonPlanetGravityComponent.h"
 
 #include "AstraeonGameInstance.h"
 #include "AstraeonGameModeBase.h"
@@ -113,6 +115,14 @@ void AAstraeonPlayerController::StartSelectedNewGame()
 	SetInputMode(FInputModeGameOnly());
 	if (auto* SpawnedPlayerCharacter = Cast<AAstraeonPlayerCharacter>(GetPawn()))
 	{
+		if (auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
+		{
+			SpawnedPlayerCharacter->SetActorLocation(Planet->GetSurfacePointCm(FVector(0,0,1),150.0),false,nullptr,ETeleportType::TeleportPhysics);
+			SpawnedPlayerCharacter->GetCharacterMovement()->StopMovementImmediately();
+			SpawnedPlayerCharacter->FindComponentByClass<UAstraeonPlanetGravityComponent>()->SetPlanetBody(
+				Planet->GetActorLocation(),Planet->RadiusCm,float(Planet->GravityMS2));
+			return;
+		}
 		// Relativo al origen de Ítaca, no a Z=100 fijo: con relieve la estancia se apoya a
 		// la cota de su plataforma, y aparecer a 100 cm del cero del mundo dejaba al
 		// jugador dentro del bloque de terreno.
@@ -126,6 +136,11 @@ void AAstraeonPlayerController::StartSelectedNewGame()
 
 void AAstraeonPlayerController::ContinueSavedGame()
 {
+	if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		UE_LOG(LogTemp,Display,TEXT("Planet lab: save v3 is pending in Phase 2; start a lab session with Enter."));
+		return;
+	}
 	if (!bMenuVisible)
 	{
 		return;
@@ -146,6 +161,11 @@ void AAstraeonPlayerController::ContinueSavedGame()
 
 void AAstraeonPlayerController::SaveCurrentGame()
 {
+	if (AAstraeonPlanetRuntime::FindActive(GetWorld()))
+	{
+		UE_LOG(LogTemp,Display,TEXT("Planet lab: saving unavailable until planetary save v3 (Phase 2)."));
+		return;
+	}
 	UAstraeonGameInstance* AstraeonGameInstance = GetGameInstance<UAstraeonGameInstance>();
 	const bool bSaved = !bMenuVisible && AstraeonGameInstance && AstraeonGameInstance->SaveCurrentGame();
 	if (AstraeonGameInstance)

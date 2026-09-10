@@ -5,6 +5,7 @@
 #include "AstraeonTerrainField.generated.h"
 
 class UInstancedStaticMeshComponent;
+struct FAstraeonPlanetDefinition;
 
 // Contrato de consulta de la superficie final. Todas las coordenadas son centímetros
 // Unreal y la seed es la seed efectiva ya normalizada por la sesión. El contexto contiene
@@ -41,6 +42,9 @@ class ASTRAEON_API AAstraeonTerrainField : public AActor
 
 public:
 	AAstraeonTerrainField();
+	// Planetary contract: global radial direction, centimetres, no actors required.
+	// Legacy XY methods remain solely for archived flat-map regression during migration.
+	static double SampleRadialHeightCm(const FAstraeonPlanetDefinition& Planet, const FVector& Direction);
 
 	// GroundFlatSpotsCm aplana el suelo con una rampa suave, y está pensado sólo para
 	// estructuras rígidas que no pueden seguir el relieve (Ítaca). MountainKeepOutCm impide
