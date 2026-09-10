@@ -1,9 +1,11 @@
 # Backlog — ASTRAEON
 
-## Estado vigente 2026-09-10 — Fase 2 en curso
+## Estado vigente 2026-09-10 — Fase 2 cerrada; Fase 3 abierta
 
-La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
-`fase-1-nucleo-planetario-cerrada`. Orden de ejecución de la Fase 2:
+La Fase 2 cerró con la etiqueta `fase-2-patches-lod-cerrada` (`PHASE_STATUS.md`). Sigue la Fase 3,
+*La primera señal esférica*, con su orden en `PLAN_TRANSICION_EJECUCION.md` §4.
+
+Orden de ejecución de la Fase 2, cumplido:
 
 - [x] P2.1 — Dirección de patch, hash estable versionado y constructor independiente con skirts.
       Integrado como constructor del patch raíz en `TL_11`; cinco pruebas de contrato nuevas.
@@ -26,7 +28,9 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
       Smoke `State` en `TL_13`: abatida, descargada, recargada, guardada y cargada, sigue abatida.
 - [x] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
       Migradas a la esfera con todas sus aserciones; 7 seeds transitables al primer intento.
-- [ ] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.
+- [x] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.
+      Build empaquetada con los laboratorios cocinados; 4 smokes sobre el ejecutable; ADR 0006;
+      [evidencia/PUERTA_FASE_2.md](evidencia/PUERTA_FASE_2.md). **Fase 2 cerrada.**
 
 **Pedido del propietario, no bloqueante (2026-09-10, al mirar `TL_12`):** las montañas se leen
 como lomas. Quiere algunas **más imponentes y de formas y tamaños distintos**; el boceto actual

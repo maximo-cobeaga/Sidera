@@ -1,4 +1,14 @@
-## Estado vigente 2026-09-10 — Fase 1 cerrada; comienza la ejecución de Fase 2
+## Estado vigente 2026-09-10 — **Fase 2 cerrada**; Fase 3 abierta
+
+La puerta de la Fase 2 pasó con sus ocho criterios
+([evidencia/PUERTA_FASE_2.md](evidencia/PUERTA_FASE_2.md)) y la etiqueta
+`fase-2-patches-lod-cerrada`. El planeta se dibuja por patches con LOD en workers, colisión por
+anillo, marco local, estado mutable persistente y save v3; se camina a 200 m, 50 km, 500 km y
+2.500 km, y la build Development empaquetada corre los laboratorios. **96/96 Automation.** Siguiente
+fase: *La primera señal esférica* (región planetaria y contenido de Region A sobre la esfera).
+Traspaso en [HANDOFF_SESION_20260910_FASE2_CERRADA.md](HANDOFF_SESION_20260910_FASE2_CERRADA.md).
+
+## Estado 2026-09-10 — Fase 1 cerrada; ejecución de Fase 2
 
 El cierre humano y técnico de Fase 1 está registrado en `PHASE_STATUS.md` y en la etiqueta
 `fase-1-nucleo-planetario-cerrada`. Las entradas inferiores son históricas: sus pendientes de

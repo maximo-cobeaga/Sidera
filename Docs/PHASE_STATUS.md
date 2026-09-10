@@ -1,6 +1,42 @@
 # Estado de fases — ASTRAEON
 
-## Actualización 2026-09-10 — **Fase 1 CERRADA**. Fase activa: **Fase 2 — Patches, LOD y precisión**
+## Actualización 2026-09-10 — **Fase 2 CERRADA**. Fase activa: **Fase 3 — La primera señal esférica**
+
+La puerta de la Fase 2 pasó entera: los ocho criterios con evidencia en
+[evidencia/PUERTA_FASE_2.md](evidencia/PUERTA_FASE_2.md), la lista de `AGENTS.md` §15.1 completa y
+**ninguna prueba de la Fase 2 en cuarentena**. El propietario confirmó a mano `TL_11` y `TL_12` y
+autorizó por escrito cerrar P2.4–P2.8 sin más pruebas humanas; esas etapas se cierran con smokes,
+Automation, perfiles, build empaquetada y capturas revisadas por el agente.
+
+Con esta puerta queda cumplido el **Producto A** (núcleo planetario).
+
+| Lista de cierre (§15.1) | Dónde |
+|---|---|
+| Commit identificable | `ef56365` (P2.3-A) a `9a0e3ae` (P2.7) y el commit de cierre; etiqueta `fase-2-patches-lod-cerrada` |
+| Comando de build | `Build.bat` editor y juego Development; `RunUAT BuildCookRun` Win64 Development → `Builds/WindowsFase2` |
+| Resultado de las pruebas | **96/96 Automation**; smokes de `TL_11`–`TL_14`, `State`, `Observer`, `Critical`; 4 smokes sobre el ejecutable empaquetado |
+| Captura | vuelo de `TL_12` (esquina, arista, órbita) y caminata Stress a 2.500 km, revisadas |
+| Perfil | Unreal Insights de `TL_12` y `TL_13`; perfiles de frame de `TL_11`, `TL_12`, `TL_14` |
+| Warnings nuevos | ninguno del proyecto (compilación y ejecución) |
+| Limitaciones y próximo paso | `KNOWN_ISSUES.md`; Fase 3 abajo |
+| Pruebas de la fase en cuarentena | ninguna: `Connectivity` y `TraversalDetectsWalls` recuperadas |
+
+---
+
+## Fase activa: **3 — La primera señal esférica**
+
+Abierta el 2026-09-10. Entregables y puerta en `PLAN_TRANSICION_EJECUCION.md` §4, Fase 3: región
+planetaria (dirección, extensión angular, altitud), contenido de Region A proyectado sobre la
+esfera, escáner, mapa y bitácora en coordenadas planetarias, llegada controlada, y **la tabla de
+cuarentena vacía** como puerta. Lo que la Fase 2 deja preparado para ella: validador de tránsito
+esférico (`FAstraeonPlanetTraversal`), identidad y estado de entidades, save v3 y la fauna
+planetaria apagada a la espera de su contenido.
+
+---
+
+## Histórico: **2 — Patches, LOD, precisión y estado mutable** — puerta PASADA
+
+## Actualización 2026-09-10 — **Fase 1 CERRADA**. Fase activa entonces: **Fase 2 — Patches, LOD y precisión**
 
 La puerta de la Fase 1 pasó entera, con los cinco criterios confirmados a mano por el propietario
 y la lista de cierre de `AGENTS.md` §15.1 completa.
@@ -16,7 +52,7 @@ y la lista de cierre de `AGENTS.md` §15.1 completa.
 
 ---
 
-## Fase activa: **2 — Patches, LOD, precisión y estado mutable**
+## Fase 2 — Patches, LOD, precisión y estado mutable (cerrada el 2026-09-10)
 
 Abierta el 2026-09-10. Entregables y puerta en `PLAN_TRANSICION_EJECUCION.md` §4. Absorbe el
 Bloque B de `ESTADO_Y_RUTA_MAPA.md`.
@@ -37,15 +73,16 @@ Bloque B de `ESTADO_Y_RUTA_MAPA.md`.
 
 ### Puerta de salida
 
-- [ ] El tier Target de 500 km funciona sin que los patches de alta resolución crezcan
-      linealmente con el radio.
-- [ ] El stress test no produce jitter cerca del jugador.
-- [ ] Sin grietas en la ruta de prueba.
-- [ ] La colisión no desaparece bajo el jugador.
-- [ ] Ida y vuelta regenera el mismo patch.
-- [ ] Sin hitches recurrentes sobre presupuesto.
-- [ ] **Una criatura abatida sigue abatida** tras descargar y recargar su patch (`BACKLOG` MV4).
-- [ ] `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` salen de cuarentena.
+- [x] El tier Target de 500 km funciona sin que los patches de alta resolución crezcan
+      linealmente con el radio. *48 patches finos a 500 y a 2.500 km.*
+- [x] El stress test no produce jitter cerca del jugador. *Cámara quieta 0,0000 cm a 2.500 km.*
+- [x] Sin grietas en la ruta de prueba. *La peor grieta es 0,855 del faldón; 918 relevos sin agujero.*
+- [x] La colisión no desaparece bajo el jugador. *0 frames sin suelo en todas las caminatas.*
+- [x] Ida y vuelta regenera el mismo patch. *1.104 de 1.104 idénticos byte a byte.*
+- [x] Sin hitches recurrentes sobre presupuesto. *p99 5,2–5,8 ms; el único pico es la captura.*
+- [x] **Una criatura abatida sigue abatida** tras descargar y recargar su patch (`BACKLOG` MV4).
+      *Smoke `State`, también sobre el ejecutable empaquetado.*
+- [x] `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` salen de cuarentena.
 
 ### Avance técnico 2026-09-10 — P2.1/P2.2 y selección LOD
 
@@ -266,8 +303,8 @@ Ninguna empieza antes de que pase la puerta de la anterior.
 |---:|---|---|---|
 | 0 | Transición controlada | ADR y documentos sincronizados; spike de gravedad radial en pie | **PASADA** |
 | 1 | Núcleo planetario | Gravedad y cámara estables sobre una esfera cerrada | **PASADA** |
-| 2 | Patches, LOD y precisión | Streaming sin grietas ni hitches; estado mutable persistente | **en curso** |
-| 3 | La primera señal esférica | Vertical slice completo; **cuarentena vacía** | pendiente |
+| 2 | Patches, LOD y precisión | Streaming sin grietas ni hitches; estado mutable persistente | **PASADA** |
+| 3 | La primera señal esférica | Vertical slice completo; **cuarentena vacía** | **en curso** |
 | 4 | Planeta visual y biomas | Seis biomas y rendimiento aprobado | pendiente |
 | 5 | Protagonista, Ítaca y vuelo | Ida y vuelta sin carga perceptible | pendiente |
 | 6 | Sistema estelar | Persistencia entre cuerpos | pendiente |

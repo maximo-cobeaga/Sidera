@@ -1,3 +1,10 @@
+## 2026-09-10 — P2.8: build empaquetada
+
+- **Resuelto:** los laboratorios planetarios crasheaban en la build empaquetada (0xC0000005 tras
+  `Failed to load package`) porque no se cocinaban. `Config/DefaultGame.ini` los lista.
+- **Baja, abierta:** un mapa que no está cocinado termina en error fatal del motor en vez de volver
+  al mapa por defecto. Es comportamiento del motor; la lista de cocinado lo evita.
+
 ## 2026-09-10 — P2.6: estado y guardado
 
 - **Resuelto:** criaturas abatidas que reaparecían (MV4). El reloj de nido nunca arrancaba porque

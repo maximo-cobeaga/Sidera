@@ -1,3 +1,30 @@
+## 2026-09-10 — Fase 2, P2.8: build empaquetada y cierre de la puerta
+
+```powershell
+& "C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject" -noP4 -platform=Win64 -clientconfig=Development -build -cook -stage -pak -archive -archivedirectory="C:\Users\MAXIMO\Desktop\Astraeon\Builds\WindowsFase2" -utf8output
+```
+
+`BUILD SUCCESSFUL`. **Defecto encontrado y corregido:** en la primera build, `TL_13` y `TL_14`
+crasheaban con 0xC0000005, porque el mapa no estaba cocinado (`Failed to load package`) y el motor
+abortaba al no poder entrar. Sin lista explícita sólo se cocinaba el mapa por defecto, y los
+empaquetados anteriores sólo probaban ese mapa plano. `Config/DefaultGame.ini` ahora lista los
+seis mapas que se cocinan.
+
+Smokes sobre `Builds/WindowsFase2/Astraeon.exe`, ya con los mapas cocinados, sin ningún `ensure`:
+
+| Smoke | Resultado |
+|---|---|
+| `State` en `TL_13` con fauna | OK: abatida, descargada, recargada, guardada y cargada, sigue abatida; repuebla al vencer |
+| Caminata Stress 2.500 km, 60 s + 5 s quieto, cambios cada 200 m | OK: 3 cambios de marco, cámara quieta 0,0000 cm, error de trayectoria p99 1,18 cm |
+| Vuelo de `TL_12` | OK: 747 auditorías sin agujero, 387 patches visibles como máximo |
+| Recorrido crítico plano (`L_AstraeonBootstrap`) | OK: `Saved=true Loaded=true LoadedResolved=true` con save v3 |
+
+Capturas del ejecutable revisadas: la caminata a 2.500 km muestra terreno continuo al horizonte
+con 354 patches visibles y 6 de colisión; la órbita de `TL_12`, la esfera entera. Warnings nuevos
+del proyecto: ninguno. Evidencia de los ocho criterios en
+[evidencia/PUERTA_FASE_2.md](evidencia/PUERTA_FASE_2.md). Decisión del backend en
+[ADR 0006](ADR/0006-backend-de-patches-proceduralmesh.md).
+
 ## 2026-09-10 — Fase 2, P2.7: `Terrain.Connectivity` y `TraversalDetectsWalls` salen de cuarentena
 
 Migradas a la esfera en `Tests/AstraeonTerrainTraversalTests.cpp`, con validador nuevo en
