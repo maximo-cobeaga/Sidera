@@ -8,6 +8,7 @@
 #include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "Planet/Surface/AstraeonCubeSphereMesh.h"
 #include "Planet/LOD/AstraeonPlanetLODManager.h"
+#include "Planet/Collision/AstraeonPlanetCollisionRing.h"
 #include <limits>
 
 namespace AstraeonPatchTests
@@ -340,45 +341,87 @@ bool FAstraeonPatchOrderTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonPatchCollisionBridgeTest, "Astraeon.Planet.Patches.CollisionBridgeMatchesFinestPatches",
+// Replaces `Patches.CollisionBridgeMatchesFinestPatches` (P2.3): the whole-face bridge it
+// proved was retired by the P2.4 ring. The property it guarded —the ground one stands on is the
+// ground one sees— is now checked patch by patch, at every engineering tier.
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonCollisionSurfaceTest, "Astraeon.Planet.Collision.MatchesRenderedSurface",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-bool FAstraeonPatchCollisionBridgeTest::RunTest(const FString& Parameters)
+bool FAstraeonCollisionSurfaceTest::RunTest(const FString& Parameters)
 {
-	// P2.3 keeps whole-face collision until P2.4. It is only honest if a face built at
-	// Quads << FinestLod is, triangle by triangle and in the same winding, the finest patches.
 	using namespace AstraeonPatchTests;
-	const auto P = Planet(20000.0);
 	const FAstraeonPlanetLODSettings Settings;
-	const uint8 Finest = FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings);
-	const int32 Grid = Settings.Quads << Finest;
-	if (!TestTrue(TEXT("Lab radius fits the builder"), Finest > 0 && Grid <= 128)) return false;
-	const int32 Q = Settings.Quads, Count = 1 << Finest;
-	for (int32 Face = 0; Face < 6; ++Face)
+	for (double Radius : {20000.0, 5000000.0, 50000000.0, 250000000.0})
 	{
-		FAstraeonCubeSphereMesh Whole;
-		if (!TestTrue(TEXT("Collision face builds"), FAstraeonCubeSphereMesh::BuildFace(P, EAstraeonPlanetFace(Face), Grid, Whole))) return false;
-		for (int32 PY = 0; PY < Count; ++PY)
-		for (int32 PX = 0; PX < Count; ++PX)
+		const auto P = Planet(Radius);
+		const uint8 Finest = FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings);
+		for (const FVector Dir : {FVector(0,0,1), FVector(1,1,1).GetSafeNormal(), FVector(1,0,1).GetSafeNormal()})
 		{
-			auto A = Address(Finest, PX, PY); A.BodyId = P.BodyId; A.Face = EAstraeonPlanetFace(Face);
-			FAstraeonPlanetPatchBuildResult Patch;
-			if (!Build(P, A, Patch)) { AddError(TEXT("Finest patch build failed")); return false; }
-			int32 Mismatches = 0;
-			for (int32 Y = 0; Y < Q; ++Y)
-			for (int32 X = 0; X < Q; ++X)
-			{
-				const int32 PatchCell = (Y * Q + X) * 6, FaceCell = ((PY * Q + Y) * Grid + PX * Q + X) * 6;
-				for (int32 K = 0; K < 6; ++K)
-				{
-					const FVector Rendered = Patch.Vertices[Patch.Indices[PatchCell + K]] + Patch.OriginBodyCm;
-					const FVector Collided = Whole.Vertices[Whole.Indices[FaceCell + K]] + Whole.OriginBodyCm;
-					Mismatches += !Rendered.Equals(Collided, 1.e-6);
-				}
-			}
-			TestEqual(TEXT("Every collision triangle is a rendered triangle, same corner order"), Mismatches, 0);
+			FAstraeonPlanetPatchAddress A;
+			if (!TestTrue(TEXT("Address at the finest level"), FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId, Dir, Finest, A))) return false;
+			FAstraeonPlanetPatchBuildOptions Render; Render.Quads = Settings.Quads;
+			Render.SkirtDepthCm = FAstraeonPlanetLODManager::SkirtDepthCm(P, A, Settings.Quads);
+			FAstraeonPlanetPatchBuildOptions Collision; Collision.Quads = Settings.Quads; Collision.SkirtDepthCm = 0.0;
+			FAstraeonPlanetPatchBuildResult Seen, Ground;
+			if (!TestTrue(TEXT("Rendered patch builds"), FAstraeonPlanetPatchMesh::Build(P, A, 1, Render, Seen) == EAstraeonPatchBuildStatus::Success)
+				|| !TestTrue(TEXT("Collision patch builds"), FAstraeonPlanetPatchMesh::Build(P, A, 1, Collision, Ground) == EAstraeonPatchBuildStatus::Success)) return false;
+			TestEqual(TEXT("Collision has no skirt vertices"), Ground.Vertices.Num(), Seen.SurfaceVertexCount);
+			TestEqual(TEXT("Collision has no skirt triangles"), Ground.Indices.Num(), Seen.SurfaceIndexCount);
+			TestTrue(TEXT("Same origin"), Ground.OriginBodyCm == Seen.OriginBodyCm);
+			bool bSame = true;
+			for (int32 I = 0; I < Ground.Indices.Num() && bSame; ++I)
+				bSame = Ground.Indices[I] == Seen.Indices[I] && Ground.Vertices[Ground.Indices[I]] == Seen.Vertices[Seen.Indices[I]];
+			TestTrue(FString::Printf(TEXT("Every collision triangle is the rendered one (radius %.0f, lod %d)"), Radius, Finest), bSame);
 		}
 	}
-	AddInfo(FString::Printf(TEXT("CollisionBridge radius_cm=%.0f finest_lod=%d grid=%d"), P.RadiusCm, Finest, Grid));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonCollisionRingTest, "Astraeon.Planet.Collision.RingCoversCap",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonCollisionRingTest::RunTest(const FString& Parameters)
+{
+	using namespace AstraeonPatchTests;
+	const FAstraeonPlanetLODSettings Settings;
+	int32 Cases = 0, MaxRing = 0, MaxKeep = 0;
+	for (double Radius : {20000.0, 5000000.0, 50000000.0, 250000000.0})
+	{
+		const auto P = Planet(Radius);
+		const uint8 Finest = FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings);
+		// Face centres, a seam and a corner: the cap straddles two and three faces there.
+		for (const FVector Dir : {FVector(0,0,1), FVector(1,0,1).GetSafeNormal(), FVector(1,1,1).GetSafeNormal(),
+			FVector(0.37,-0.81,0.45).GetSafeNormal()})
+		{
+			TArray<FAstraeonPlanetPatchAddress> Ring, Keep, Again;
+			if (!TestTrue(TEXT("Ring selects"), FAstraeonPlanetCollisionRing::Select(P, Finest, Dir, FAstraeonPlanetCollisionRing::RadiusCm, Ring))
+				|| !TestTrue(TEXT("Keep selects"), FAstraeonPlanetCollisionRing::Select(P, Finest, Dir, FAstraeonPlanetCollisionRing::KeepRadiusCm, Keep))) return false;
+			FAstraeonPlanetCollisionRing::Select(P, Finest, Dir, FAstraeonPlanetCollisionRing::RadiusCm, Again);
+			TestTrue(TEXT("Deterministic"), Ring == Again);
+			FAstraeonPlanetPatchAddress Under;
+			FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId, Dir, Finest, Under);
+			TestTrue(TEXT("The patch under the point comes first"), Ring[0] == Under);
+			TestTrue(TEXT("Keep contains the whole ring (hysteresis)"), !Ring.ContainsByPredicate([&Keep](const auto& A) { return !Keep.Contains(A); }));
+			// Dense cover check: every point of the cap, down to a 5 cm sliver at its rim.
+			const FVector Ref = FMath::Abs(Dir.Z) < 0.9 ? FVector(0,0,1) : FVector(1,0,0);
+			const FVector TA = FVector::CrossProduct(Ref, Dir).GetSafeNormal(), TB = FVector::CrossProduct(Dir, TA);
+			int32 Missing = 0;
+			for (int32 I = 0; I < 4000; ++I)
+			{
+				// Low-discrepancy spiral: uniform over the disc, no random stream needed.
+				const double R = (FAstraeonPlanetCollisionRing::RadiusCm - 5.0) * FMath::Sqrt((I + 0.5) / 4000.0);
+				const double Angle = I * 2.39996322972865332;
+				const FVector Point = Dir * FMath::Cos(R / Radius) + (TA * FMath::Cos(Angle) + TB * FMath::Sin(Angle)) * FMath::Sin(R / Radius);
+				FAstraeonPlanetPatchAddress Covering;
+				FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId, Point, Finest, Covering);
+				Missing += !Ring.Contains(Covering);
+			}
+			TestEqual(FString::Printf(TEXT("No point of the cap lacks collision (radius %.0f, dir %s)"), Radius, *Dir.ToString()), Missing, 0);
+			MaxRing = FMath::Max(MaxRing, Ring.Num()); MaxKeep = FMath::Max(MaxKeep, Keep.Num()); ++Cases;
+		}
+	}
+	// Cube-sphere cells shrink towards the cube corners (to ~0.58 of a face centre) and three
+	// faces meet there, so the 160 m keep cap spans up to 4 patches a side; measured 12.
+	TestTrue(TEXT("Ring stays small: collision is local, never planetary"), MaxRing <= 6 && MaxKeep <= 16);
+	AddInfo(FString::Printf(TEXT("CollisionRing cases=%d max_ring=%d max_keep=%d"), Cases, MaxRing, MaxKeep));
 	return true;
 }
 

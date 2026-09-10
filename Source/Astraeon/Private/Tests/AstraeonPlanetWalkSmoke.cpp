@@ -247,9 +247,11 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 	}
 	if (const auto* PlanetActor = AAstraeonPlanetRuntime::FindActive(GetWorld()))
 	{
-		UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: reconstrucciones de colision=%d (%.2f por segundo)"),
+		UE_LOG(LogTemp, Display, TEXT("AstraeonPlanetWalk: reconstrucciones de colision=%d (%.2f por segundo) | de emergencia=%d | frames sin colision bajo el jugador=%d | patches de colision vivos=%d"),
 			PlanetActor->GetCollisionRebuildCount(),
-			Elapsed > 0.0f ? PlanetActor->GetCollisionRebuildCount() / Elapsed : 0.0);
+			Elapsed > 0.0f ? PlanetActor->GetCollisionRebuildCount() / Elapsed : 0.0,
+			PlanetActor->GetCollisionEmergencyBuilds(), PlanetActor->GetCollisionMissingFrames(),
+			PlanetActor->GetCollisionPatchCount());
 	}
 
 	UE_LOG(LogTemp, Display,
@@ -297,10 +299,16 @@ void AAstraeonPlanetWalkSmoke::Tick(float DeltaSeconds)
 
 	if (const auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
 	{
-		if (DistanceTravelledCm < 2.0*PI*Planet->RadiusCm)
+		// La vuelta completa se exige donde cabe en la caminata (banco de 200 m); en un planeta
+		// grande basta la distancia, que ya se exige arriba.
+		constexpr double LapPlanetMaxCircumferenceCm = 150000.0;
+		if (2.0*PI*Planet->RadiusCm <= LapPlanetMaxCircumferenceCm && DistanceTravelledCm < 2.0*PI*Planet->RadiusCm)
 			Failures+=TEXT("No complete logical lap; ");
-		// Guardian del puente de colision: el suelo que se pisa es el del patch mas fino, asi
-		// que ese patch tiene que ser el que se ve. Mismo margen que el corte de locomocion.
+		// Guardian del anillo de colision: nunca un frame sin suelo bajo el jugador.
+		if (Planet->GetCollisionMissingFrames()>0)
+			Failures+=FString::Printf(TEXT("%d frames sin colision bajo el jugador; "),Planet->GetCollisionMissingFrames());
+		// El suelo que se pisa es el del patch mas fino, asi que ese patch tiene que ser el que
+		// se ve. Mismo margen que el corte de locomocion.
 		if (const auto* Patches=Planet->GetPatchManager())
 		{
 			const auto& S=Patches->GetStats();

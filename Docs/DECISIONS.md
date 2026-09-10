@@ -1,5 +1,21 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P2.4: colisión por anillo de patches
+
+El propietario autorizó cerrar la Fase 2 sin más pruebas humanas; la evidencia es automática y
+visual (capturas revisadas por el agente).
+
+La colisión se construye con el mismo constructor que los patches dibujados, al nivel más fino y
+sin faldones, un componente por patch. Anillo de 40 m, conservación hasta 80 m. Los patches se
+piden a una cola de workers propia para no competir con el render. Si el patch bajo el jugador
+no está listo, se construye en el acto y se cuenta como emergencia: sólo debe pasar al arrancar
+o tras un teletransporte. Un patch sobre el que alguien está parado nunca se retira. Cocinado
+síncrono: el suelo existe en el instante del commit.
+
+Se retiran el puente de P2.3, el doble búfer de Fase 1 y `-AstraeonPlanetLegacyFaces`, como
+estaba acordado. `SpawnDirection` en el runtime decide dónde aparece una sesión nueva, y el
+suelo se prepara antes del teletransporte.
+
 ## 2026-09-10 — Plan de cierre de P2.3 y gestor de patches
 
 El propietario aprobó cerrar P2.3 en cuatro incrementos: A, gestor puro; B, backend

@@ -18,7 +18,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
         El perfil encontró el selector cuadrático (19 ms); corregido a 1,1 ms, resultado idéntico.
   - [x] D — Documentación y prueba humana. `TL_11` confirmada. `TL_12` devolvió un defecto
         (caía con Play); corregido con modo observador y smoke `Observer`, y re-confirmada.
-- [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
+- [x] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
+      20 patches de colisión donde había 434 reconstrucciones; `TL_13` se camina a 50 km.
 - [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
 - [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.
 - [ ] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.

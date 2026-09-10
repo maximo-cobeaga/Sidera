@@ -1,3 +1,50 @@
+## 2026-09-10 — Fase 2, P2.4: anillo de colisión y `TL_13_CollisionRing`
+
+Implementación en `Planet/Collision/AstraeonPlanetCollisionRing.*` y `AstraeonPlanetRuntime.*`;
+mapas `TL_13_CollisionRing` (50 km, se camina, aparición en una esquina del cubo) y
+`TL_14_FrameTransition` generados por `Scripts/Editor/CreatePlanetLabMap.py`. Salen el puente
+de colisión de P2.3, el doble búfer de Fase 1 y `-AstraeonPlanetLegacyFaces`.
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check LabMap -Map TL_13_CollisionRing
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Map TL_13_CollisionRing
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals -Map TL_13_CollisionRing
+.\Scripts\RunPlanetChecks.ps1 -Check Walk
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+.\Scripts\RunPlanetChecks.ps1 -Check PatchLOD
+.\Scripts\RunPlanetChecks.ps1 -Check Observer
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **92/92 Automation**. Todos
+los smokes OK.
+
+| Caminata de 250 s | `TL_11` (200 m) | `TL_13` (50 km, desde una esquina) |
+|---|---|---|
+| Recorrido / saltos | 141.214 cm / 62 | 141.170 cm / 62 |
+| Frames en Idle caminando | 0 | 0 |
+| Frames sin colisión bajo el jugador | **0** | **0** |
+| Patches de colisión construidos | **20** (antes 434 reconstrucciones) | 45 |
+| De emergencia en el hilo de juego | 1 (arranque) | 1 (arranque) |
+| Suelo visible ≠ pisado | 0 | 0 de 58.329 |
+
+Cardinales 26/26 en los dos mapas, incluidas las 8 esquinas del planeta de 50 km.
+
+Pruebas nuevas: `Collision.MatchesRenderedSurface` —en los cuatro radios de ingeniería, cada
+triángulo de colisión es el triángulo dibujado, sin faldones— y `Collision.RingCoversCap` —4.000
+puntos del casquete de 40 m, en centros de cara, costuras y esquinas, todos con colisión; como
+máximo 4 patches en el anillo y 12 en el de conservación, sin importar el radio—. Reemplazan a
+`Patches.CollisionBridgeMatchesFinestPatches`, cuyo puente ya no existe.
+
+Insights, caminata de 120 s en `TL_13`: `Astraeon_PlanetCollision_Commit` 24 llamadas, **1,84 ms**
+de media y 2,02 de máximo (el cocinado síncrono); `Astraeon_PlanetCollision_Update` 0,013 ms
+de media. Se mantiene el cocinado síncrono: garantiza suelo en el instante del commit y pasa 0,2
+veces por segundo.
+
+Fallo encontrado y corregido en el camino: los cardinales no encontraban triángulo en la esquina
+(−1, 1, −1) con 7 patches de colisión cargados. El rayo pasaba justo por el vértice que comparten
+tres mallas distintas; se reemplazó por un barrido de esfera de 5 cm (`KNOWN_ISSUES`).
+
 ## 2026-09-10 — Fase 2, P2.3-D: prueba humana y observador de `TL_12`
 
 Prueba humana: **`TL_11` confirmada por el propietario** ("anda ok"). **`TL_12` falló**: con

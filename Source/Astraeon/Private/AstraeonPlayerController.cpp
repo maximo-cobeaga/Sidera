@@ -117,7 +117,9 @@ void AAstraeonPlayerController::StartSelectedNewGame()
 	{
 		if (auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
 		{
-			SpawnedPlayerCharacter->SetActorLocation(Planet->GetSurfacePointCm(FVector(0,0,1),150.0),false,nullptr,ETeleportType::TeleportPhysics);
+			// Ground first, then the player: a teleport onto a patch without collision is a fall.
+			Planet->PrepareCollision(Planet->SpawnDirection,true);
+			SpawnedPlayerCharacter->SetActorLocation(Planet->GetSurfacePointCm(Planet->SpawnDirection,150.0),false,nullptr,ETeleportType::TeleportPhysics);
 			SpawnedPlayerCharacter->GetCharacterMovement()->StopMovementImmediately();
 			SpawnedPlayerCharacter->FindComponentByClass<UAstraeonPlanetGravityComponent>()->SetPlanetBody(
 				Planet->GetActorLocation(),Planet->RadiusCm,float(Planet->GravityMS2));

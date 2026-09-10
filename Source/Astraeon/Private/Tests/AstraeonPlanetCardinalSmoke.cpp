@@ -55,8 +55,16 @@ void AAstraeonPlanetCardinalSmoke::Tick(float DeltaSeconds)
 		FHitResult Hit;
 		FCollisionQueryParams Query(SCENE_QUERY_STAT(PlanetCardinalGround),true,Character);
 		const FVector Center=Planet->GetActorLocation();
-		if (!GetWorld()->LineTraceSingleByChannel(Hit,Center+Up*(Planet->RadiusCm*1.03),Center+Up*(Planet->RadiusCm*0.97),ECC_Visibility,Query))
-		{ Finish(false,TEXT("No rendered triangle under test direction")); return; }
+		// A 5 cm sphere, not a ray. Collision is one mesh per patch since P2.4, and a ray aimed
+		// exactly down a seam or through the vertex three meshes share can slip through the
+		// sub-millimetre float gap between them. The player is a capsule and never can.
+		const FVector From=Center+Up*(Planet->RadiusCm*1.03), To=Center+Up*(Planet->RadiusCm*0.97);
+		if (!GetWorld()->SweepSingleByChannel(Hit,From,To,FQuat::Identity,ECC_Visibility,FCollisionShape::MakeSphere(5.f),Query))
+		{
+			Finish(false,FString::Printf(TEXT("No ground under test direction site=%d collision_patches=%d triangles=%d"),
+				Site,Planet->GetCollisionPatchCount(),Planet->GetCollisionTriangleCount()));
+			return;
+		}
 		Ground=Hit.ImpactPoint;
 		Character->StopJumping(); Move->StopMovementImmediately();
 		Gravity->ClearPlanetBody();

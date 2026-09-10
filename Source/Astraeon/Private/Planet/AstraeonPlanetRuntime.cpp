@@ -1,4 +1,5 @@
 #include "Planet/AstraeonPlanetRuntime.h"
+#include "Planet/Collision/AstraeonPlanetCollisionRing.h"
 #include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "Components/SceneComponent.h"
 #include "ProceduralMeshComponent.h"
@@ -14,13 +15,16 @@
 #include "Misc/Parse.h"
 #include "Camera/PlayerCameraManager.h"
 #include "HAL/PlatformTime.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 namespace
 {
-	// Provisional, to be measured in TL_12: selection cadence and uploads per frame.
+	// Provisional, measured in TL_12: selection cadence and uploads per frame.
 	constexpr float SelectionIntervalSeconds = 0.1f;
 	constexpr int32 MaxCommitsPerTick = 2;
 	constexpr int32 MaxBuilderQuads = 128;
+	// The ring is recomputed only after this much movement: it is 40 m wide.
+	constexpr double RingRecenterCm = 100.0;
 }
 
 AAstraeonPlanetRuntime::AAstraeonPlanetRuntime()
@@ -35,19 +39,6 @@ AAstraeonPlanetRuntime::AAstraeonPlanetRuntime()
 		Mesh->SetCollisionProfileName(TEXT("NoCollision"));
 		Faces.Add(Mesh);
 	}
-	// Dos búferes de colisión, no uno. Ver `PrepareCollision`: el relevo se construye antes de
-	// retirar el que sostiene al jugador.
-	for (int32 I=0; I<2; ++I)
-	{
-		auto* Near = CreateDefaultSubobject<UProceduralMeshComponent>(
-			I==0 ? TEXT("NearCollision") : TEXT("NearCollisionRelay"));
-		Near->SetupAttachment(RootComponent);
-		Near->SetCollisionProfileName(TEXT("BlockAll"));
-		Near->SetVisibility(false);
-		Near->bUseAsyncCooking = false; // tiny bounded proof; worker pipeline belongs to Phase 2
-		if (I==0) NearCollision = Near; else NearCollisionRelay = Near;
-	}
-	NearCollisionRelay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 FAstraeonPlanetDefinition AAstraeonPlanetRuntime::GetDefinition() const
@@ -70,12 +61,7 @@ void AAstraeonPlanetRuntime::OnConstruction(const FTransform& Transform)
 bool AAstraeonPlanetRuntime::Rebuild()
 {
 	const auto P=GetDefinition();
-	// Same builder, same integer global grid and same diagonals: a whole face at
-	// Quads << FinestLod has exactly the vertices and triangles of the finest patches.
-	CollisionQuads = Patches.IsValid() && bNearCollision
-		? int32(FMath::Min<int64>(int64(LODSettings.Quads) << FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings), MaxBuilderQuads+1))
-		: FaceQuads;
-	if (!P.IsValid() || FaceQuads<4 || FaceQuads>MaxBuilderQuads || !FMath::IsPowerOfTwo(FaceQuads) || CollisionQuads>MaxBuilderQuads
+	if (!P.IsValid() || FaceQuads<4 || FaceQuads>MaxBuilderQuads || !FMath::IsPowerOfTwo(FaceQuads)
 		|| !GetActorScale3D().Equals(FVector::OneVector) || !GetActorQuat().Equals(FQuat::Identity))
 	{
 		UE_LOG(LogTemp, Error, TEXT("PlanetRuntime: invalid definition/grid/transform; radius is data, body axes fixed"));
@@ -84,74 +70,154 @@ bool AAstraeonPlanetRuntime::Rebuild()
 	FaceData.SetNum(6);
 	for (int32 I=0; I<6; ++I)
 	{
-		if (!FAstraeonCubeSphereMesh::BuildFace(P, EAstraeonPlanetFace(I), CollisionQuads, FaceData[I])) return false;
-		// With patches the faces are only the bootstrap image: retired when the first cover shows.
+		if (!FAstraeonCubeSphereMesh::BuildFace(P, EAstraeonPlanetFace(I), FaceQuads, FaceData[I])) return false;
+		// The bootstrap image: retired in the frame the first patch cover shows.
 		const auto& D=FaceData[I];
 		Faces[I]->SetRelativeLocation(D.OriginBodyCm);
 		Faces[I]->CreateMeshSection(0,D.Vertices,D.Indices,D.Normals,D.UVs,TArray<FColor>(),TArray<FProcMeshTangent>(),false);
 		if (SurfaceMaterial) Faces[I]->SetMaterial(0,SurfaceMaterial);
 	}
 	bFacesRetired=false;
-	if (!bNearCollision)
+	// A different definition invalidates every collision patch; the ring rebuilds on demand.
+	ResetCollision();
+	return true;
+}
+
+FAstraeonPlanetPatchBuildOptions AAstraeonPlanetRuntime::CollisionOptions() const
+{
+	// Same grid as the rendered patches; no skirts, which are visual cover and never ground.
+	FAstraeonPlanetPatchBuildOptions Options;
+	Options.Quads=LODSettings.Quads; Options.SkirtDepthCm=0.0;
+	return Options;
+}
+
+void AAstraeonPlanetRuntime::CommitCollision(const FAstraeonPlanetPatchBuildResult& Mesh)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(Astraeon_PlanetCollision_Commit);
+	if (CollisionLive.Contains(Mesh.Address)) return;
+	UProceduralMeshComponent* Component = CollisionFree.IsEmpty() ? nullptr : CollisionFree.Pop(EAllowShrinking::No);
+	if (!Component)
 	{
-		for (auto* Buffer:{NearCollision.Get(),NearCollisionRelay.Get()})
-		{
-			Buffer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Buffer->ClearAllMeshSections();
-		}
-		CollisionTriangles=0;
-		return true;
+		Component=NewObject<UProceduralMeshComponent>(this);
+		Component->SetupAttachment(RootComponent);
+		Component->SetCollisionProfileName(TEXT("BlockAll"));
+		Component->SetVisibility(false);
+		Component->SetCanEverAffectNavigation(false);
+		Component->bUseAsyncCooking=false; // Built ahead of the player: the cook is ready on commit.
+		Component->RegisterComponent();
+		CollisionComponents.Add(Component);
 	}
-	return PrepareCollision(FVector(0,0,1),true);
+	Component->SetRelativeLocation(Mesh.OriginBodyCm);
+	Component->CreateMeshSection(0,Mesh.Vertices,Mesh.Indices,TArray<FVector>(),TArray<FVector2D>(),
+		TArray<FColor>(),TArray<FProcMeshTangent>(),true);
+	Component->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionLive.Add(Mesh.Address,Component);
+	CollisionTriangles+=Mesh.Indices.Num()/3;
+	++CollisionRebuilds;
+}
+
+void AAstraeonPlanetRuntime::RemoveCollision(const FAddress& Address)
+{
+	UProceduralMeshComponent* Component=nullptr;
+	if (!CollisionLive.RemoveAndCopyValue(Address,Component)) return;
+	CollisionTriangles-=Component->GetProcMeshSection(0) ? Component->GetProcMeshSection(0)->ProcIndexBuffer.Num()/3 : 0;
+	Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Component->ClearAllMeshSections();
+	CollisionFree.Add(Component);
+}
+
+void AAstraeonPlanetRuntime::ResetCollision()
+{
+	TArray<FAddress> Live;
+	CollisionLive.GetKeys(Live);
+	for (const auto& A:Live) RemoveCollision(A);
+	for (const auto& Item:CollisionPending) if (CollisionStreaming) CollisionStreaming->Release(Item.Key);
+	CollisionPending.Reset(); CollisionWant.Reset(); CollisionKeep.Reset();
+	CollisionRingCenter=FVector::ZeroVector; CollisionTriangles=0;
+}
+
+bool AAstraeonPlanetRuntime::BuildCollisionNow(const FAddress& Address)
+{
+	if (CollisionLive.Contains(Address)) return true;
+	if (CollisionStreaming && CollisionPending.Remove(Address)) CollisionStreaming->Release(Address);
+	FAstraeonPlanetPatchBuildResult Mesh;
+	if (FAstraeonPlanetPatchMesh::Build(GetDefinition(),Address,1,CollisionOptions(),Mesh)!=EAstraeonPatchBuildStatus::Success)
+	{
+		UE_LOG(LogTemp,Error,TEXT("PlanetRuntime: collision patch failed to build; the player has no ground here"));
+		return false;
+	}
+	CommitCollision(Mesh);
+	return true;
 }
 
 bool AAstraeonPlanetRuntime::PrepareCollision(const FVector& Direction, bool bForce)
 {
 	if (!bNearCollision) return false;
-	FVector Unit;
-	if (FaceData.Num()!=6 || !FAstraeonPlanetCoordinates::TryNormalizeDirection(Direction,Unit)) return false;
-	if (!bForce && FVector::DotProduct(Unit,CollisionDirection)>FMath::Cos(0.5/FaceQuads)) return true;
-	// Select nearby cells from all faces: seam crossings include both neighbours.
-	// Collision uses EXACTLY the rendered triangles, with an origin close to the player.
-	const FVector Origin=Unit*RadiusCm;
-	TArray<FVector> V;
-	TArray<int32> Indices;
-	const double MinDot=FMath::Cos(6.0/FaceQuads);
-	for (const auto& D:FaceData)
-	for (int32 Cell=0; Cell<D.Indices.Num(); Cell+=6)
+	const auto P=GetDefinition();
+	const uint8 Finest=FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings);
+	TArray<FAddress> Ring;
+	if (!FAstraeonPlanetCollisionRing::Select(P,Finest,Direction,FAstraeonPlanetCollisionRing::RadiusCm,Ring)) return false;
+	bool bUnder=BuildCollisionNow(Ring[0]);
+	if (bForce) for (int32 I=1; I<Ring.Num(); ++I) BuildCollisionNow(Ring[I]);
+	CollisionRingCenter=FVector::ZeroVector; // Force the next tick to recompute around the new spot.
+	return bUnder;
+}
+
+void AAstraeonPlanetRuntime::UpdateCollision(const FVector& PawnBodyCm)
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(Astraeon_PlanetCollision_Update);
+	const auto P=GetDefinition();
+	const uint8 Finest=FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings);
+	FVector Direction;
+	if (!FAstraeonPlanetCoordinates::TryNormalizeDirection(PawnBodyCm,Direction)) return;
+	LastPawnDirection=Direction;
+	if (CollisionRingCenter.IsZero() || FVector::DistSquared(Direction,CollisionRingCenter)*FMath::Square(RadiusCm)>FMath::Square(RingRecenterCm))
 	{
-		FVector Center=FVector::ZeroVector;
-		for (int32 J=0; J<6; ++J) Center+=D.Vertices[D.Indices[Cell+J]]+D.OriginBodyCm;
-		if (FVector::DotProduct(Center.GetSafeNormal(),Unit)<MinDot) continue;
-		for (int32 J=0; J<6; ++J)
-		{
-			Indices.Add(V.Num());
-			V.Add(D.Vertices[D.Indices[Cell+J]]+D.OriginBodyCm-Origin);
-		}
+		CollisionRingCenter=Direction;
+		FAstraeonPlanetCollisionRing::Select(P,Finest,Direction,FAstraeonPlanetCollisionRing::RadiusCm,CollisionWant);
+		FAstraeonPlanetCollisionRing::Select(P,Finest,Direction,FAstraeonPlanetCollisionRing::KeepRadiusCm,CollisionKeep);
 	}
-	if (V.IsEmpty()) return false;
-	// Re-centering collision preserves world triangles; it is NOT a moving platform.
-	//
-	// Con un solo componente esto costaba dos frames sin suelo bajo el jugador: había que
-	// despegarlo (`SetBase(nullptr)`), mover el componente y recocer su cuerpo físico en el
-	// sitio. Medido el 2026-09-10 sobre 40 s de caminata: 55 reconstrucciones y 53 caídas de
-	// la velocidad a 0, que el selector de animación leía como `Idle` y le reiniciaban el
-	// ciclo de paso al jugador ~1,3 veces por segundo.
-	//
-	// Con dos búferes el relevo se construye completo y se activa ANTES de retirar el
-	// saliente, y el personaje se pasa de uno a otro en vez de quedarse sin base.
-	UProceduralMeshComponent* Incoming = ActiveCollisionBuffer==0 ? NearCollisionRelay : NearCollision;
-	UProceduralMeshComponent* Outgoing = ActiveCollisionBuffer==0 ? NearCollision : NearCollisionRelay;
-	Incoming->SetRelativeLocation(Origin);
-	Incoming->CreateMeshSection(0,V,Indices,TArray<FVector>(),TArray<FVector2D>(),TArray<FColor>(),TArray<FProcMeshTangent>(),true);
-	Incoming->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	for (TActorIterator<ACharacter> It(GetWorld()); It; ++It)
-		if (It->GetMovementBase()==Outgoing) It->SetBase(Incoming);
-	Outgoing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	Outgoing->ClearAllMeshSections();
-	ActiveCollisionBuffer = 1-ActiveCollisionBuffer;
-	CollisionDirection=Unit; CollisionTriangles=Indices.Num()/3; ++CollisionRebuilds;
-	return true;
+	const TSet<FAddress> Keep(CollisionKeep);
+	// Results from workers: only what is still wanted becomes ground.
+	FAstraeonPlanetPatchCompletion Done;
+	while (CollisionStreaming->TryTakeCompleted(Done))
+	{
+		const uint64* Pending=CollisionPending.Find(Done.Address);
+		if (!Pending || *Pending!=Done.BuildRevision || !CollisionStreaming->IsCurrent(Done.Address,Done.BuildRevision)) continue;
+		CollisionStreaming->Release(Done.Address);
+		CollisionPending.Remove(Done.Address);
+		if (Done.Status==EAstraeonPatchBuildStatus::Success && Keep.Contains(Done.Address)) CommitCollision(Done.Mesh);
+		else if (Done.Status!=EAstraeonPatchBuildStatus::Success)
+			UE_LOG(LogTemp,Error,TEXT("PlanetRuntime: collision patch build failed (status %d)"),int32(Done.Status));
+	}
+	// The patch under the player has ground now, never later. Not being ready is counted.
+	FAddress Under;
+	if (FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId,Direction,Finest,Under) && !CollisionLive.Contains(Under))
+	{
+		++CollisionEmergencyBuilds;
+		if (!BuildCollisionNow(Under)) ++CollisionMissingFrames;
+	}
+	for (const auto& A:CollisionWant)
+	{
+		if (CollisionLive.Contains(A) || CollisionPending.Contains(A)) continue;
+		uint64 Revision=0;
+		const auto Status=CollisionStreaming->Request(P,A,CollisionOptions(),Revision);
+		if (Status==EAstraeonPatchRequestStatus::AtCapacity) break;
+		if (Status==EAstraeonPatchRequestStatus::Accepted) CollisionPending.Add(A,Revision);
+		else UE_LOG(LogTemp,Error,TEXT("PlanetRuntime: collision request rejected (status %d)"),int32(Status));
+	}
+	// Leaving the keep radius frees the patch, unless something still stands on it.
+	TArray<FAddress> Leaving;
+	for (const auto& Item:CollisionLive) if (!Keep.Contains(Item.Key)) Leaving.Add(Item.Key);
+	for (const auto& A:Leaving)
+	{
+		bool bStoodOn=false;
+		for (TActorIterator<ACharacter> It(GetWorld()); It && !bStoodOn; ++It) bStoodOn=It->GetMovementBase()==CollisionLive[A];
+		if (!bStoodOn) RemoveCollision(A);
+	}
+	TArray<FAddress> Stale;
+	for (const auto& Item:CollisionPending) if (!Keep.Contains(Item.Key)) Stale.Add(Item.Key);
+	for (const auto& A:Stale) { CollisionStreaming->Release(A); CollisionPending.Remove(A); }
 }
 
 FVector AAstraeonPlanetRuntime::GetSurfacePointCm(FVector Direction, double AltitudeCm) const
@@ -167,23 +233,13 @@ void AAstraeonPlanetRuntime::BeginPlay()
 	GetWorld()->GetWorldSettings()->bEnableWorldBoundsChecks=false;
 	// Overrides are test-only, documented and logged; same map proves radius is a datum.
 	FParse::Value(FCommandLine::Get(),TEXT("AstraeonPlanetRadiusCm="),RadiusCm);
-	if (!FParse::Param(FCommandLine::Get(),TEXT("AstraeonPlanetLegacyFaces")))
-	{
-		const auto P=GetDefinition();
-		const int64 Grid=int64(LODSettings.Quads) << FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings);
-		if (!bNearCollision || Grid<=MaxBuilderQuads)
-		{
-			Streaming=MakeUnique<FAstraeonPlanetStreamingManager>();
-			Backend=MakeUnique<FAstraeonPlanetProceduralPatchBackend>(*GetRootComponent(),SurfaceMaterial);
-			Patches=MakeUnique<FAstraeonPlanetPatchManager>(*Streaming,*Backend);
-		}
-		else
-			UE_LOG(LogTemp,Warning,TEXT("PlanetRuntime: radius_cm=%.0f needs a %lld-quad collision grid; the exact bridge stops at %d. Six fixed faces until P2.4"),
-				RadiusCm,Grid,MaxBuilderQuads);
-	}
+	Streaming=MakeUnique<FAstraeonPlanetStreamingManager>();
+	Backend=MakeUnique<FAstraeonPlanetProceduralPatchBackend>(*GetRootComponent(),SurfaceMaterial);
+	Patches=MakeUnique<FAstraeonPlanetPatchManager>(*Streaming,*Backend);
+	if (bNearCollision) CollisionStreaming=MakeUnique<FAstraeonPlanetStreamingManager>();
 	if (!Rebuild()) return;
-	UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: Ready radius_cm=%.0f seed=%d mode=%s collision_grid=%d collision=%d"),
-		RadiusCm,BodySeed,Patches.IsValid()?TEXT("patches"):TEXT("legacy_faces"),CollisionQuads,CollisionTriangles);
+	UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: Ready radius_cm=%.0f seed=%d finest_lod=%d near_collision=%d"),
+		RadiusCm,BodySeed,FAstraeonPlanetLODManager::FinestAllowedLod(GetDefinition(),LODSettings),bNearCollision);
 }
 
 void AAstraeonPlanetRuntime::EndPlay(const EEndPlayReason::Type Reason)
@@ -194,24 +250,31 @@ void AAstraeonPlanetRuntime::EndPlay(const EEndPlayReason::Type Reason)
 		UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: patches requests=%d commits=%d relays=%d stale=%d failures=%d cancels=%d visible=%d components=%d ground_mismatch=%d/%d work_ms mean=%.3f max=%.2f over_%.0fms=%d"),
 			S.Requests,S.Commits,S.Relays,S.StaleDrops,S.Failures,S.Cancels,Patches->GetVisibleCount(),Backend->GetComponentCount(),
 			GroundMismatchFrames,GroundCheckedFrames,GetMeanPatchWorkMs(),MaxPatchWorkMs,PatchWorkBudgetMs,PatchWorkFramesOverBudget);
+		UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: collision patches built=%d emergency=%d missing_frames=%d live=%d"),
+			CollisionRebuilds,CollisionEmergencyBuilds,CollisionMissingFrames,CollisionLive.Num());
 		// The manager releases through the queue and backend, so it goes first.
 		Patches->Reset();
 	}
-	Patches.Reset(); Backend.Reset(); Streaming.Reset();
+	ResetCollision();
+	Patches.Reset(); Backend.Reset(); Streaming.Reset(); CollisionStreaming.Reset();
 	Super::EndPlay(Reason);
 }
 
 void AAstraeonPlanetRuntime::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	const double Start=FPlatformTime::Seconds();
 	const auto* PC=GetWorld()->GetFirstPlayerController();
 	if (PC && PC->GetPawn())
 	{
 		if (auto* Character=Cast<ACharacter>(PC->GetPawn()))
 			Character->GetCharacterMovement()->AddTickPrerequisiteActor(this);
-		if (bNearCollision) PrepareCollision(PC->GetPawn()->GetActorLocation()-GetActorLocation());
+		if (bNearCollision && CollisionStreaming) UpdateCollision(PC->GetPawn()->GetActorLocation()-GetActorLocation());
 	}
 	if (Patches.IsValid()) UpdatePatches(DeltaSeconds);
+	const double Ms=(FPlatformTime::Seconds()-Start)*1000.0;
+	MaxPatchWorkMs=FMath::Max(MaxPatchWorkMs,Ms); SumPatchWorkMs+=Ms; ++PatchWorkFrames;
+	PatchWorkFramesOverBudget+=Ms>PatchWorkBudgetMs;
 }
 
 FVector AAstraeonPlanetRuntime::ObserverBodyCm() const
@@ -225,12 +288,11 @@ FVector AAstraeonPlanetRuntime::ObserverBodyCm() const
 		: FVector::ZeroVector;
 	if (Camera.Size()>=RadiusCm*0.5) return Camera;
 	if (PC && PC->GetPawn()) return PC->GetPawn()->GetActorLocation()-GetActorLocation();
-	return CollisionDirection*(RadiusCm+1000.0);
+	return LastPawnDirection*(RadiusCm+1000.0);
 }
 
 void AAstraeonPlanetRuntime::UpdatePatches(float DeltaSeconds)
 {
-	const double Start=FPlatformTime::Seconds();
 	const auto P=GetDefinition();
 	const FVector Observer=ObserverBodyCm();
 	SinceSelection+=DeltaSeconds;
@@ -263,9 +325,6 @@ void AAstraeonPlanetRuntime::UpdatePatches(float DeltaSeconds)
 			if (!Patches->IsVisible(Under)) ++GroundMismatchFrames;
 		}
 	}
-	const double Ms=(FPlatformTime::Seconds()-Start)*1000.0;
-	MaxPatchWorkMs=FMath::Max(MaxPatchWorkMs,Ms); SumPatchWorkMs+=Ms; ++PatchWorkFrames;
-	PatchWorkFramesOverBudget+=Ms>PatchWorkBudgetMs;
 }
 
 AAstraeonPlanetRuntime* AAstraeonPlanetRuntime::FindActive(const UWorld* World)

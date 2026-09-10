@@ -1,3 +1,20 @@
+## 2026-09-10 — P2.4: anillo de colisión
+
+- **Resuelto:** la colisión se rehacía cada 3,1 m recorriendo las 6.144 celdas del planeta (434
+  veces en 250 s). Ahora se construye por patch en workers: 20 patches en la misma caminata de
+  `TL_11` y 45 en `TL_13`, con 0 frames sin suelo.
+- **Resuelto:** el puente exacto sólo cabía hasta ~448 m de radio. El anillo no depende del
+  radio: `TL_13` se camina a 50 km.
+- **Baja, abierta:** cada patch de colisión es su propia malla, y las costuras entre dos mallas
+  tienen una rendija submilimétrica por la conversión a float de cada una. Un **rayo** apuntado
+  exactamente por la costura o por el vértice que comparten tres mallas puede pasar: los cardinales
+  lo hicieron en la esquina (−1, 1, −1). Una cápsula no puede, y el personaje es una cápsula. Si un
+  rayo de juego (escáner, arma) llegara a colarse, la solución es cerrar la costura en la malla
+  de colisión, no agrandar el anillo.
+- **Baja, abierta:** el cocinado síncrono de un patch de colisión cuesta ~1,8 ms en el hilo de
+  juego, 0,2 veces por segundo al caminar. Si hiciera falta, puede pasar a cocinado asíncrono
+  para los patches del anillo; los de emergencia tienen que seguir siendo síncronos.
+
 ## 2026-09-10 — Resuelto: `TL_12` con Play caía a través del planeta
 
 Prueba humana de P2.3-D. El propietario abrió `TL_12_PatchLOD` en el editor con Play y el
