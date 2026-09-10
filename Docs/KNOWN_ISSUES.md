@@ -1,3 +1,17 @@
+## 2026-09-10 — Resuelto: `TL_12` con Play caía a través del planeta
+
+Prueba humana de P2.3-D. El propietario abrió `TL_12_PatchLOD` en el editor con Play y el
+personaje **se cayó del mapa al instante**. Confirmado en el log: sesión PIE sin
+`-AstraeonSmokePatchLOD`. `TL_12` no tiene colisión cercana por diseño, y sólo el smoke de vuelo
+congelaba al personaje: el mapa servía por línea de comandos y no con Play, que es como se abre.
+
+Corrección: en un planeta sin colisión cercana el personaje pasa a **observador en vuelo libre**
+desde el primer frame, también con el menú abierto. W avanza hacia la mirada, Espacio sube, Ctrl
+baja (el eje `ShipLift` de la nave) y Shift multiplica por 5. La velocidad escala con la altura
+sobre el terreno y un piso de 2 m impide atravesarlo. Si un smoke congela al personaje, el modo
+lo respeta. Guardián nuevo: `RunPlanetChecks.ps1 -Check Observer` reproduce el caso —3 s de menú,
+avance, subida y picada—: avanzó 97 m, subió 49 m y nunca bajó de 200 cm.
+
 ## 2026-09-10 — Deuda de integración de Fase 2 tras P2.1/P2.2
 
 - **Resuelto (P2.3-B/C):** el runtime renderiza por patches con workers y selector LOD en

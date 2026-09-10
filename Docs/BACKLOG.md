@@ -16,7 +16,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
         Cardinales 26/26, caminata de 250 s con 0 cortes y 0 frames de suelo desalineado.
   - [x] C — `TL_12_PatchLOD` a 50 km, smoke `-AstraeonSmokePatchLOD`, faldón medido, Insights.
         El perfil encontró el selector cuadrático (19 ms); corregido a 1,1 ms, resultado idéntico.
-  - [ ] D — Documentación y prueba humana en `TL_11` y `TL_12`.
+  - [~] D — Documentación y prueba humana. `TL_11` confirmada. `TL_12` devolvió un defecto
+        (caía con Play); corregido con modo observador y smoke `Observer`. Falta re-mirarla.
 - [ ] P2.4 — Anillo cercano con relevo de colisión y `TL_13`; pagar reconstrucción excesiva.
 - [ ] P2.5 — Transiciones de frame local y `TL_14` sobre Target/Stress.
 - [ ] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.

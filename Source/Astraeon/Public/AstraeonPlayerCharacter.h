@@ -51,6 +51,10 @@ public:
 	void PrepareForShipFlight();
 	void RecoverFromShipFlight(const FVector& LandingLocationCm);
 
+	// Planet without near collision (TL_12): nothing to stand on, so the player flies as an
+	// observer instead of falling through the surface.
+	bool IsObserverFlight() const { return bObserverFlight; }
+
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
@@ -129,6 +133,10 @@ private:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void FlyLift(float Value);
+	void UpdateObserverFlight();
+	bool bObserverFlight = false;
+	bool bObserverFast = false;
 	void StartJump();
 	void StopJump();
 	void StartSprint();

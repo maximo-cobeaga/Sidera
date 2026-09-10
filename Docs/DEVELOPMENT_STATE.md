@@ -31,8 +31,11 @@ desalineado. `-AstraeonPlanetLegacyFaces` vuelve a las seis caras.
 un agujero, patch más fino bajo la cámara el 100 % del tiempo a ras del suelo, faldón medido
 suficiente también para delta 2. Insights mostró un selector cuadrático de 19 ms por llamada;
 ahora es 1,1 ms con resultado idéntico y el p99 del vuelo pasó de 33,6 a 5,2 ms. El observador
-del LOD es la cámara. **91/91 Automation.** Siguiente paso: P2.3-D, prueba humana en `TL_11` y
-`TL_12`, y cierre de P2.3.
+del LOD es la cámara. **91/91 Automation.**
+
+**P2.3-D en curso.** `TL_11` confirmada a mano. `TL_12` caía con Play porque no tiene colisión;
+ahora el personaje vuela como observador en planetas sin colisión cercana, con guardián
+`-Check Observer`. Siguiente paso: re-mirada humana de `TL_12` y cierre de P2.3.
 
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 

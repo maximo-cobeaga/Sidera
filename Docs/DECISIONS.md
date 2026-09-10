@@ -42,6 +42,11 @@ se conserva el desempate. La versión anterior queda como `SelectReference` y un
 las dos en 624 vistas. No se lleva la selección a un worker todavía: con 1,1 ms de media ya no
 es el cuello de botella, y moverla agrega latencia y otra cola.
 
+Observador (D). Un mapa de laboratorio tiene que funcionar con Play, no sólo por línea de
+comandos. En un planeta sin colisión cercana el personaje vuela en lugar de caer: es el mismo
+personaje, con la misma cámara y la misma orientación radial, no un pawn aparte. Así el LOD se
+inspecciona desde donde lo verá el jugador. No es la nave de la Fase 5 ni pretende serlo.
+
 Desvío del plan: no se sube `MaxTrackedPatches` de 64 a 512. El gestor libera cada dirección
 del streaming apenas recoge su resultado, así que ese registro cuenta trabajo pendiente —acotado
 por los 2 trabajos simultáneos— y el conjunto confirmado es del gestor. La cola se abstrae en

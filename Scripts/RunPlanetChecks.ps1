@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Map','Walk','Cardinals','Automation','Critical','PatchLODMap','PatchLOD')][string]$Check='Automation',
+    [ValidateSet('Map','Walk','Cardinals','Automation','Critical','PatchLODMap','PatchLOD','Observer')][string]$Check='Automation',
     [double]$RadiusCm=20000,
     [int]$Seconds=250,
     [switch]$Profile,
@@ -10,7 +10,7 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path $PSScriptRoot -Parent
 $editor='C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 # TL_12 carries its radius as map data; only an explicit -RadiusCm overrides it.
-$patchLod=$Check -like 'PatchLOD*'
+$patchLod=$Check -like 'PatchLOD*' -or $Check -eq 'Observer'
 $label=if ($patchLod) { "Planet_$Check" } else { "Planet_${Check}_${RadiusCm}$(if ($LegacyFaces) {'_legacy'})" }
 $log=Join-Path $repo "Saved\Logs\$label.log"
 $arguments=@("$repo\Astraeon.uproject",'-unattended','-nosplash','-nop4',"-abslog=$log")
@@ -25,6 +25,7 @@ switch ($Check) {
         if ($PSBoundParameters.ContainsKey('RadiusCm')) { $arguments+="-AstraeonPlanetRadiusCm=$RadiusCm" }
         if ($Profile) { $arguments+=@('-AstraeonPerfBaseline','-AstraeonPerfWarmup=5','-AstraeonPerfSeconds=170','-AstraeonPerfKeepRunning') }
     }
+    'Observer' { $arguments+=@('/Game/Maps/TL_12_PatchLOD')+$render+'-AstraeonSmokePlanetObserver' }
     default {
         $arguments+=@('/Game/Maps/TL_11_CubeSphereClosed')+$render+"-AstraeonPlanetRadiusCm=$RadiusCm"
         if ($Check -eq 'Walk') { $arguments+=@('-AstraeonSmokePlanetWalk',"-AstraeonWalkSeconds=$Seconds") }
@@ -52,6 +53,7 @@ $expected=switch($Check) {
     'Walk' {'AstraeonPlanetWalk: RESULTADO=OK'}
     'Cardinals' {'PlanetCardinals: PASS'}
     'PatchLOD' {'PlanetPatchLOD: RESULTADO=OK'}
+    'Observer' {'PlanetObserver: RESULTADO=OK'}
     'Critical' {'Deployed=true Scanned=true Crafted=true Resolved=true Saved=true Loaded=true LoadedResolved=true'}
     'Automation' {'Astraeon.Planet.Surface.ContinuityAndInvalidInput'}
 }

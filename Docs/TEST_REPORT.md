@@ -1,3 +1,22 @@
+## 2026-09-10 — Fase 2, P2.3-D: prueba humana y observador de `TL_12`
+
+Prueba humana: **`TL_11` confirmada por el propietario** ("anda ok"). **`TL_12` falló**: con
+Play el personaje caía a través del planeta (`KNOWN_ISSUES`). Corregido con el modo observador
+y verificado:
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Observer
+.\Scripts\RunPlanetChecks.ps1 -Check PatchLOD
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+.\Scripts\RunPlanetChecks.ps1 -Check Walk
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **Observer
+`RESULTADO=OK`** (97 m de avance, 49 m de subida, altura mínima 200 cm); vuelo de `TL_12` OK con
+las mismas cifras que en C; cardinales 26/26; caminata de 250 s OK (141.216 cm, 62 saltos, 0
+frames en Idle); **91/91 Automation**. Queda pendiente la segunda mirada humana de `TL_12`.
+
 ## 2026-09-10 — Fase 2, P2.3-C: `TL_12_PatchLOD`, faldón medido y selector lineal
 
 Mapa `TL_12_PatchLOD` generado por `Scripts/Editor/CreatePatchLODTestMap.py`: 50 km de radio,

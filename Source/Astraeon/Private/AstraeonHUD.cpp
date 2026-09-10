@@ -68,7 +68,9 @@ void AAstraeonHUD::DrawHUD()
 			FString::Printf(TEXT("%s | Colision cercana: %d triangulos"),
 				Patches?*FString::Printf(TEXT("Patches visibles: %d"),Patches->GetVisibleCount()):TEXT("Caras fijas"),
 				Planet->GetCollisionTriangleCount()),
-			TEXT("WASD caminar | Raton mirar | Espacio saltar | V camara")};
+			AstraeonCharacter->IsObserverFlight()
+				? TEXT("Vuelo libre: WASD hacia la mirada | Espacio sube | Ctrl baja | Shift x5")
+				: TEXT("WASD caminar | Raton mirar | Espacio saltar | V camara")};
 	}
 	UFont* Font = GEngine->GetMediumFont() ? GEngine->GetMediumFont() : GEngine->GetSmallFont();
 	constexpr float X = 36.0f;

@@ -191,6 +191,8 @@ void AAstraeonPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &AAstraeonPlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &AAstraeonPlayerCharacter::MoveRight);
+	// Space up, Ctrl down: the ship's lift axis, reused by the observer on collisionless planets.
+	PlayerInputComponent->BindAxis(TEXT("ShipLift"), this, &AAstraeonPlayerCharacter::FlyLift);
 	// La mirada pasa por el personaje y no directo a APawn: con gravedad radial hay que girar
 	// alrededor del arriba LOCAL, y la rotación de mando del motor es una FRotator de mundo.
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &AAstraeonPlayerCharacter::LookYaw);
@@ -326,6 +328,7 @@ void AAstraeonPlayerCharacter::Tick(float DeltaSeconds)
 
 	// La cámara sí necesita cada frame: a 0,2 s la vista iría a trompicones detrás del ratón.
 	ApplyPlanetaryView();
+	UpdateObserverFlight();
 
 	// El rig se anima por frame (lo hace su propio componente); esta lógica no lo necesita
 	// y mantiene la cadencia de 0,2 s que tenía cuando el Tick del actor iba a esa tasa.
@@ -818,7 +821,55 @@ void AAstraeonPlayerCharacter::MoveForward(float Value)
 {
 	if (!FMath::IsNearlyZero(Value) && Controller)
 	{
-		AddMovementInput(GetActorForwardVector(), Value);
+		// Flying, forward is where one looks: looking down and pressing W descends.
+		AddMovementInput(bObserverFlight ? PlanetGravity->GetViewDirection() : GetActorForwardVector(), Value);
+	}
+}
+
+void AAstraeonPlayerCharacter::FlyLift(float Value)
+{
+	if (bObserverFlight && !FMath::IsNearlyZero(Value) && Controller)
+	{
+		AddMovementInput(PlanetGravity->GetUpVector(), Value);
+	}
+}
+
+void AAstraeonPlayerCharacter::UpdateObserverFlight()
+{
+	const AAstraeonPlanetRuntime* Planet = AAstraeonPlanetRuntime::FindActive(GetWorld());
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	if (!Planet || Planet->bNearCollision || !PlanetGravity || !PlanetGravity->IsPlanetGravityActive() || !Movement)
+	{
+		return;
+	}
+	if (!bObserverFlight)
+	{
+		bObserverFlight = true;
+		SetActorEnableCollision(false);
+		UE_LOG(LogTemp, Display, TEXT("Planet: sin colision cercana; el jugador vuela como observador"));
+	}
+	// A smoke that froze the pawn owns it from then on.
+	if (Movement->MovementMode == MOVE_None)
+	{
+		return;
+	}
+	Movement->SetMovementMode(MOVE_Flying);
+
+	const FVector Center = Planet->GetActorLocation();
+	const FVector Up = (GetActorLocation() - Center).GetSafeNormal();
+	const FVector Ground = Planet->GetSurfacePointCm(Up, 0.0);
+	const double AboveGroundCm = FVector::Dist(GetActorLocation(), Center) - FVector::Dist(Ground, Center);
+	// Covering one's own height per second keeps 20 m and 300 km equally usable.
+	constexpr double MinSpeedCmS = 2000.0, MaxSpeedCmS = 5000000.0, MinClearanceCm = 200.0;
+	const double Speed = FMath::Clamp(FMath::Max(MinSpeedCmS, AboveGroundCm) * (bObserverFast ? 5.0 : 1.0), MinSpeedCmS, MaxSpeedCmS);
+	Movement->MaxFlySpeed = float(Speed);
+	Movement->MaxAcceleration = float(Speed * 4.0);
+	Movement->BrakingDecelerationFlying = float(Speed * 4.0);
+	// No collision means nothing stops a dive into the terrain; the floor is kept here.
+	if (AboveGroundCm < MinClearanceCm)
+	{
+		SetActorLocation(Ground + Up * MinClearanceCm, false, nullptr, ETeleportType::TeleportPhysics);
+		Movement->Velocity -= FMath::Min(0.0, FVector::DotProduct(Movement->Velocity, Up)) * Up;
 	}
 }
 
@@ -832,6 +883,7 @@ void AAstraeonPlayerCharacter::MoveRight(float Value)
 
 void AAstraeonPlayerCharacter::StartJump()
 {
+	if (bObserverFlight) return; // Space is the lift axis while flying.
 	Jump();
 }
 
@@ -843,11 +895,13 @@ void AAstraeonPlayerCharacter::StopJump()
 void AAstraeonPlayerCharacter::StartSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = AstraeonPlayerCharacterMovement::SprintSpeedCms;
+	bObserverFast = true;
 }
 
 void AAstraeonPlayerCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = AstraeonPlayerCharacterMovement::WalkSpeedCms;
+	bObserverFast = false;
 }
 
 void AAstraeonPlayerCharacter::EquipProtectionModule(EAstraeonProtectionModule Protection)
