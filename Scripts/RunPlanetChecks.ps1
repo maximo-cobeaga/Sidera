@@ -37,8 +37,8 @@ if ($content -notmatch [regex]::Escape($expected)) { throw "Missing completion m
 $successes=[regex]::Matches($content,'Test Completed. Result=\{Success\}').Count
 if ($Check -eq 'Automation') {
     $discovered=[regex]::Match($content,"Found (\d+) automation tests based on 'Astraeon'")
-    if (-not $discovered.Success -or $successes -lt 82 -or $successes -ne [int]$discovered.Groups[1].Value) {
-        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 82"
+    if (-not $discovered.Success -or $successes -lt 88 -or $successes -ne [int]$discovered.Groups[1].Value) {
+        throw "Incomplete queue: $successes successful tests; expected all discovered tests and at least 88"
     }
     foreach ($required in @(
         'Astraeon.Planet.Patches.AddressHierarchy',
@@ -50,7 +50,10 @@ if ($Check -eq 'Automation') {
         'Astraeon.Planet.Patches.SharedEdgesAndLodSamples',
         'Astraeon.Planet.Patches.InvalidAndCancelledBuilds',
         'Astraeon.Planet.Streaming.RevisionsCancellationAndBackpressure',
-        'Astraeon.Planet.Streaming.SubmissionOrderDeterminism'
+        'Astraeon.Planet.Streaming.SubmissionOrderDeterminism',
+        'Astraeon.Planet.PatchManager.HoleFreeSplitAndMerge',
+        'Astraeon.Planet.PatchManager.RejectsStaleFailedAndInvalid',
+        'Astraeon.Planet.PatchManager.DeterministicRouteWithWorkers'
     )) {
         if ($content -notmatch ('Test Completed\. Result=\{Success\}[^\r\n]*Path=\{' + [regex]::Escape($required) + '\}')) {
             throw "Missing required Phase 2 test: $required"

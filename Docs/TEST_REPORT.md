@@ -1,3 +1,35 @@
+## 2026-09-10 — Fase 2, P2.3-A: gestor de patches con relevo sin agujeros
+
+Implementación en `Planet/Patches/AstraeonPlanetPatchManager.*`, interfaz de cola en
+`Planet/Streaming/AstraeonPlanetStreamingManager.h`, `ValidatePartition` en el selector y
+`Tests/AstraeonPlanetPatchManagerTests.cpp`. **El runtime no cambia en este incremento.**
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' Astraeon Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **88/88 Automation**. El
+guardián exige ahora al menos 88 y las tres pruebas nuevas por nombre:
+
+- `PatchManager.HoleFreeSplitAndMerge`: la primera cobertura aparece entera o no aparece; en un
+  split el padre sigue en pantalla hasta que el cuarto hijo está listo; en un merge los hijos
+  siguen hasta que el padre está listo; un cambio de objetivo a mitad de relevo cancela lo
+  pendiente, retira lo oculto y el padre nunca desaparece.
+- `PatchManager.RejectsStaleFailedAndInvalid`: objetivo desbalanceado, rejilla inválida y cuerpo
+  ajeno rechazados; tope de subidas por llamada; revisión falsificada descartada sin consumir
+  tope; resultado de una dirección liberada nunca llega al backend aunque la cola lo entregue;
+  un build fallido deja al padre en pantalla, se cuenta una vez y no se reintenta cada frame.
+- `PatchManager.DeterministicRouteWithWorkers`: selector real sobre una ruta que cruza una arista
+  y una esquina, más rápida que los builds a propósito. Partición verificada tras **cada**
+  llamada. Dos corridas: **2.428 operaciones de backend idénticas**, 708 commits, 108 relevos.
+  La misma ruta sobre el pool real de workers asienta en cada parada y el registro del
+  streaming nunca supera los 2 trabajos pendientes.
+
+Dato medido: durante un relevo llegaron a verse **462 patches** a la vez con un objetivo de hasta
+384, porque conviven el conjunto saliente y el entrante. Se registra en `KNOWN_ISSUES`.
+
 ## 2026-09-10 — Fase 2, P2.1/P2.2/P2.3 parcial: patches, workers y LOD
 
 Implementación identificable en `Planet/Patches/`, `Planet/Streaming/`, `Planet/LOD/` y

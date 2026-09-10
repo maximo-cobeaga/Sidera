@@ -18,6 +18,11 @@ caras con delta de vecinos ≤ 1, presupuesto acotado y determinismo. Sigue pend
 que conecte workers y selector al runtime en `TL_12_PatchLOD`. Los límites de dos trabajos y 64 direcciones son provisionales;
 deben medirse junto al planificador. La puerta de Fase 2 permanece abierta; P2.3–P2.8 pendientes.
 
+**P2.3-A hecho.** `FAstraeonPlanetPatchManager` une selector, cola y backend: pide lo que falta,
+confirma sólo revisiones vigentes, libera lo que sale y releva sin agujeros. **88/88
+Automation**. Todavía no lo consume el runtime: `TL_11` sigue con seis caras. Siguiente paso:
+P2.3-B, backend ProceduralMesh y runtime con el puente de colisión (`DECISIONS`).
+
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 
 El relieve radial dejó de ser un placeholder. `FAstraeonPlanetSurface` porta del dominio plano las

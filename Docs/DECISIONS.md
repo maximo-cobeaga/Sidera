@@ -1,5 +1,32 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — Plan de cierre de P2.3 y gestor de patches
+
+El propietario aprobó cerrar P2.3 en cuatro incrementos: A, gestor puro; B, backend
+ProceduralMesh y runtime de `TL_11`; C, `TL_12_PatchLOD` y su smoke; D, documentación y prueba
+humana. Tres decisiones suyas:
+
+- **`TL_12` a 50 km de radio**, en vuelo por una ruta scripteada y sin colisión. Los 500 km de
+  Target se prueban en P2.5, con marcos locales, para no mezclar LOD con precisión float.
+- **Puente exacto de colisión en `TL_11`**: `FaceQuads = Quads << FinestAllowedLod`. Constructor,
+  rejilla global entera y diagonales son los mismos, así que la colisión coincide triángulo por
+  triángulo con los patches finos. Radio y cadencia del relevo fijos en metros. Sólo sirve en
+  Lab; P2.4 lo reemplaza con el anillo.
+- **`-AstraeonPlanetLegacyFaces`** conserva las seis caras fijas para comparar. Se borra al
+  cerrar P2.4.
+
+Diseño del gestor (A). El conjunto visible es siempre una partición de la esfera: un split
+muestra los hijos cuando los cuatro están confirmados y un merge oculta los hijos cuando el
+padre está confirmado. Mientras tanto, lo viejo sigue en pantalla. El delta de LOD puede superar
+uno durante un relevo; por eso el selector separa `ValidatePartition` de `ValidateCover`. Un
+build fallido no se sustituye por terreno plano: el patch que iba a reemplazar se queda. Las
+solicitudes se ordenan por distancia al observador, con desempate determinista.
+
+Desvío del plan: no se sube `MaxTrackedPatches` de 64 a 512. El gestor libera cada dirección
+del streaming apenas recoge su resultado, así que ese registro cuenta trabajo pendiente —acotado
+por los 2 trabajos simultáneos— y el conjunto confirmado es del gestor. La cola se abstrae en
+`IAstraeonPlanetPatchBuildQueue` para probar el gestor con una cola determinista.
+
 ## 2026-09-10 — Selección quadtree LOD como contrato puro
 
 La selección LOD se implementa como función de datos sin mundo ni UObjects. Comienza con una

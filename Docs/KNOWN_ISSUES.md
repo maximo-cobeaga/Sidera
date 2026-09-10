@@ -6,6 +6,13 @@
 - **Media, abierta:** faldón predeterminado de 100 cm sin dimensionamiento frente al error de
   LOD. Las muestras compartidas coinciden, pero eso no demuestra que el borde interpolado
   fino/grueso quede cubierto en una ruta visible. Medir en P2.3 antes de ajustar o hacer stitching.
+- **Media, abierta (P2.3-A):** durante un relevo el conjunto visible puede superar el tope de
+  la selección: 462 patches medidos contra un objetivo de hasta 384, porque conviven saliente y
+  entrante. Además el delta de LOD visible puede ser 2 un instante, y el faldón está dimensionado
+  para 1. Medir en `TL_12` (P2.3-C) conteo máximo, grietas y coste antes de acotar.
+- **Baja, abierta (P2.3-A):** si el objetivo cambia más rápido de lo que se construye, un padre
+  puede quedarse en pantalla mucho tiempo esperando a sus cuatro hijos. No hay agujero, pero sí
+  detalle demorado. Medir el tiempo de asentamiento en el smoke de `TL_12`.
 - **Media, heredada:** sigue pendiente el coste excesivo de reconstrucción de colisión
   documentado abajo. Corresponde a P2.4; no se altera el relevo validado de Fase 1.
 - **Resueltos durante desarrollo:** exportar una clase propietaria de `TFuture` instanciaba

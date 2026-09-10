@@ -37,6 +37,9 @@ struct ASTRAEON_API FAstraeonPlanetLODManager
 		const FAstraeonPlanetLODSettings& Settings, FAstraeonPlanetLODSelection& Out);
 	static bool SameLevelNeighbor(const FAstraeonPlanetPatchAddress& Address, EAstraeonPatchEdge Edge,
 		FAstraeonPlanetPatchAddress& Out);
+	// Partition: every face fully covered, no overlap. Cover: partition plus LOD delta <= 1.
+	// A visible set mid-relay only guarantees the partition.
+	static bool ValidatePartition(const TArray<FAstraeonPlanetPatchAddress>& Leaves, FString* Reason = nullptr);
 	static bool ValidateCover(const TArray<FAstraeonPlanetPatchAddress>& Leaves, FString* Reason = nullptr);
 	static bool Less(const FAstraeonPlanetPatchAddress& A, const FAstraeonPlanetPatchAddress& B);
 	static double SkirtDepthCm(const FAstraeonPlanetDefinition& Planet,

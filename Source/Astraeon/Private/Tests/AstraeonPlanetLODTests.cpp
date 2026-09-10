@@ -97,6 +97,11 @@ bool FAstraeonLODCoverTest::RunTest(const FString& Parameters)
 	Root.TryChild(0,Child); Leaves.Remove(Child);
 	for (uint8 Q = 0; Q < 4; ++Q) { FAstraeonPlanetPatchAddress Grandchild; Child.TryChild(Q,Grandchild); Leaves.Add(Grandchild); }
 	TestFalse(TEXT("Two-level delta at another cube face is rejected"), FAstraeonPlanetLODManager::ValidateCover(Leaves));
+	TestTrue(TEXT("The same unbalanced set is still a partition, as mid-relay screens are"), FAstraeonPlanetLODManager::ValidatePartition(Leaves));
+	auto Holed = Leaves; Holed.Pop();
+	TestFalse(TEXT("Partition rejects a hole"), FAstraeonPlanetLODManager::ValidatePartition(Holed));
+	auto Overlapped = Leaves; Overlapped.Add(Child);
+	TestFalse(TEXT("Partition rejects overlap"), FAstraeonPlanetLODManager::ValidatePartition(Overlapped));
 	FAstraeonPlanetLODView V; V.ObserverBodyCm = FVector(1,0,0) * 50001000.0;
 	FAstraeonPlanetLODSettings S; S.MaxPatches = 6;
 	FAstraeonPlanetLODSelection Out;

@@ -91,22 +91,44 @@ bool FAstraeonPlanetLODManager::SameLevelNeighbor(const FAddress& Address, EAstr
 	return FAddress::TryFromDirection(A.BodyId, N + U * Uv.X + V * Uv.Y, A.Lod, Out);
 }
 
+namespace
+{
+	bool Partition(const TArray<FAddress>& Leaves, int32 MaxLeaves, FSet& Set, FString* Reason)
+	{
+		const auto Fail = [Reason](const TCHAR* Text) { if (Reason) *Reason = Text; return false; };
+		if (Leaves.Num() < 6 || Leaves.Num() > MaxLeaves) return Fail(TEXT("Invalid leaf budget"));
+		uint64 Area[6] = {};
+		for (const auto& A : Leaves)
+		{
+			if (!A.IsValid() || A.BodyId != Leaves[0].BodyId || Set.Contains(A)) return Fail(TEXT("Invalid or duplicate address"));
+			Set.Add(A);
+			Area[uint8(A.Face)] += uint64(1) << (2 * (FAddress::MaxLod - A.Lod));
+		}
+		for (const auto& A : Leaves)
+		{
+			auto Parent = A;
+			while (Parent.TryParent(Parent)) if (Set.Contains(Parent)) return Fail(TEXT("Ancestor overlaps a leaf"));
+		}
+		for (uint64 FaceArea : Area) if (FaceArea != (uint64(1) << (2 * FAddress::MaxLod))) return Fail(TEXT("Face is not completely covered"));
+		if (Reason) Reason->Reset();
+		return true;
+	}
+}
+
+bool FAstraeonPlanetLODManager::ValidatePartition(const TArray<FAddress>& Leaves, FString* Reason)
+{
+	// A relay can briefly show the outgoing and incoming selections side by side.
+	FSet Set;
+	return Partition(Leaves, 2 * FAstraeonPlanetLODSettings::MaxAllowedPatches, Set, Reason);
+}
+
 bool FAstraeonPlanetLODManager::ValidateCover(const TArray<FAddress>& Leaves, FString* Reason)
 {
 	const auto Fail = [Reason](const TCHAR* Text) { if (Reason) *Reason = Text; return false; };
-	if (Leaves.Num() < 6 || Leaves.Num() > FAstraeonPlanetLODSettings::MaxAllowedPatches) return Fail(TEXT("Invalid leaf budget"));
 	FSet Set;
-	uint64 Area[6] = {};
+	if (!Partition(Leaves, FAstraeonPlanetLODSettings::MaxAllowedPatches, Set, Reason)) return false;
 	for (const auto& A : Leaves)
 	{
-		if (!A.IsValid() || A.BodyId != Leaves[0].BodyId || Set.Contains(A)) return Fail(TEXT("Invalid or duplicate address"));
-		Set.Add(A);
-		Area[uint8(A.Face)] += uint64(1) << (2 * (FAddress::MaxLod - A.Lod));
-	}
-	for (const auto& A : Leaves)
-	{
-		auto Parent = A;
-		while (Parent.TryParent(Parent)) if (Set.Contains(Parent)) return Fail(TEXT("Ancestor overlaps a leaf"));
 		for (uint8 E = 0; E < 4; ++E)
 		{
 			FAddress Neighbor, Cover;
@@ -114,8 +136,6 @@ bool FAstraeonPlanetLODManager::ValidateCover(const TArray<FAddress>& Leaves, FS
 			if (CoveringLeaf(Set, Neighbor, Cover) && A.Lod > Cover.Lod + 1) return Fail(TEXT("Adjacent LOD delta exceeds one"));
 		}
 	}
-	for (uint64 FaceArea : Area) if (FaceArea != (uint64(1) << (2 * FAddress::MaxLod))) return Fail(TEXT("Face is not completely covered"));
-	if (Reason) Reason->Reset();
 	return true;
 }
 
