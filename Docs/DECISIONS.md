@@ -1,5 +1,16 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — P2.7: tránsito validado sobre la esfera
+
+El validador plano resolvía una sub-seed de relieve para que la región fuese transitable. En un
+planeta el relieve es global: re-sembrarlo por región rompería a los vecinos. Lo que se resuelve
+es dónde se ubica la región, con la misma forma: hasta 8 candidatos deterministas y una variante
+segura documentada. La variante es la primera ancla cuya región entera no tiene capa de montaña;
+el suelo solo respeta siempre el escalón (`Terrain.Relief`), así que es transitable por
+construcción, y la prueba lo verifica igual. El plan de Region A en coordenadas planas se ubica
+sobre el planeta por mapa exponencial hasta que la Fase 3 lo autoree sobre la esfera. El
+validador plano sigue para la build plana.
+
 ## 2026-09-10 — P2.6: estado mutable, identidad de entidad y save v3
 
 **Identidad de entidad.** Las criaturas planetarias se colocan por celdas de nivel fijo (~1 km),

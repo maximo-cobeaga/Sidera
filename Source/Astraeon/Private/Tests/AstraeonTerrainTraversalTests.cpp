@@ -1,20 +1,29 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Misc/AutomationTest.h"
-#include "WorldGen/AstraeonRegionMaterializer.h"
+#include "Planet/LOD/AstraeonPlanetLODManager.h"
+#include "Planet/Patches/AstraeonPlanetPatchMesh.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "Planet/Surface/AstraeonPlanetTraversal.h"
 #include "WorldGen/AstraeonTerrainTraversal.h"
-#include "WorldGen/AstraeonWorldProfiles.h"
 
+// Migrated to the sphere on 2026-09-10 to leave quarantine (Phase 2, P2.7). Every assertion of the
+// flat versions is kept; what changes is the surface they walk: Region A's plan placed on a
+// planet by exponential map, heights from the radial two-layer relief, spacing of the finest
+// patch grid. The flat validator stays for the flat build and is no longer what these test.
 namespace AstraeonTraversalTest
 {
-	// Las cinco seeds de contenido que `Docs/MVP_WORLD_ARCHITECTURE.md` exige comprobar,
-	// más la seed del smoke y la variante segura, que tiene que valerse por sí misma.
+	// The five content seeds `Docs/MVP_WORLD_ARCHITECTURE.md` asks to check, plus the smoke's
+	// seed and the safe variant's, which has to stand on its own.
 	const TArray<int32> Seeds = { 100, 200, 300, 400, 500, 13579, 1001 };
 
-	FVector2D DeploymentXY(const FVector& ItacaOriginCm)
+	// A walkable 50 km planet with mountains: the size of TL_13, where regions will live.
+	FAstraeonPlanetDefinition Planet()
 	{
-		const FVector Deployment = UAstraeonRegionMaterializer::GetSurfaceDeploymentLocationCm(ItacaOriginCm);
-		return FVector2D(Deployment.X, Deployment.Y);
+		FAstraeonPlanetDefinition P;
+		P.BodyId = TEXT("traversal_lab"); P.RadiusCm = 5000000.0; P.MassKg = 1.e16; P.SurfaceGravityMS2 = 9.81;
+		P.WorldSeed = 4242; P.BodySeed = 4242;
+		return P;
 	}
 }
 
@@ -24,63 +33,72 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonTerrainConnectivityTest,
 
 bool FAstraeonTerrainConnectivityTest::RunTest(const FString& Parameters)
 {
-	// El límite tiene que ser el del motor, no uno inventado: si fuera más permisivo la
-	// prueba aprobaría laderas por las que el jugador resbala.
-	const float SpacingCm = FAstraeonTerrainTraversal::GetSampleSpacingCm();
-	TestTrue(TEXT("La validación mide la superficie a la resolución de la malla"),
-		FMath::IsNearlyEqual(SpacingCm, AAstraeonTerrainField::GetSurfaceSpacingCm()));
+	using namespace AstraeonTraversalTest;
+	const FAstraeonPlanetDefinition P = Planet();
+	TestTrue(TEXT("The planet has a mountain layer, so walls can exist"), FAstraeonPlanetSurface::HasMountainLayer(P));
+
+	// The limit has to be the engine's, not an invented one: a laxer one would pass slopes the
+	// player slides down. Measured against the actual finest patch mesh at the region.
+	const FVector Probe = FAstraeonPlanetTraversal::CandidateAnchor(P, 1001, 0);
+	const double SpacingCm = FAstraeonPlanetTraversal::MeshSpacingCm(P, Probe);
+	{
+		const FAstraeonPlanetLODSettings Settings;
+		FAstraeonPlanetPatchAddress Patch;
+		FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId, Probe, FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings), Patch);
+		FAstraeonPlanetPatchBuildOptions Options; Options.Quads = Settings.Quads; Options.SkirtDepthCm = 0.0;
+		FAstraeonPlanetPatchBuildResult Mesh;
+		FAstraeonPlanetPatchMesh::Build(P, Patch, 1, Options, Mesh);
+		// The mesh edge closest to the probe, along the grid's X.
+		int32 Nearest = 0; double Best = TNumericLimits<double>::Max();
+		for (int32 I = 0; I < Mesh.SurfaceVertexCount; ++I)
+		{
+			if (I % (Options.Quads + 1) == Options.Quads) continue;
+			const double D = FVector::DistSquared((Mesh.Vertices[I] + Mesh.OriginBodyCm).GetSafeNormal(), Probe);
+			if (D < Best) { Best = D; Nearest = I; }
+		}
+		const double MeshEdgeCm = FAstraeonPlanetSurface::ArcDistanceCm(P, Mesh.Vertices[Nearest] + Mesh.OriginBodyCm, Mesh.Vertices[Nearest + 1] + Mesh.OriginBodyCm);
+		TestTrue(FString::Printf(TEXT("La validación mide la superficie a la resolución de la malla (%.1f cm contra %.1f cm)"), SpacingCm, MeshEdgeCm),
+			FMath::IsNearlyEqual(SpacingCm, MeshEdgeCm, MeshEdgeCm * 0.01));
+	}
 	TestTrue(TEXT("El desnivel admitido nunca baja del escalón de la cápsula"),
-		FAstraeonTerrainTraversal::GetMaxWalkableRiseCm(SpacingCm) >= AAstraeonTerrainField::GetMaxWalkableStepCm());
+		FAstraeonTerrainTraversal::GetMaxWalkableRiseCm(float(SpacingCm)) >= FAstraeonPlanetSurface::MaxWalkableStepCm);
 
 	const FVector ItacaOriginCm = FVector::ZeroVector;
-	for (const int32 Seed : AstraeonTraversalTest::Seeds)
+	for (const int32 Seed : Seeds)
 	{
-		const FAstraeonRegionLayout Layout = UAstraeonWorldProfiles::BuildFixedRegionLayout(Seed);
-		const TArray<FAstraeonTraversalGoal> Goals = UAstraeonRegionMaterializer::BuildTraversalGoals(Layout);
-		TestTrue(FString::Printf(TEXT("Seed %d declara objetivos que alcanzar"), Seed), Goals.Num() > 0);
+		const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(Seed, ItacaOriginCm);
+		TestTrue(FString::Printf(TEXT("Seed %d declara objetivos que alcanzar"), Seed), Plan.Goals.Num() > 0);
 
-		const FAstraeonTerrainSurfaceContext Context =
-			UAstraeonRegionMaterializer::BuildSurfaceContext(Seed, ItacaOriginCm, Layout);
-		const FAstraeonTerrainSeedResolution Resolution = FAstraeonTerrainTraversal::ResolveTerrainSeed(
-			Context, AstraeonTraversalTest::DeploymentXY(ItacaOriginCm), Goals);
-
-		// Lo que se exige no es que la seed pedida sirva, sino que la publicada sí: ninguna
-		// partida puede acabar con un recurso crítico o la señal detrás de un muro.
+		const FAstraeonPlanetRegionResolution Resolution = FAstraeonPlanetTraversal::ResolveRegion(P, Seed, Plan);
+		// What is demanded is not that the requested place works, but that the published one
+		// does: no session can end with a critical resource or the signal behind a wall.
 		TestTrue(FString::Printf(TEXT("Seed %d publica una región transitable"), Seed), Resolution.Report.bPassed);
-		TestEqual(FString::Printf(TEXT("Seed %d no deja objetivos inalcanzables"), Seed),
-			Resolution.Report.UnreachableGoals.Num(), 0);
+		TestEqual(FString::Printf(TEXT("Seed %d no deja objetivos inalcanzables"), Seed), Resolution.Report.UnreachableGoals.Num(), 0);
 		TestFalse(FString::Printf(TEXT("Seed %d no necesita la variante segura"), Seed), Resolution.bUsedFallback);
 
-		// Determinismo: la misma seed tiene que resolver siempre al mismo relieve, o cargar
-		// una partida guardada devolvería otra región.
-		const FAstraeonTerrainSeedResolution Repeat = FAstraeonTerrainTraversal::ResolveTerrainSeed(
-			Context, AstraeonTraversalTest::DeploymentXY(ItacaOriginCm), Goals);
-		TestEqual(FString::Printf(TEXT("Seed %d resuelve siempre al mismo relieve"), Seed),
-			Repeat.TerrainSeed, Resolution.TerrainSeed);
+		// Determinism: the same seed always resolves to the same place, or loading a saved
+		// session would put its region somewhere else.
+		const FAstraeonPlanetRegionResolution Repeat = FAstraeonPlanetTraversal::ResolveRegion(P, Seed, Plan);
+		TestTrue(FString::Printf(TEXT("Seed %d resuelve siempre al mismo relieve"), Seed), Repeat.Anchor == Resolution.Anchor);
+		AddInfo(FString::Printf(TEXT("PlanetTraversal seed=%d attempts=%d reachable_cells=%d worst_rise_cm=%.1f"),
+			Seed, Resolution.AttemptsUsed, Resolution.Report.ReachableCells, Resolution.Report.WorstReachableRiseCm));
 	}
 
-	// La variante segura no puede ser una esperanza: se comprueba con los mismos objetivos.
+	// The safe variant cannot be a hope: it is checked with the same goals.
 	{
-		const int32 FallbackSeed = FAstraeonTerrainTraversal::GetFallbackTerrainSeed();
-		const FAstraeonRegionLayout Layout = UAstraeonWorldProfiles::BuildFixedRegionLayout(FallbackSeed);
-		const FAstraeonTerrainSurfaceContext Context =
-			UAstraeonRegionMaterializer::BuildSurfaceContext(FallbackSeed, ItacaOriginCm, Layout);
-		const FAstraeonTraversalReport Report = FAstraeonTerrainTraversal::Evaluate(Context,
-			AstraeonTraversalTest::DeploymentXY(ItacaOriginCm),
-			UAstraeonRegionMaterializer::BuildTraversalGoals(Layout));
+		const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(1001, ItacaOriginCm);
+		FVector SafeAnchor;
+		TestTrue(TEXT("Existe una variante segura"), FAstraeonPlanetTraversal::FindSafeAnchor(P, 1001, Plan.RadiusCm, SafeAnchor));
+		const FAstraeonTraversalReport Report = FAstraeonPlanetTraversal::Evaluate(FAstraeonPlanetRegionSurface::Place(P, SafeAnchor, Plan));
 		TestTrue(TEXT("La variante segura es transitable por sí misma"), Report.bPassed);
 	}
 
-	// Ítaca puede aterrizar en cualquier parte de la región. El campo sigue cubriendo la
-	// región entera y la huella plana viaja con la nave, así que la garantía se mantiene.
+	// Itaca can land anywhere in the region. The region still covers its whole field and the
+	// cleared footprint travels with the ship, so the guarantee holds.
 	{
 		const FVector LandedOriginCm(12000.0f, -8000.0f, 0.0f);
-		const FAstraeonRegionLayout Layout = UAstraeonWorldProfiles::BuildFixedRegionLayout(1001);
-		const FAstraeonTerrainSurfaceContext Context =
-			UAstraeonRegionMaterializer::BuildSurfaceContext(1001, LandedOriginCm, Layout);
-		const FAstraeonTerrainSeedResolution Resolution = FAstraeonTerrainTraversal::ResolveTerrainSeed(
-			Context, AstraeonTraversalTest::DeploymentXY(LandedOriginCm),
-			UAstraeonRegionMaterializer::BuildTraversalGoals(Layout));
+		const FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(1001, LandedOriginCm);
+		const FAstraeonPlanetRegionResolution Resolution = FAstraeonPlanetTraversal::ResolveRegion(P, 1001, Plan);
 		TestTrue(TEXT("Con Ítaca aterrizada lejos la región sigue siendo transitable"), Resolution.Report.bPassed);
 	}
 
@@ -93,31 +111,27 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonTerrainTraversalDetectsWallsTest,
 
 bool FAstraeonTerrainTraversalDetectsWallsTest::RunTest(const FString& Parameters)
 {
-	// Una prueba de conectividad que aprueba siempre no prueba nada. Esta comprueba que
-	// detecta el caso que existe para detectar: un objetivo fuera del campo de la región,
-	// al que no se llega por mucho que el relieve sea suave.
-	const FAstraeonRegionLayout Layout = UAstraeonWorldProfiles::BuildFixedRegionLayout(1001);
-	const FAstraeonTerrainSurfaceContext Context =
-		UAstraeonRegionMaterializer::BuildSurfaceContext(1001, FVector::ZeroVector, Layout);
-
-	TArray<FAstraeonTraversalGoal> Goals = UAstraeonRegionMaterializer::BuildTraversalGoals(Layout);
-	const int32 ReachableGoals = Goals.Num();
+	// A connectivity test that always passes proves nothing. This one checks that the validator
+	// detects the case it exists for: a goal outside the region, unreachable however gentle the
+	// relief. On the sphere as on the plane.
+	using namespace AstraeonTraversalTest;
+	const FAstraeonPlanetDefinition P = Planet();
+	FAstraeonPlanetRegionPlan Plan = FAstraeonPlanetRegionPlan::FromFlatRegion(1001, FVector::ZeroVector);
+	const int32 ReachableGoals = Plan.Goals.Num();
+	const FVector Anchor = FAstraeonPlanetTraversal::ResolveRegion(P, 1001, Plan).Anchor;
 
 	FAstraeonTraversalGoal Unreachable;
 	Unreachable.GoalId = TEXT("prueba_fuera_de_la_region");
-	// Fuera del campo de la región. Fabricar un muro de relieve dependería de qué produzca
-	// la seed del día; quedarse fuera del campo es inalcanzable por construcción.
-	Unreachable.LocationCm = FVector2D(AAstraeonTerrainField::GetFieldRadiusCm() * 4.0f, 0.0f);
-	Goals.Add(Unreachable);
+	// Outside the region's field. Making a relief wall would depend on what the seed produces
+	// that day; being outside the field is unreachable by construction.
+	Unreachable.LocationCm = Plan.CenterCm + FVector2D(Plan.RadiusCm * 4.0, 0.0);
+	Plan.Goals.Add(Unreachable);
+	Plan.StartCm = FVector2D(900.0, 0.0); // As in the flat version: just outside Itaca.
 
-	const FAstraeonTraversalReport Report = FAstraeonTerrainTraversal::Evaluate(Context,
-		FVector2D(900.0f, 0.0f), Goals);
+	const FAstraeonTraversalReport Report = FAstraeonPlanetTraversal::Evaluate(FAstraeonPlanetRegionSurface::Place(P, Anchor, Plan));
 	TestFalse(TEXT("Un objetivo inalcanzable hace fallar la validación"), Report.bPassed);
-	// Se nombra el objetivo, no sólo el fallo: sin eso el reporte no diría qué arreglar.
-	// No se exige que sea el único, porque la seed pedida puede tener sus propios
-	// objetivos tapados; para eso existe la resolución de sub-seeds.
-	TestTrue(TEXT("El objetivo de fuera de la región aparece señalado"),
-		Report.UnreachableGoals.Contains(Unreachable.GoalId));
+	// The goal is named, not just the failure: without that the report would not say what to fix.
+	TestTrue(TEXT("El objetivo de fuera de la región aparece señalado"), Report.UnreachableGoals.Contains(Unreachable.GoalId));
 	TestTrue(TEXT("La región declara objetivos que alcanzar"), ReachableGoals > 0);
 	return true;
 }

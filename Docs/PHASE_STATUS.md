@@ -238,8 +238,8 @@ sigue verde sobre el mapa plano y la tabla es el inventario de lo que va a entra
 |---|---|---|
 | `Astraeon.WorldGen.Terrain.Relief` | Fase 1 | **RECUPERADA** el 2026-09-10 |
 | `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3 | movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) |
-| `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 | verde |
-| `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 | verde |
+| `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 | **RECUPERADA** el 2026-09-10, sobre la esfera |
+| `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 | **RECUPERADA** el 2026-09-10, sobre la esfera |
 | `Astraeon.WorldGen.Itaca.DeckRestsOnTerrain` | Fase 3 | verde |
 | `Astraeon.WorldGen.Itaca.MaterializerSpecs` | Fase 3 | verde |
 | `Astraeon.WorldGen.Region.MaterializerSpecs` | Fase 3 | verde |

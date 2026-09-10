@@ -1,3 +1,31 @@
+## 2026-09-10 — Fase 2, P2.7: `Terrain.Connectivity` y `TraversalDetectsWalls` salen de cuarentena
+
+Migradas a la esfera en `Tests/AstraeonTerrainTraversalTests.cpp`, con validador nuevo en
+`Planet/Surface/AstraeonPlanetTraversal.*`. Conservan los mismos nombres y **todas** sus aserciones;
+cambia la superficie que recorren. El plan de Region A (objetivos, claros, exclusiones de
+montaña, Ítaca y salida) se ubica sobre un planeta de 50 km con capa de montañas, por mapa
+exponencial alrededor de un ancla. Las alturas salen del relieve radial de dos capas, con la
+misma regla de claros y exclusiones que el campo plano, y la inundación va a la resolución real
+de la malla más fina.
+
+Como el relieve de un planeta es global y no se puede re-sembrar por región, lo que se resuelve
+es dónde se ubica la región: hasta 8 anclas deterministas. Si ninguna sirve, se usa la variante
+segura, que es la primera ancla cuya región no tiene capa de montaña.
+
+| Aserción (plana → esférica) | Resultado |
+|---|---|
+| La validación mide a la resolución de la malla | igual al lado real del patch fino (1 %) |
+| El desnivel admitido nunca baja del escalón | cumple |
+| 7 seeds: declaran objetivos, región transitable, 0 inalcanzables, sin variante segura | las 7, al primer intento |
+| Determinismo: misma seed, mismo lugar | cumple |
+| La variante segura es transitable por sí misma | cumple |
+| Con Ítaca aterrizada lejos, sigue transitable | cumple |
+| Un objetivo fuera de la región hace fallar la validación y queda nombrado | cumple |
+
+Peor desnivel alcanzado por seed: entre 8 y 580 cm, contra un límite de ~600 cm por pendiente
+caminable. **96/96 Automation.** La tabla de cuarentena queda sin pruebas de la Fase 2; las que
+restan son de la Fase 3.
+
 ## 2026-09-10 — Fase 2, P2.6: estado mutable, criatura abatida persistente y save v3
 
 Implementación en `Planet/State/` (colocación determinista de entidades, `UAstraeonRuntimeStateManager`

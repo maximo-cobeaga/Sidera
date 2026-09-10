@@ -24,7 +24,8 @@ La Fase 1 está cerrada según `PHASE_STATUS.md` y la etiqueta
       500 ni a 2.500 km; 48 patches finos visibles en los dos radios.
 - [x] P2.6 — Estado mutable planetario, criatura abatida persistente y migración save v2 → v3.
       Smoke `State` en `TL_13`: abatida, descargada, recargada, guardada y cargada, sigue abatida.
-- [ ] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
+- [x] P2.7 — Recuperar `Terrain.Connectivity` y `Terrain.TraversalDetectsWalls` sin relajar aserciones.
+      Migradas a la esfera con todas sus aserciones; 7 seeds transitables al primer intento.
 - [ ] P2.8 — Inspección visual, Insights, build Development y evidencia completa de la puerta.
 
 **Pedido del propietario, no bloqueante (2026-09-10, al mirar `TL_12`):** las montañas se leen
