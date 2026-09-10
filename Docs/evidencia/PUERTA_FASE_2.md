@@ -7,6 +7,10 @@ El propietario confirmó a mano `TL_11` y `TL_12` (P2.3) y autorizó cerrar el r
 sin más pruebas humanas; la evidencia de P2.4–P2.8 es automática, con capturas revisadas por el
 agente. Una captura no reemplaza a una prueba ni una prueba a la inspección: hay de ambas.
 
+**Prueba humana posterior al cierre, 2026-09-10:** el propietario jugó `TL_13_CollisionRing` y
+`TL_14_FrameTransition` y los confirmó: *"estuvieron muy bien"*. Cubre a mano los criterios de
+colisión bajo el jugador (anillo a 50 km) y de marco local en el tier Target.
+
 ## Criterio por criterio
 
 | # | Criterio de la puerta | Evidencia | Estado |

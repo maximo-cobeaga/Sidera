@@ -6,7 +6,8 @@ La puerta de la Fase 2 pasó entera: los ocho criterios con evidencia en
 [evidencia/PUERTA_FASE_2.md](evidencia/PUERTA_FASE_2.md), la lista de `AGENTS.md` §15.1 completa y
 **ninguna prueba de la Fase 2 en cuarentena**. El propietario confirmó a mano `TL_11` y `TL_12` y
 autorizó por escrito cerrar P2.4–P2.8 sin más pruebas humanas; esas etapas se cierran con smokes,
-Automation, perfiles, build empaquetada y capturas revisadas por el agente.
+Automation, perfiles, build empaquetada y capturas revisadas por el agente. Después del cierre, el
+propietario jugó `TL_13` y `TL_14` y los confirmó a mano ("estuvieron muy bien").
 
 Con esta puerta queda cumplido el **Producto A** (núcleo planetario).
 

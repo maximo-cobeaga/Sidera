@@ -1,3 +1,9 @@
+## 2026-09-10 — Prueba humana de `TL_13` y `TL_14`
+
+El propietario jugó `TL_13_CollisionRing` (50 km, anillo de colisión) y `TL_14_FrameTransition`
+(Target, 500 km, marco local) con Play y los confirmó: *"estuvieron muy bien"*. Sin defectos
+reportados.
+
 ## 2026-09-10 — Fase 2, P2.8: build empaquetada y cierre de la puerta
 
 ```powershell
