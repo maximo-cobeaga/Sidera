@@ -127,7 +127,8 @@ mano y por dónde seguir. El más reciente es el útil; los anteriores son antec
 
 | Archivo | Cierra |
 |---|---|
-| `HANDOFF_SESION_20260909_TRANSICION.md` | **El más reciente.** Transición a planetas esféricos: 12 commits, qué leer al reanudar, cómo verificar, siete trampas medidas y la ruta de la Fase 1 |
+| `HANDOFF_SESION_20260910_FASE1_CERRADA.md` | **El más reciente.** Cierre de la Fase 1: qué leer al reanudar, cómo verificar, el defecto de colisión que parecía animación, y la Fase 2 con su deuda heredada |
+| `HANDOFF_SESION_20260909_TRANSICION.md` | Transición a planetas esféricos: 12 commits, qué leer al reanudar, cómo verificar, siete trampas medidas y la ruta de la Fase 1 |
 | `HANDOFF_SESION_20260909.md` | Cierre del arte del protagonista, anterior a la transición |
 | `HANDOFF_PERSONAJE_PRINCIPAL.md` | Marcado **SUPERADO** en su propia cabecera |
 | `HANDOFF_FASE_MUNDO_VIVO.md` | Decisión de salir del MVP e Ítaca como nave |
