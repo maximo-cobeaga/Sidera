@@ -9,6 +9,7 @@
 #include "Creatures/AstraeonCreatureActor.h"
 #include "Building/AstraeonBuiltStructure.h"
 #include "WorldGen/AstraeonTerrainField.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "Exploration/AstraeonMapRevealLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Knowledge/AstraeonLogbookComponent.h"
@@ -1059,102 +1060,138 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonTerrainReliefTest,
 
 bool FAstraeonTerrainReliefTest::RunTest(const FString& Parameters)
 {
-	// Determinismo: la altura es función pura de (seed, x, y), que es lo que permitirá
-	// colocar cosas sobre el suelo antes de construirlo cuando existan planetas.
+	// Migrada al contrato radial el 2026-09-10 para salir de cuarentena (Fase 1). Conserva
+	// TODAS las aserciones que tenía en el dominio plano: lo único que cambia es que la
+	// altura se consulta por dirección planetaria global en vez de por (x, y). Las
+	// constantes son las mismas porque son de escala humana: el radio del planeta cambia
+	// cuánta superficie hay, no qué es un escalón caminable.
+	using FSurface = FAstraeonPlanetSurface;
+
+	FAstraeonPlanetDefinition Planet;
+	Planet.BodyId = TEXT("relief"); Planet.RadiusCm = 1000000.0; // tier Lab, 10 km
+	Planet.MassKg = 1.0e16; Planet.SurfaceGravityMS2 = 9.81; Planet.BodySeed = 4242;
+
+	auto Tangents = [](const FVector& D, FVector& OutA, FVector& OutB)
+	{
+		const FVector Reference = FMath::Abs(D.Z) < 0.9 ? FVector(0, 0, 1) : FVector(1, 0, 0);
+		OutA = FVector::CrossProduct(Reference, D).GetSafeNormal();
+		OutB = FVector::CrossProduct(D, OutA).GetSafeNormal();
+	};
+	// Desplazarse una distancia física sobre la superficie, no un ángulo arbitrario.
+	auto Walk = [](const FVector& D, const FVector& Axis, double DistanceCm, double RadiusCm)
+	{
+		return (D + Axis * (DistanceCm / RadiusCm)).GetSafeNormal();
+	};
+
+	// Determinismo: la altura es función pura de (seed, dirección), que es lo que permite
+	// colocar cosas sobre el suelo antes de construirlo.
+	const FVector Probe = FVector(1.0, 0.4, -0.2).GetSafeNormal();
 	TestEqual(TEXT("Terrain height is deterministic for a seed"),
-		AAstraeonTerrainField::GetHeightCm(4242, 5000.0f, -3000.0f),
-		AAstraeonTerrainField::GetHeightCm(4242, 5000.0f, -3000.0f));
+		FSurface::SampleRadialHeightCm(Planet, Probe), FSurface::SampleRadialHeightCm(Planet, Probe));
 
 	bool bAnyDifference = false;
 	bool bAnyRelief = false;
+	FAstraeonPlanetDefinition FirstSeed = Planet; FirstSeed.BodySeed = 11;
+	FAstraeonPlanetDefinition SecondSeed = Planet; SecondSeed.BodySeed = 22;
 	for (int32 Step = 0; Step < 64; ++Step)
 	{
-		const float SampleX = Step * 1700.0f;
-		const float SampleY = Step * -900.0f;
-		const float FirstSeed = AAstraeonTerrainField::GetHeightCm(11, SampleX, SampleY);
-		const float SecondSeed = AAstraeonTerrainField::GetHeightCm(22, SampleX, SampleY);
+		const FVector Direction = FVector(1.0, Step * 0.031 - 1.0, Step * 0.017 - 0.5).GetSafeNormal();
+		const double First = FSurface::SampleRadialHeightCm(FirstSeed, Direction);
+		const double Second = FSurface::SampleRadialHeightCm(SecondSeed, Direction);
 
-		bAnyDifference = bAnyDifference || !FMath::IsNearlyEqual(FirstSeed, SecondSeed);
-		bAnyRelief = bAnyRelief || FirstSeed > 200.0f;
+		bAnyDifference = bAnyDifference || !FMath::IsNearlyEqual(First, Second);
+		bAnyRelief = bAnyRelief || First > 200.0;
 
-		// Nunca por debajo de la placa de suelo: el relieve sólo sube.
-		TestTrue(TEXT("Terrain never digs below the floor plate"), FirstSeed >= 0.0f);
+		// Nunca por debajo del nivel del mar: el relieve sólo sube.
+		TestTrue(TEXT("Terrain never digs below sea level"), First >= 0.0);
 	}
 
 	TestTrue(TEXT("Different seeds produce different terrain"), bAnyDifference);
 	TestTrue(TEXT("The seed produces actual relief, not a flat plain"), bAnyRelief);
-	TestTrue(TEXT("Flat spots are wider than a tile so clearings stay usable"),
-		AAstraeonTerrainField::GetFlatSpotRadiusCm() > AAstraeonTerrainField::GetTileSizeCm());
+	TestTrue(TEXT("Flat spots are wider than the traversal spacing so clearings stay usable"),
+		FSurface::FlatSpotRadiusCm > FSurface::TileSizeCm);
 
-	// Invariante que se rompió una vez y dejó el mapa intransitable: el terreno es de
-	// bloques, así que el desnivel entre tiles vecinos es un escalón vertical. El SUELO
-	// debe respetarlo siempre; las montañas son barreras deliberadas y quedan exentas.
-	const float TileSize = AAstraeonTerrainField::GetTileSizeCm();
-	const float MaxStep = AAstraeonTerrainField::GetMaxWalkableStepCm();
-	float WorstGroundStepCm = 0.0f;
-	float TallestMountainCm = 0.0f;
+	// Invariante que se rompió una vez y dejó el mapa intransitable: el SUELO debe respetar
+	// el límite de escalón siempre; las montañas son barreras deliberadas y quedan exentas.
+	double WorstGroundStepCm = 0.0;
+	double TallestMountainCm = 0.0;
 	for (int32 Seed = 1; Seed <= 6; ++Seed)
 	{
-		for (int32 TileX = -40; TileX <= 40; ++TileX)
+		FAstraeonPlanetDefinition P = Planet; P.BodySeed = Seed;
+		for (int32 IU = -30; IU <= 30; ++IU)
 		{
-			for (int32 TileY = -40; TileY <= 40; ++TileY)
+			for (int32 IV = -30; IV <= 30; ++IV)
 			{
-				const float X = TileX * TileSize;
-				const float Y = TileY * TileSize;
-				const float Here = AAstraeonTerrainField::GetGroundHeightCm(Seed, X, Y);
-				WorstGroundStepCm = FMath::Max(WorstGroundStepCm, FMath::Abs(AAstraeonTerrainField::GetGroundHeightCm(Seed, X + TileSize, Y) - Here));
-				WorstGroundStepCm = FMath::Max(WorstGroundStepCm, FMath::Abs(AAstraeonTerrainField::GetGroundHeightCm(Seed, X, Y + TileSize) - Here));
-				TallestMountainCm = FMath::Max(TallestMountainCm, AAstraeonTerrainField::GetMountainHeightCm(Seed, X, Y));
+				const FVector Direction = FVector(1.0, IU * 0.03, IV * 0.03).GetSafeNormal();
+				FVector AxisA, AxisB;
+				Tangents(Direction, AxisA, AxisB);
+				const double Here = FSurface::SampleGroundHeightCm(P, Direction);
+				WorstGroundStepCm = FMath::Max(WorstGroundStepCm, FMath::Abs(
+					FSurface::SampleGroundHeightCm(P, Walk(Direction, AxisA, FSurface::TileSizeCm, P.RadiusCm)) - Here));
+				WorstGroundStepCm = FMath::Max(WorstGroundStepCm, FMath::Abs(
+					FSurface::SampleGroundHeightCm(P, Walk(Direction, AxisB, FSurface::TileSizeCm, P.RadiusCm)) - Here));
+				TallestMountainCm = FMath::Max(TallestMountainCm, FSurface::SampleMountainHeightCm(P, Direction));
 			}
 		}
 	}
 
-	TestTrue(FString::Printf(TEXT("The walkable ground stays walkable (worst step %.0f cm, limit %.0f cm)"), WorstGroundStepCm, MaxStep),
-		WorstGroundStepCm <= MaxStep);
+	UE_LOG(LogTemp, Display, TEXT("RELIEVE_RADIAL: peor escalon de suelo=%.1f cm (limite %.0f) | montana mas alta=%.0f cm"),
+		WorstGroundStepCm, FSurface::MaxWalkableStepCm, TallestMountainCm);
+	TestTrue(FString::Printf(TEXT("The walkable ground stays walkable (worst step %.0f cm, limit %.0f cm)"),
+		WorstGroundStepCm, FSurface::MaxWalkableStepCm), WorstGroundStepCm <= FSurface::MaxWalkableStepCm);
+	// Sin esto el limite de escalon aprobaria tambien un mundo liso, que es justo el
+	// fallo que la capa de suelo existe para no cometer.
+	TestTrue(FString::Printf(TEXT("The ground layer is not a flat plain (worst step %.1f cm)"), WorstGroundStepCm),
+		WorstGroundStepCm > 1.0);
 
-	// El propietario pidió montañas de verdad: si la capa nunca supera una loma, el
-	// paisaje volvió a ser plano y el trabajo no cumple su propósito.
+	// El propietario pidió montañas de verdad: si la capa nunca supera una loma, el paisaje
+	// volvió a ser plano y el trabajo no cumple su propósito.
 	TestTrue(FString::Printf(TEXT("Mountains actually rise (tallest %.0f cm)"), TallestMountainCm),
-		TallestMountainCm > 2000.0f);
+		TallestMountainCm > 2000.0);
 
-	// El llano de Ítaca nivela contra la altura LOCAL, no excava hasta cero: cavar dejaba un
-	// cráter enorme alrededor de la nave y exigía un radio gigante para ser caminable.
-	const FVector2D ItacaSpot(12000.0f, -8000.0f);
-	const TArray<FVector2D> FlatSpots = { ItacaSpot };
-	const float ClearanceRadius = AAstraeonTerrainField::GetFlatSpotRadiusCm();
-	float WorstClearanceStepCm = 0.0f;
+	// El llano de Ítaca nivela contra la altura LOCAL, no excava hasta el nivel del mar:
+	// cavar dejaba un cráter enorme alrededor de la nave y exigía un radio gigante para ser
+	// caminable.
+	const FVector ItacaSpot = FVector(0.8, 0.5, 0.33).GetSafeNormal();
+	const TArray<FVector> FlatSpots = { ItacaSpot };
+	FVector SpotAxisA, SpotAxisB;
+	Tangents(ItacaSpot, SpotAxisA, SpotAxisB);
+	double WorstClearanceStepCm = 0.0;
 	for (int32 Seed = 1; Seed <= 6; ++Seed)
 	{
-		for (float Offset = 0.0f; Offset <= ClearanceRadius * 2.0f; Offset += TileSize)
+		FAstraeonPlanetDefinition P = Planet; P.BodySeed = Seed;
+		for (double Offset = 0.0; Offset <= FSurface::FlatSpotRadiusCm * 2.0; Offset += FSurface::TileSizeCm)
 		{
-			const FVector2D Here(ItacaSpot.X + Offset, ItacaSpot.Y);
-			const FVector2D Next(ItacaSpot.X + Offset + TileSize, ItacaSpot.Y);
+			const FVector Here = Walk(ItacaSpot, SpotAxisA, Offset, P.RadiusCm);
+			const FVector Next = Walk(ItacaSpot, SpotAxisA, Offset + FSurface::TileSizeCm, P.RadiusCm);
 			WorstClearanceStepCm = FMath::Max(WorstClearanceStepCm, FMath::Abs(
-				AAstraeonTerrainField::GetClearedGroundHeightCm(Seed, Next, FlatSpots)
-				- AAstraeonTerrainField::GetClearedGroundHeightCm(Seed, Here, FlatSpots)));
+				FSurface::SampleClearedGroundHeightCm(P, Next, FlatSpots)
+				- FSurface::SampleClearedGroundHeightCm(P, Here, FlatSpots)));
 		}
 	}
 
-	TestTrue(FString::Printf(TEXT("The Ítaca clearing stays walkable (worst step %.0f cm)"), WorstClearanceStepCm),
-		WorstClearanceStepCm <= MaxStep);
+	TestTrue(FString::Printf(TEXT("The Itaca clearing stays walkable (worst step %.0f cm)"), WorstClearanceStepCm),
+		WorstClearanceStepCm <= FSurface::MaxWalkableStepCm);
 
-	// La meseta queda a la altura del suelo local, no en cero: si se hundiera hasta Z=0
-	// volvería el cráter que se veía al despegar.
-	const float PlateauHeight = AAstraeonTerrainField::GetClearedGroundHeightCm(4242, ItacaSpot, FlatSpots);
-	TestEqual(TEXT("The clearing levels to the local ground, not to zero"),
-		PlateauHeight, AAstraeonTerrainField::GetGroundHeightCm(4242, ItacaSpot.X, ItacaSpot.Y));
+	// La meseta queda a la altura del suelo local, no en cero: si se hundiera hasta el nivel
+	// del mar volvería el cráter que se veía al despegar.
+	TestEqual(TEXT("The clearing levels to the local ground, not to sea level"),
+		FSurface::SampleClearedGroundHeightCm(Planet, ItacaSpot, FlatSpots),
+		FSurface::SampleGroundHeightCm(Planet, ItacaSpot));
+	const FVector FarFromSpot = Walk(ItacaSpot, SpotAxisA, FSurface::FlatSpotRadiusCm * 3.0, Planet.RadiusCm);
 	TestEqual(TEXT("Terrain far from a clearing is untouched"),
-		AAstraeonTerrainField::GetClearedGroundHeightCm(4242, FVector2D(ItacaSpot.X + ClearanceRadius * 3.0f, ItacaSpot.Y), FlatSpots),
-		AAstraeonTerrainField::GetGroundHeightCm(4242, ItacaSpot.X + ClearanceRadius * 3.0f, ItacaSpot.Y));
+		FSurface::SampleClearedGroundHeightCm(Planet, FarFromSpot, FlatSpots),
+		FSurface::SampleGroundHeightCm(Planet, FarFromSpot));
 
 	// La exclusión de montañas se comprueba por radio explícito. Deducirla de la rampa
 	// suave la dejó sin efecto y una montaña acabó tapando la escotilla de la nave.
 	TestTrue(TEXT("A gameplay point is inside its own keep-out"),
-		AAstraeonTerrainField::IsWithinAnySpot(ItacaSpot, FlatSpots, AAstraeonTerrainField::GetMountainClearanceCm()));
+		FSurface::IsWithinAnySpot(Planet, ItacaSpot, FlatSpots, FSurface::MountainClearanceCm));
 	TestFalse(TEXT("Far terrain is outside the keep-out"),
-		AAstraeonTerrainField::IsWithinAnySpot(FVector2D(ItacaSpot.X + 40000.0f, ItacaSpot.Y), FlatSpots, AAstraeonTerrainField::GetMountainClearanceCm()));
+		FSurface::IsWithinAnySpot(Planet, Walk(ItacaSpot, SpotAxisA, 40000.0, Planet.RadiusCm),
+			FlatSpots, FSurface::MountainClearanceCm));
 	TestTrue(TEXT("Mountains are pushed further from gameplay than the ground clearing"),
-		AAstraeonTerrainField::GetMountainClearanceCm() > ClearanceRadius);
+		FSurface::MountainClearanceCm > FSurface::FlatSpotRadiusCm);
 	return true;
 }
 

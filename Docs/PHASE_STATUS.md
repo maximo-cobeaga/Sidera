@@ -99,13 +99,16 @@ Biomas finales, nave pilotable, ciudades y generación masiva de assets.
 Abierta por el corte inmediato del mundo plano (ADR 0004). Reglas en `AGENTS.md` §7: no se borra
 ninguna, ninguna se relaja, y **una fase no cierra con pruebas suyas todavía aquí**.
 
-Estado: **poblada al abrir la Fase 1**. Mientras el mapa plano siga en el repositorio, estas
-pruebas siguen verdes y la tabla es sólo el inventario de lo que va a entrar.
+Estado: **la Fase 1 ya no tiene deuda aquí**. `Terrain.Relief` volvió el 2026-09-10 migrada al
+contrato radial sin perder ninguna aserción, y `Terrain.SurfaceContract` pasó a la Fase 3 por
+[ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md): valida mayoritariamente contenido de
+región —plataforma de Ítaca, claros, exclusiones, Region A— que la Fase 3 va a definir. El resto
+sigue verde sobre el mapa plano y la tabla es el inventario de lo que va a entrar.
 
 | Prueba | Vuelve en | Estado |
 |---|---|---|
-| `Astraeon.WorldGen.Terrain.Relief` | Fase 1 | verde |
-| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 1 | verde |
+| `Astraeon.WorldGen.Terrain.Relief` | Fase 1 | **RECUPERADA** el 2026-09-10 |
+| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3 | movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) |
 | `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 | verde |
 | `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 | verde |
 | `Astraeon.WorldGen.Itaca.DeckRestsOnTerrain` | Fase 3 | verde |

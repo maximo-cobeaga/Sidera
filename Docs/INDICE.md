@@ -39,7 +39,8 @@ el más reciente.
 | `ADR/0001-bootstrap-cpp-unreal-project.md` | vigente | Arranque del proyecto C++ en Unreal |
 | `ADR/0002-continuous-terrain-prototype.md` | vigente | Prototipo de malla continua como experimento aislado |
 | `ADR/0003-fixed-region-world-architecture.md` | **parcialmente superado** | Mundo fijo: la estructura no deriva de `WorldSeed`, se consumen regiones diseñadas. *Sobrevive el principio; el 0004 anuló su orden de prioridades* |
-| `ADR/0004-planetas-esfericos-fundacionales.md` | **vigente, el más nuevo** | La esfera y la gravedad radial pasan a requisito fundacional. Corte inmediato del mundo plano, cuarentena de pruebas, estado mutable como prerrequisito de la Fase 2 |
+| `ADR/0005-cuarentena-surfacecontract-a-fase-3.md` | **vigente, el más nuevo** | `Terrain.SurfaceContract` vuelve en la Fase 3: valida contenido de región, no núcleo planetario. `Terrain.Relief` sí volvió en la Fase 1 |
+| `ADR/0004-planetas-esfericos-fundacionales.md` | vigente | La esfera y la gravedad radial pasan a requisito fundacional. Corte inmediato del mundo plano, cuarentena de pruebas, estado mutable como prerrequisito de la Fase 2 |
 
 ---
 

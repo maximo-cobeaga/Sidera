@@ -14,7 +14,9 @@ struct ASTRAEON_API FAstraeonPlanetDefinition
 	double SeaLevelAltitudeCm = 0.0;
 	int32 WorldSeed = 0;
 	int32 BodySeed = 0;
-	int32 GeneratorVersion = 2;
+	// Sigue a `FAstraeonPlanetSurface::GeneratorVersion`, que no se puede incluir aqui sin
+	// ciclo. La 3 separo suelo caminable y montanas; la 2 era una sola capa de +-180 cm.
+	int32 GeneratorVersion = 3;
 
 	bool IsValid(FString* OutReason = nullptr) const;
 };

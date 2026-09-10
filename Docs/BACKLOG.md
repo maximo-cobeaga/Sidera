@@ -10,8 +10,15 @@
 - [x] Runtime de seis caras y `TL_11_CubeSphereClosed`.
 - [x] Smoke cardinal de polos, ecuador, aristas y esquinas.
 - [x] Caminata sostenida 270 s + captura 1920×1080 + baseline de rendimiento.
-- [ ] Reactivar `Astraeon.WorldGen.Terrain.Relief` y `Terrain.SurfaceContract` contra el
-      contrato radial; siguen en cuarentena hasta migrarlas sin debilitar sus aserciones.
+- [x] `Astraeon.WorldGen.Terrain.Relief` **recuperada** el 2026-09-10, migrada al contrato radial
+      con todas sus aserciones y una más: el límite de escalón ya no puede aprobarse con un mundo
+      liso. Peor escalón de suelo 7,2 cm contra un límite de 45; montaña más alta 51 m.
+- [x] `Astraeon.WorldGen.Terrain.SurfaceContract` movida a la Fase 3 por
+      [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md): valida sobre todo contenido de
+      región —plataforma de Ítaca, claros, exclusiones, Region A— que la Fase 3 define. Se mueve
+      la fecha, no el listón.
+- [x] Relieve radial de **dos capas**: suelo caminable con límite de escalón y montañas exentas,
+      más claros por radio angular. `GeneratorVersion` sube a 3.
 - [x] Sesión humana en `TL_11_CubeSphereClosed`, 2026-09-10: orientación, costura, salto y caída,
       cámara y salto en movimiento **confirmados a mano**. Devolvió un defecto de locomoción.
 - [x] Corregido el corte de locomoción: la colisión cercana se rehacía con un solo componente y

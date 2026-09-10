@@ -1,4 +1,33 @@
-# Informe de pruebas — ASTRAEON
+
+## Estado actualizado 2026-09-10 — `Terrain.Relief` recuperada sobre el contrato radial
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Automation   # PASS, 75 pruebas
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals    # PASS
+.\Scripts\RunPlanetChecks.ps1 -Check Walk         # PASS, RESULTADO=OK
+```
+
+`Astraeon.WorldGen.Terrain.Relief` corre ahora contra `FAstraeonPlanetSurface` por dirección
+planetaria global. Conserva sus ocho aserciones y suma una: `WorstGroundStepCm > 1.0`, para que el
+límite de escalón no pueda aprobarse con un mundo liso.
+
+Medido sobre el tier Lab de 10 km, seis seeds, rejilla de 61 × 61 direcciones:
+
+| | |
+|---|---|
+| Peor escalón del suelo | **7,2 cm** (límite 45) |
+| Montaña más alta | **5.100 cm** |
+| Suelo por debajo del nivel del mar | ninguno |
+| Claro de Ítaca | nivela a la altura del suelo local; a 3× el radio, terreno intacto |
+
+Tres pruebas verdes de la Fase 1 se ajustaron al relieve de dos capas, sin bajar ningún listón:
+`Planet.Height.Determinism` actualiza su valor fijo por el cambio de `GeneratorVersion` a 3;
+`Planet.Surface.ContinuityAndInvalidInput` pasa a exigirle la continuidad a la **capa de suelo**
+—que es la que se camina— y añade que un cuerpo de 200 m no recibe capa de montañas mientras uno
+de 10 km sí; `Planet.Topology.MeshAtEngineeringTiers` sigue igual.
+
+Rendimiento tras el nuevo relieve: `perf_baseline_20260910_013511.json`, 205,3 FPS medios, p99 de
+**6,99 ms**, 1 hitch de arranque. Sin coste medible frente a los 7,24 ms de antes del cambio.
 
 ## Estado actualizado 2026-09-10 — corte de locomoción: control, causa y arreglo
 

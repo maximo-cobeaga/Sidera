@@ -1,4 +1,26 @@
-# Estado de desarrollo — ASTRAEON
+
+## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
+
+El relieve radial dejó de ser un placeholder. `FAstraeonPlanetSurface` porta del dominio plano las
+**dos capas** que ese dominio ya había pagado descubrir: suelo caminable de amplitud contenida,
+que respeta el límite de escalón, y montañas aisladas y altas que están exentas a propósito porque
+son barreras. Se suman el claro por radio angular —meseta a la altura del suelo local, no pozo
+excavado— y la exclusión de montañas por radio explícito. `GeneratorVersion` sube a **3**.
+
+Un cuerpo demasiado chico para contener varias celdas de montaña no recibe la capa: el banco de
+locomoción de 200 m de radio sigue siendo todo suelo caminable, que es lo que necesita.
+
+`Astraeon.WorldGen.Terrain.Relief` **salió de cuarentena** migrada con todas sus aserciones y una
+más, para que el límite de escalón no pueda aprobarse con un mundo liso. Medido sobre el tier Lab
+de 10 km, seis seeds y 61 × 61 direcciones: peor escalón de suelo **7,2 cm** contra un límite de
+45, montaña más alta **5.100 cm**.
+
+`Terrain.SurfaceContract` pasó a la Fase 3 por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md):
+valida mayoritariamente contenido de región, no núcleo planetario.
+
+Evidencia: `Automation` 75/75, `Cardinals` PASS, `Walk` de 250 s `RESULTADO=OK` con 141.228 cm y
+0 frames en `Idle` mientras camina. Rendimiento sin cambio medible tras el nuevo relieve: 205,3
+FPS medios y p99 de 6,99 ms, frente a 203,1 y 7,24 ms antes.
 
 ## Estado actualizado 2026-09-10 — Fase 1: la puerta queda a una re-mirada
 

@@ -54,7 +54,7 @@ Esto es la evidencia del §1.4 del documento rector: **no se reinicia el proyect
 
 | Sistema | Archivo | Qué cambia |
 |---|---|---|
-| Consulta de altura | `AstraeonTerrainField.h/.cpp` | `GetHeightCm(seed, x, y)` → `SampleRadialHeightM(seed, FVector3d dir)`. La función ya es estática y pura, y el propio header dice que se diseñó para que la generación planetaria la consulte antes de que el terreno exista. Cambia la firma y el dominio del ruido |
+| Consulta de altura | `AstraeonTerrainField.h/.cpp` → `FAstraeonPlanetSurface` | **Hecho el 2026-09-10.** No fue sólo cambiar la firma: el relieve radial nació como una sola capa de ±180 cm y hubo que portarle las **dos capas** del dominio plano —suelo caminable con límite de escalón, y montañas exentas— además del claro por radio angular. Las constantes son las mismas: son de escala humana |
 | Contexto de superficie | `FAstraeonTerrainSurfaceContext` | Todos sus campos son `FVector2D`: centro, origen de Ítaca, claros, exclusiones de montaña. Pasan a dirección planetaria |
 | Validador de tránsito | `AstraeonTerrainTraversal.h/.cpp` | BFS sobre malla muestreada con escalón máximo → BFS sobre vértices de patch. La lógica se conserva. `Terrain.TraversalDetectsWalls` —la prueba negativa que exige que el validador falle cuando debe— sobrevive intacta |
 | Constructor de malla | `AstraeonTerrainSurfacePrototype.cpp` | `BuildMeshData` pasa a ser el constructor de patch detrás de `IPlanetPatchMeshBackend` |
@@ -95,8 +95,8 @@ inventario de la deuda abierta por el corte.
 
 | Prueba | Vuelve en |
 |---|---|
-| `Astraeon.WorldGen.Terrain.Relief` | Fase 1 |
-| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 1 |
+| `Astraeon.WorldGen.Terrain.Relief` | Fase 1 — **recuperada el 2026-09-10** |
+| `Astraeon.WorldGen.Terrain.SurfaceContract` | Fase 3, movida por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md) |
 | `Astraeon.WorldGen.Terrain.Connectivity` | Fase 2 |
 | `Astraeon.WorldGen.Terrain.TraversalDetectsWalls` | Fase 2 |
 | `Astraeon.WorldGen.Itaca.DeckRestsOnTerrain` | Fase 3 |
@@ -187,8 +187,13 @@ una formalidad: durante las Fases 1 y 2 es la única build que se puede mostrar 
 - `Astraeon.Planet.Gravity.CardinalPoints` — polos, ecuador y bordes de cara.
 
 **Puerta de salida:** vuelta lógica completa sin perder orientación; sin costura abierta; saltar
-y caer funciona en polos, ecuador y bordes; la cámara no da tirones; `Terrain.Relief` y
-`Terrain.SurfaceContract` salen de cuarentena.
+y caer funciona en polos, ecuador y bordes; la cámara no da tirones; `Terrain.Relief` sale de
+cuarentena.
+
+> Modificado el 2026-09-10 por [ADR 0005](ADR/0005-cuarentena-surfacecontract-a-fase-3.md):
+> `Terrain.SurfaceContract` vuelve en la Fase 3. La premisa del §2.2 —que migrar el terreno era
+> cambiar la firma y el dominio del ruido— resultó cierta para `Relief` y falsa para
+> `SurfaceContract`, que valida sobre todo contenido de región. Se mueve la fecha, no el listón.
 
 ### Fase 2 — Patches, LOD, precisión y estado mutable
 

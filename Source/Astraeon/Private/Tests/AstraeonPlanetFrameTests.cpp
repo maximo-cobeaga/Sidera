@@ -142,15 +142,19 @@ bool FAstraeonPlanetHeightDeterminismTest::RunTest(const FString& Parameters)
 	Planet.BodyId = TEXT("planet_test"); Planet.RadiusCm = 1000000.0;
 	Planet.MassKg = 1.0e16; Planet.SurfaceGravityMS2 = 9.81;
 	Planet.BodySeed = 4242; Planet.GeneratorVersion = FAstraeonPlanetSurface::GeneratorVersion;
-	TestTrue(TEXT("Version 2 fixed fixture survives executions and builds"),
-		FMath::IsNearlyEqual(FAstraeonPlanetSurface::SampleRadialHeightCm(Planet,FVector(1,0,0)),-29.686772625538321,1e-9));
+	// Esta direccion cae sobre una montana a 10 km de radio, asi que el valor fijo cubre
+	// las dos capas a la vez: si cualquiera cambia sin subir la version, esto lo delata.
+	TestTrue(TEXT("Version 3 fixed fixture survives executions and builds"),
+		FMath::IsNearlyEqual(FAstraeonPlanetSurface::SampleRadialHeightCm(Planet,FVector(1,0,0)),2488.334339054522388,1e-9));
 	const TArray<FVector> Directions = { FVector(1, 2, 3).GetSafeNormal(), FVector(-2, 1, 0.5).GetSafeNormal() };
 	for (const FVector& Direction : Directions)
 	{
 		const double A = FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
 		const double B = FAstraeonPlanetSurface::SampleRadialHeightCm(Planet, Direction);
 		TestTrue(TEXT("La misma seed y direccion son deterministas"), FMath::IsNearlyEqual(A, B, 1.0e-9));
-		TestTrue(TEXT("El relieve queda dentro del rango de Fase 1"), FMath::Abs(A) <= 180.0);
+		// El suelo nace en el nivel del mar y sube: el relieve nunca excava por debajo.
+		TestTrue(TEXT("El relieve queda dentro del rango de Fase 1"),
+			A >= 0.0 && A <= FAstraeonPlanetSurface::MaxReliefCm);
 	}
 	return true;
 }
@@ -441,12 +445,20 @@ bool FAstraeonPlanetSurfaceContinuityTest::RunTest(const FString& Parameters)
 		{
 			const FVector D=FVector(1.0,I*0.02-1.0,0.31).GetSafeNormal();
 			const FVector T=FVector::CrossProduct(D,FVector(0,0,1)).GetSafeNormal();
+			// La continuidad se le exige a la capa de SUELO, que es la que se camina. Las
+			// montanas estan exentas a proposito: una montana es un muro, y pedirle
+			// pendiente suave seria pedirle que deje de ser una barrera.
+			const double G=FAstraeonPlanetSurface::SampleGroundHeightCm(P,D);
+			const double GNear=FAstraeonPlanetSurface::SampleGroundHeightCm(P,(D+T/Radius).GetSafeNormal());
+			TestTrue(TEXT("One centimetre move changes ground height less than 0.1 cm"),FMath::Abs(G-GNear)<0.1);
 			const double H=FAstraeonPlanetSurface::SampleRadialHeightCm(P,D);
-			const double Near=FAstraeonPlanetSurface::SampleRadialHeightCm(P,(D+T/Radius).GetSafeNormal());
-			TestTrue(TEXT("One centimetre move changes height less than 0.1 cm"),FMath::Abs(H-Near)<0.1);
-			TestTrue(TEXT("Height stays within 1.8 m"),FMath::Abs(H)<=180.0);
+			TestTrue(TEXT("Height stays between sea level and the relief ceiling"),
+				H>=0.0 && H<=FAstraeonPlanetSurface::MaxReliefCm);
 			const FVector N=FAstraeonPlanetSurface::SampleRadialNormal(P,D);
-			TestTrue(TEXT("Normal finite, unit, outward"),!N.ContainsNaN() && FMath::Abs(N.Size()-1.0)<1e-8 && FVector::DotProduct(N,D)>0.99);
+			TestTrue(TEXT("Normal finite, unit, outward"),!N.ContainsNaN() && FMath::Abs(N.Size()-1.0)<1e-8 && FVector::DotProduct(N,D)>0.0);
+			// Fuera de las montanas la superficie es casi tangente, como antes.
+			if (FAstraeonPlanetSurface::SampleMountainHeightCm(P,D)==0.0)
+				TestTrue(TEXT("Ground normal stays near vertical"),FVector::DotProduct(N,D)>0.99);
 			auto Changed=P; ++Changed.BodySeed;
 			Variation+=FMath::Abs(H-FAstraeonPlanetSurface::SampleRadialHeightCm(Changed,D));
 		}
@@ -455,6 +467,13 @@ bool FAstraeonPlanetSurfaceContinuityTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Zero direction rejected"),FAstraeonPlanetCoordinates::DirectionToFaceUv(FVector::ZeroVector).bIsValid);
 	TestTrue(TEXT("Out of range UV rejected"),FAstraeonPlanetCoordinates::FaceUvToDirection(EAstraeonPlanetFace::PositiveX,FVector2D(2,0)).ContainsNaN());
 	TestTrue(TEXT("Zero input cannot become flat ground"),!FMath::IsFinite(FAstraeonPlanetSurface::SampleRadialHeightCm(P,FVector::ZeroVector)));
+	TestTrue(TEXT("Zero input cannot become flat ground on the walkable layer"),!FMath::IsFinite(FAstraeonPlanetSurface::SampleGroundHeightCm(P,FVector::ZeroVector)));
+	// Un cuerpo demasiado chico para contener varias celdas de montana no recibe la capa:
+	// el banco de locomocion de 200 m de radio es todo suelo caminable.
+	auto Tiny=P; Tiny.RadiusCm=20000.0; Tiny.GeneratorVersion=FAstraeonPlanetSurface::GeneratorVersion;
+	TestFalse(TEXT("A 200 m body has no mountain layer"),FAstraeonPlanetSurface::HasMountainLayer(Tiny));
+	auto Big=P; Big.RadiusCm=1000000.0; Big.GeneratorVersion=FAstraeonPlanetSurface::GeneratorVersion;
+	TestTrue(TEXT("A 10 km body does have one"),FAstraeonPlanetSurface::HasMountainLayer(Big));
 	P.GeneratorVersion=999;
 	TestFalse(TEXT("Unknown version rejected"),FMath::IsFinite(FAstraeonPlanetSurface::SampleRadialHeightCm(P,FVector(1,0,0))));
 	return true;
