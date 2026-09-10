@@ -1,5 +1,119 @@
 # Estado de desarrollo — ASTRAEON
 
+## Estado actualizado 2026-09-10 — Fase 1: la puerta queda a una re-mirada
+
+La sesión humana sobre `TL_11_CubeSphereClosed` confirmó **cuatro de los cinco criterios
+perceptuales** de la puerta: orientación tras la vuelta, ausencia de costura, salto y caída,
+cámara sin tirones y salto en movimiento. El quinto devolvió un defecto de locomoción que resultó
+no ser animación.
+
+`PrepareCollision` rehacía la colisión cercana con **un solo componente**: despegaba al personaje,
+movía el componente y recocía su cuerpo físico en el sitio. Cada 312 cm el jugador se quedaba sin
+suelo dos frames, `Velocity` caía a 0 y el selector de animación devolvía `Idle`, reiniciando el
+ciclo de paso **1,3 veces por segundo**. Nunca entraba en `Falling`, que es por lo que las pruebas
+anteriores pasaban: el defecto vivía justo por debajo de lo que medían. Correlación 1:1 entre 55
+reconstrucciones de colisión y 53 cortes de animación.
+
+Corregido con **doble búfer de colisión** —el relevo se activa antes de retirar el saliente y la
+base del personaje se traspasa—. Medido: de 53 cortes en 40 s a **0**, `Walk_F` al 100 % de los
+frames, `Run_F` al 99,2 % corriendo, y **24 % más de distancia recorrida** en el mismo tiempo. El
+smoke incorpora un guardián que falla si vuelve a haber más de 0,5 % de frames en `Idle`
+caminando. Batería completa en verde: `Automation` 75/75, `Cardinals` PASS, `Walk` de 250 s
+`RESULTADO=OK`.
+
+Pendiente para cerrar la puerta: que el propietario vuelva a mirar la locomoción corregida, y
+reactivar `Terrain.Relief` y `Terrain.SurfaceContract` contra el contrato radial. El pulido de
+codos queda en espera de esa re-mirada: juzgar una pose sobre un ciclo que se reiniciaba tres
+veces por vuelta no era juzgar la pose.
+
+## Estado actualizado 2026-09-10 — animación del protagonista corregida e integrada
+
+La escena canónica de Blender quedó guardada. El lote pulido de 51 acciones se exportó e importó
+en Unreal 5.7.4 en `/Game/Astraeon/Characters/Player/Optimized_Polished`, enlazado al esqueleto
+aprobado; el runtime usa esta variante y `/Optimized` queda disponible para comparación.
+Automation, Critical, Visual, Package Development, PackagedCritical y PackagedVisual pasaron.
+Evidencia: `ContentPipeline/reports/polished_character_animation_import.json` y
+`graphics/characters/main_player/docs/locomotion_polish_20260910.json`.
+Registro completo: [ANIMACION_PROTAGONISTA_CORRECCION_20260910.md](ANIMACION_PROTAGONISTA_CORRECCION_20260910.md).
+
+La revisión visual mostró dos causas separadas: pose A demasiado cerrada y cambios de clip sin
+continuidad de fase. Se corrigió la pose base y los ciclos `Idle`, `Walk_*` y `Run_*` en Blender
+(`upperarm X = -1,08 rad`), se exportó el FBX pulido y se reimportó sobre la misma ruta. El ciclo
+`Walk_F` conserva 37 frames a 30 FPS, 1,2 s, y su primer/último pose coincide. En C++ se añadió
+histeresis Idle/Walk/Run y continuidad de fase entre ciclos locomotores para evitar reinicios
+visibles durante la aceleración o al cruzar el umbral de carrera.
+
+Pendiente del bloque: medir patinaje de pies contra `CharacterMovement` y realizar prueba humana
+de caminar, correr, cambiar dirección y detenerse.
+
+Corrección adicional tras la revisión visual: la primera pasada sólo afectaba el cuerpo de
+tercera persona. Ahora las manos de primera persona usan la variante aislada
+`/Game/Astraeon/Art/Blockouts/Human/PolishedFP`, con balanceo medido en Walk/Run y fases Jump/Land.
+La validación angular confirma movimiento real; `Package` y `PackagedVisual` volvieron a pasar.
+
+## 2026-09-10 — Fase 1: runtime esférico y locomoción verificados
+
+Se completó el núcleo técnico mínimo: `FAstraeonPlanetDefinition`, `FAstraeonPlanetCoordinates`,
+`FAstraeonPlanetSurface`, `FAstraeonCubeSphereMesh` y `AAstraeonPlanetRuntime`. El mapa
+`TL_11_CubeSphereClosed` genera seis caras con relieve radial compartido por dirección global,
+colisión local alrededor del jugador y gravedad radial; no depende de Landscape plano.
+
+Verificación: build `AstraeonEditor Win64 Development` correcta; **75/75 Automation**; smoke
+cardinal en polos, ecuador, aristas y esquinas; caminata de 270 s con 131.483 cm recorridos,
+67 saltos, 0,0% desalineado y 0,0% fuera de altitud. Captura: `Saved/Screenshots/WindowsEditor/PlanetWalkLab.png`.
+Perfil de 1920×1080: 211,5 FPS medios, p99 5,41 ms, 1 hitch >50 ms durante arranque/streaming,
+memoria 2.267→2.306 MB.
+
+Siguiente trabajo de Fase 1: reactivar las pruebas heredadas `Terrain.Relief` y
+`Terrain.SurfaceContract` contra la consulta radial, ejecutar una sesión humana breve y cerrar
+la puerta sólo con esa evidencia. Después comienza Fase 2 (patches, LOD y persistencia mutable).
+
+## 2026-09-10 — Animación del protagonista: primera pasada Bridge
+
+Bridge está conectado a Blender y la fuente canónica activa es
+`graphics/characters/main_player/blender/CHR_Astraeon_Player.blend`. Se corrigieron en la
+sesión viva los brazos de `Run_F/B/L/R` y las poses de `Jump_Start/Loop/Land`; la carrera ya
+no abre los antebrazos en T y el salto usa una pose aérea compacta. Auditoría: 30 FPS, rangos
+originales conservados, loops intactos y todas las curvas Bézier. Evidencia:
+`graphics/characters/main_player/docs/locomotion_polish_20260910.json` y renders en
+`Saved/BlenderRecovery/`.
+
+Pendiente para cerrar este bloque: medir patinaje de pies contra `CharacterMovement` y hacer una
+prueba humana.
+
+## 2026-09-09 — Fase 0 cerrada: la puerta pasó, incluida la prueba humana
+
+Traspaso completo en [HANDOFF_SESION_20260909_TRANSICION.md](HANDOFF_SESION_20260909_TRANSICION.md).
+12 commits, 58 archivos, +6.556 líneas. **69 pruebas verdes** y recorrido plano crítico en verde.
+Código: 14.284 líneas C++.
+
+**La puerta de la Fase 0 pasó entera.** El propietario probó `TL_10_RadialGravity` a mano y
+confirmó lo que faltaba: **cámara correcta y vuelta al mundo completa**. La primera prueba manual
+había devuelto cuatro defectos con cuatro causas distintas, y las cuatro están corregidas y
+medidas (`KNOWN_ISSUES`, 2026-09-09):
+
+- El vuelco y la inversión de cámara eran el mismo defecto: `bUseControllerRotationYaw` hacía que
+  el motor escribiera la rotación del actor desde una `FRotator` de **mundo** cada frame. El marco
+  de mirada pasó a vivir en la gravedad local.
+- La pantalla negra fue una regresión de la misma sesión: el guardián de mapas planetarios se
+  llevó `EnsureRuntimeLighting()`.
+- El deslizamiento tras saltar era un error de razonamiento en el orden de tick, corregido a
+  `TG_PrePhysics` con dependencia explícita.
+- El salto trabado **no era animación**: el personaje nunca aterrizaba. Sobre una superficie
+  convexa el contacto tangencial es rasante y el motor lo descarta como roce de pared. Racha en el
+  aire de 116 s antes, **1,02 s** después.
+
+De paso se corrigieron dos suposiciones de Z global que el ADR 0004 §4.1 prohíbe y que nadie
+había visto: la velocidad que elige el clip de animación usaba `Velocity.Size2D()` —el plano XY
+del mundo— y el rescate por caída comparaba `Z`, lo que lo dejaba ciego en el hemisferio sur.
+
+**Siguiente paso:** la **Fase 1 — Núcleo planetario**. Su orden está en
+`PLAN_TRANSICION_EJECUCION.md` §4 y el trabajo grande es migrar `AstraeonTerrainField` al dominio
+radial, que es cambio de firma y de dominio del ruido, no reescritura.
+
+**Antes de eso, un minuto de partida**: el arreglo del salto está medido pero no probado a mano, y
+es lo último que se tocó de algo que ya funcionaba.
+
 ## 2026-09-09 — Fase 0 abierta: el proyecto pasa a planetas esféricos
 
 Cambio de dirección aprobado ([ADR 0004](ADR/0004-planetas-esfericos-fundacionales.md)): la esfera

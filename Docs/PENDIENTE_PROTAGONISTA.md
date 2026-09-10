@@ -1,5 +1,33 @@
 # Protagonista principal — estado real y pendientes
 
+## Estado actualizado 2026-09-10
+
+El pulido de brazos en `Run_F/B/L/R` y de `Jump_Start/Loop/Land` ya está guardado en el `.blend`
+canónico, exportado a `AN_Astraeon_Player_All_Polished_20260910.fbx` e importado en Unreal en
+`/Game/Astraeon/Characters/Player/Optimized_Polished`. La variante anterior se conserva en
+`/Optimized`. Las pruebas de editor y del build Development pasaron; quedan la medición de
+patinaje de pies y la prueba humana.
+
+La primera persona también quedó corregida: `AN_HandsFP_Polished_{Idle,Walk,Run,Jump,Land}`
+conserva la pose encuadrada pero añade movimiento real de brazos. Los clips originales siguen
+intactos para comparación.
+
+### Prueba humana del 2026-09-10 — cuatro puntos
+
+El propietario jugó la variante integrada. **El pulido de brazos no pasó**: los codos siguen
+pegados al tórax y el caminar no se lee natural. Junto a eso aparecieron tres huecos que no son
+defectos sino trabajo nunca hecho: no existe quitarse el casco, la mano de primera persona sigue
+siendo el blockout sobre `SKEL_Humanoid_A` en vez de la del protagonista, y el escáner se ve en
+la mano en primera persona pero no en tercera.
+
+Diagnóstico medido en [KNOWN_ISSUES.md](KNOWN_ISSUES.md); reparto por fases en
+[BACKLOG.md](BACKLOG.md). El pulido de hombros es tarea acotada de la Fase 1 en curso; los otros
+tres son Fase 5, donde el documento rector ya los tenía escritos como entregables.
+
+Consecuencia para este documento: la línea *"protagonista TERMINADO E INTEGRADO"* sigue siendo
+cierta en cuanto a existencia, y sigue sin serlo en cuanto a calidad. Lo pendiente del personaje
+ya no es sólo la forma del casco.
+
 Última auditoría: 2026-09-08
 Fuente canónica: `graphics/characters/main_player/blender/CHR_Astraeon_Player.blend`
 Método: inspección directa de la escena viva en Blender (Higgsfield Bridge) + reportes en disco.
@@ -285,6 +313,26 @@ el tercero lo reportó el propietario ese mismo día al probar el ejecutable.
    aterrizaje. Ficha completa en `KNOWN_ISSUES.md`.
 
 ---
+
+### Avance 2026-09-10 — pulido de silueta y continuidad de locomoción
+
+La escena canónica `CHR_Astraeon_Player.blend` quedó abierta en Blender mediante Higgsfield
+Bridge y se corrigieron en la sesión viva los ciclos `Run_F/B/L/R` y `Jump_Start/Loop/Land`.
+La pose base de locomoción pasó a `upperarm X = -1,08 rad`, dejando espacio visible entre
+hombrera, brazo y tórax sin abrirse en una T. La carrera conserva el balanceo
+queda entre -0,40 y +0,40 rad y el codo entre 0,43 y 0,61 rad. El salto usa una pose aérea
+compacta, con balanceo de brazo ±0,18 rad y codo 0,45 rad. Las curvas siguen siendo Bézier,
+los loops y rangos originales se conservan, y las poses fueron revisadas con renders de
+frente en despegue, vuelo, aterrizaje y carrera; para caminar se revisaron los frames 1, 10, 20
+y 37, con el primer y último pose coincidentes.
+
+Checkpoint previo: `Saved/BlenderRecovery/CHK_Player_before_arm_silhouette_walk_cycle_20260910.blend`.
+El `.blend` canónico quedó guardado tras la autorización explícita del propietario. El FBX pulido
+se reexportó e importó en Unreal bajo `/Game/Astraeon/Characters/Player/Optimized_Polished`;
+`/Optimized` queda como comparación. El build Development se regeneró y pasaron Automation
+75/75, Critical, Package, PackagedCritical y PackagedVisual. Queda validar el contacto de pies
+contra la velocidad real de `CharacterMovement` y hacer la prueba humana antes de cerrar este
+pendiente.
 
 ## 4. Limitaciones conocidas
 

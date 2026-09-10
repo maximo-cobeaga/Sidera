@@ -1,5 +1,38 @@
 # Decisiones — ASTRAEON
 
+## 2026-09-10 — Pose A y continuidad de locomoción
+
+La captura del propietario mostró que la pose base de `Idle` y locomoción cerraba los brazos
+contra el volumen de las hombreras. Se fija `upperarm X = -1,08 rad` en `Idle`, `Walk_*` y
+`Run_*`: abre la silueta sin cambiar malla ni esqueleto. El ciclo `Walk_F` mantiene 37 frames,
+30 FPS y 1,2 s; no se elimina el último frame porque el primer/último pose son coincidentes.
+Para el runtime se incorpora histeresis en los umbrales Idle/Walk/Run y continuidad de fase
+normalizada al cambiar entre ciclos. La mezcla artística completa con AnimBlueprint/BlendSpace
+queda fuera de este parche y sigue como deuda de calidad posterior.
+
+## 2026-09-10 — Variante aislada para animaciones pulidas
+
+El lote pulido en Blender se importa a `/Game/Astraeon/Characters/Player/Optimized_Polished` y
+el runtime lo consume desde esa ruta. La carpeta `/Optimized` se conserva como comparación y
+rollback. La importación exige el esqueleto aprobado, normaliza la escala raíz en el editor,
+guarda los paquetes sólo después de validar los 18 clips de gameplay y deja un reporte reproducible
+en `ContentPipeline/reports/polished_character_animation_import.json`. Así la comparación visual
+no depende de sobrescribir assets binarios existentes.
+
+## 2026-09-09 — Continuación de Fase 1 y presupuesto de animaciones
+
+El propietario autoriza continuar y dispone hasta 10 créditos para Higgsfield Bridge si fueran
+necesarios al pulir animaciones después del núcleo planetario verificado. No es una orden de
+gastar los créditos ni de generar otro personaje. Conservar skeleton, fuentes y clips aprobados.
+
+Fase 1: cube-sphere de seis caras con rejilla uniforme, ruido de valor 3D continuo interpolado
+en posición radial y colisión limitada a celdas próximas al observador. Esa colisión mínima
+permite verificar marcha; quadtree, workers, revisión/cancelación y anillos LOD pertenecen a Fase 2.
+Radio y alturas internas de esta primera API quedan en double y centímetros explícitos,
+compatibles con el marco existente; gravedad en m/s² y masa en kg. No se fija el canon planetario.
+Los tiers de ingeniería se verifican como datos; la vuelta manual usa radio de laboratorio de 200 m.
+La elección actual de PMC es experimental, sin decisión sobre backend de producción.
+
 ## 2026-09-08 — Normalizar la escala de raíz en la importación, no en el runtime
 
 La importación FBX de animaciones sueltas pierde la conversión metros→centímetros del

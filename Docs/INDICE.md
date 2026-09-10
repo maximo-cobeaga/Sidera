@@ -82,6 +82,8 @@ Reglas vigentes sobre un sistema concreto. Se consultan antes de tocar ese siste
 | `MODULAR_ASSET_GENERATION.md` | Catálogos y selección de módulos como datos separados del gameplay |
 | `GUIA_ARTE_PLANETAS_BLENDER.md` | ⚠ Pipeline de arte para planetas procedurales. *Sus radios de 150 m a 2 km dejaron de ser tiers objetivo: el ADR 0004 los reclasificó como laboratorio. El resto —cube-sphere, materiales tileables por bioma, Blender no modela el planeta final— sigue vigente y **anticipó** la dirección actual* |
 | `CAMARA_Y_MANOS.md` | Cámara en tercera persona y manos de primera persona: qué está hecho y qué falta |
+| `evidencia/BASELINE_RENDIMIENTO.md` | El punto de comparación de rendimiento anterior a la transición, cómo reproducirlo y **qué NO mide** |
+| `evidencia/CALIBRACION_BLENDER_UNREAL.md` | Que un metro de Blender llega como 100 cm, con números, y el preset `UE57_AST_V1` congelado |
 
 ---
 
@@ -110,6 +112,7 @@ El personaje principal tiene documentación separada porque su pipeline es el m�
 |---|---|
 | `PENDIENTE_PROTAGONISTA.md` | Estado real y pendientes del protagonista. 321 líneas. Incluye la medición de las poses de brazo en cruz |
 | `INVESTIGACION_PERSONAJE_INVISIBLE.md` | **RESUELTO.** Por qué el protagonista no se veía: la importación FBX perdía la escala 100 del Armature |
+| `ANIMACION_PROTAGONISTA_CORRECCION_20260910.md` | Registro de diagnóstico, corrección Blender/Unreal, evidencias, pruebas y procedimiento de prueba humana |
 | `graphics/characters/main_player/docs/MAIN_CHARACTER_PIPELINE.md` | Contrato y evidencia del pipeline del personaje |
 | `graphics/characters/main_player/docs/SCENE_PASSPORT.md` | Pasaporte de la escena Blender |
 | `graphics/characters/main_player/docs/COMPLETION_PASSPORT.md` | Cierre del lote |
@@ -123,7 +126,8 @@ mano y por dónde seguir. El más reciente es el útil; los anteriores son antec
 
 | Archivo | Cierra |
 |---|---|
-| `HANDOFF_SESION_20260909.md` | **El más reciente.** Cuatro commits, cómo verificar que sigue en verde, tres cosas que sólo cierra una partida humana, y trampas encontradas |
+| `HANDOFF_SESION_20260909_TRANSICION.md` | **El más reciente.** Transición a planetas esféricos: 12 commits, qué leer al reanudar, cómo verificar, siete trampas medidas y la ruta de la Fase 1 |
+| `HANDOFF_SESION_20260909.md` | Cierre del arte del protagonista, anterior a la transición |
 | `HANDOFF_PERSONAJE_PRINCIPAL.md` | Marcado **SUPERADO** en su propia cabecera |
 | `HANDOFF_FASE_MUNDO_VIVO.md` | Decisión de salir del MVP e Ítaca como nave |
 | `HANDOFF_ESCOTILLA_INTERACCION.md` | Bloqueante de la escotilla que no respondía |

@@ -1,5 +1,122 @@
 # Informe de pruebas — ASTRAEON
 
+## Estado actualizado 2026-09-10 — corte de locomoción: control, causa y arreglo
+
+```powershell
+.\Scripts\RunPlanetChecks.ps1 -Check Automation   # PASS, 75 pruebas
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals    # PASS
+.\Scripts\RunPlanetChecks.ps1 -Check Walk         # PASS, RESULTADO=OK
+```
+
+Instrumentación nueva del smoke: `-AstraeonNoJump` (control: caminar sin saltar), `-AstraeonSprint`
+(reproduce la carrera), reparto de clips por frames, transiciones entre clips, reconstrucciones de
+colisión y frames en `Idle` mientras camina.
+
+Caminata de 40 s en línea recta, sin saltos, radio 200 m:
+
+| | antes | después |
+|---|---|---|
+| cambios de clip | 107 (2,67/s) | **1** (el arranque) |
+| transiciones `Walk_F->Idle` | 53 | **0** |
+| frames en `Walk_F` | 99,0 % | **100,0 %** |
+| recorrido | 16.922 cm | **20.934 cm** (+24 %) |
+| reconstrucciones de colisión | 55 | 67 *(más distancia recorrida)* |
+| en caída | 0,0 % | 0,0 % |
+
+Corriendo (`-AstraeonSprint`): `Run_F` 99,2 %, dos transiciones, ambas de arranque.
+
+Caminata larga de 250 s con saltos: 141.247 cm, 62 saltos, desalineado 0,0 %, fuera de altitud
+0,0 %, racha en el aire máxima 1,06 s, **125 cambios de clip = 62 saltos × 2 + 1 arranque**, y
+0 frames en `Idle` mientras camina. `RESULTADO=OK`.
+
+El guardián se calibró contra datos medidos: el defecto daba ~1,0 % de frames en `Idle` caminando
+y el arreglo da 0,00 %; el umbral está en 0,5 %.
+
+### Evidencia de cierre de fase (`AGENTS.md` §15.1)
+
+- **Build**: `Build.bat AstraeonEditor Win64 Development -Rebuild`, recompilación completa del
+  módulo en 57,7 s. `Result: Succeeded`, **cero warnings y cero errores**.
+- **Perfil de rendimiento re-medido durante la caminata**, 1920×1080, post-arreglo:
+  `perf_baseline_20260910_010156.json` — 203,1 FPS medios, mediana 4,67 ms, **p99 7,24 ms**,
+  1 hitch de arranque/streaming, memoria 2.258 → 2.290 MB.
+- **Regresión medida y aceptada**: el p99 pasó de **5,41 ms a 7,24 ms** frente al baseline del
+  2026-09-09. La causa es más trabajo de colisión por segundo, y en parte porque el personaje
+  ahora recorre un 24 % más de distancia en el mismo tiempo. Sigue **muy dentro del presupuesto
+  de `AGENTS.md` §8**: el objetivo del percentil 1 % es 45 FPS y 7,24 ms son 138 FPS, con más de
+  3× de margen. El hitch no es recurrente.
+- **Capturas**: `Saved/Screenshots/WindowsEditor/PlanetWalkLab.png` y `PlanetCardinalLab.png`,
+  regeneradas por las corridas posteriores al arreglo.
+
+## Estado actualizado 2026-09-10 — animación del protagonista corregida e integrada
+
+El `.blend` canónico fue guardado; el FBX pulido se importó y guardó en
+`/Game/Astraeon/Characters/Player/Optimized_Polished`.
+
+```powershell
+.\Scripts\RunCharacterChecks.ps1 -Check Automation       # PASS
+.\Scripts\RunCharacterChecks.ps1 -Check Critical         # PASS
+.\Scripts\RunCharacterChecks.ps1 -Check Visual           # PASS
+.\Scripts\RunCharacterChecks.ps1 -Check Package         # PASS
+.\Scripts\RunCharacterChecks.ps1 -Check PackagedCritical # PASS
+.\Scripts\RunCharacterChecks.ps1 -Check PackagedVisual   # PASS
+```
+
+Evidencia: `ContentPipeline/reports/polished_character_animation_import.json`,
+`graphics/characters/main_player/docs/locomotion_polish_20260910.json` y
+`Saved/Logs/Character_*.log`. El ciclo `Walk_F` mantiene 37 frames, 1,2 s y costura exacta
+entre frame 1 y 37. La pose A usa `upperarm X = -1,08 rad`; C++ añadió histeresis y continuidad
+de fase al cambiar entre ciclos. La medición de patinaje y la prueba humana siguen pendientes.
+Detalle de implementación y procedimiento de prueba: [ANIMACION_PROTAGONISTA_CORRECCION_20260910.md](ANIMACION_PROTAGONISTA_CORRECCION_20260910.md).
+
+Corrección posterior: se detectó que `AN_HandsFP_*` seguía congelado en la pose del escáner.
+Se creó `/Game/Astraeon/Art/Blockouts/Human/PolishedFP` y se conectó al runtime. Validación
+de movimiento real: Walk 0,069 rad, Run 0,105 rad, Jump 0,062 rad y Land 0,037 rad de variación
+angular en los brazos. `Package` y `PackagedVisual`: PASS.
+
+Renders nuevos revisados: `Saved/BlenderRecovery/walk_arm_silhouette_final_f01.png`,
+`walk_arm_silhouette_final_f10.png`, `walk_arm_silhouette_final_f20.png` y
+`walk_arm_silhouette_final_f37.png`; frames 1 y 37 conservan la misma pose de cierre.
+
+## 2026-09-10 — Animación del protagonista: Bridge/Blender
+
+Fuente activa: `CHR_Astraeon_Player.blend`, escena `CHR_Astraeon_Player_Work`, 30 FPS.
+Se revisaron visualmente renders de `Idle`, `Walk_F`, `Run_F` y de las tres fases del salto. Se
+modificaron `Idle`, `Walk_F/B/L/R`, `Run_F/B/L/R` y `Jump_Start/Loop/Land`: brazos separados,
+codos compactos y loops/rangos conservados. Auditoría estructural: las curvas modificadas
+siguen en Bézier. No se consumieron créditos. El `.blend` quedó guardado y el FBX fue reexportado
+e importado; la medición de patinaje queda pendiente.
+
+Evidencia: `graphics/characters/main_player/docs/locomotion_polish_20260910.json`.
+
+## 2026-09-10 — Fase 1: núcleo esférico, locomoción y rendimiento
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development Astraeon.uproject -WaitMutex -NoHotReloadFromIDE
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Seconds 270 -Profile
+```
+
+Resultado: build `Succeeded`; **75/75 Automation**; `Cardinals PASS`; `Walk PASS` con
+131.483 cm recorridos, 67 saltos, 0,0% de frames desalineados, 0,0% fuera de altitud y
+captura `PlanetWalkLab` a 1920×1080. Perfil: 211,5 FPS medios, mediana 4,62 ms, p99 5,41 ms,
+peor frame 400 ms, 1 hitch >50 ms y memoria 2.267→2.306 MB. El hitch queda atribuido al
+arranque/carga y debe volver a medirse en Fase 2 con streaming de patches.
+
+La puerta de Fase 1 sigue abierta por las dos pruebas de terreno en cuarentena
+(`Terrain.Relief`, `Terrain.SurfaceContract`) y por la confirmación humana pendiente.
+
+## 2026-09-09 — Fase 1: contrato de definición y coordenadas
+
+```powershell
+Build.bat AstraeonEditor Win64 Development Astraeon.uproject -WaitMutex -NoHotReloadFromIDE
+.\Scripts\RunCharacterChecks.ps1 -Check Automation
+```
+
+Resultado: build `Succeeded`; **73 tests verdes, 0 fallos**. Se verificaron definición válida,
+round-trip dirección ↔ cara/UV y muestras de borde/esquina. Persisten tres avisos conocidos
+`LogAutomationTest: Error: Condition failed` del motor, sin resultado fallido de Astraeon.
+
 ## 2026-09-09 — Vuelta completa a la esfera tras la primera prueba manual
 
 ```powershell

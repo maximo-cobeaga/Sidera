@@ -1,5 +1,35 @@
 # Estado de fases — ASTRAEON
 
+## Actualización 2026-09-10 — Fase 1: núcleo técnico verificado, puerta aún abierta
+
+La Fase 0 está cerrada y la fase activa es **Fase 1 — Núcleo planetario**. Ya están completos
+el contrato de definición, las coordenadas globales, la altura radial determinista, el runtime
+cube-sphere de seis caras y `TL_11_CubeSphereClosed`. La evidencia actual es `75/75` tests de
+Automation, smoke cardinal en 26 direcciones y caminata planetaria sostenida de 270 s con
+`RESULTADO=OK`. La fase no se declara cerrada todavía: falta reactivar explícitamente las dos
+pruebas de terreno que siguen en cuarentena (`Terrain.Relief` y `Terrain.SurfaceContract`) y
+registrar una prueba humana breve del salto/cámara sobre este mapa.
+
+### Sesión humana del 2026-09-10 sobre `TL_11_CubeSphereClosed`
+
+El propietario jugó el mapa. **Cuatro de los cinco criterios perceptuales quedaron confirmados a
+mano**: orientación tras la vuelta, ausencia de costura, salto y caída, cámara sin tirones, y el
+salto en movimiento —que era la confirmación que arrastraba la Fase 0 desde el 2026-09-09—.
+
+El quinto devolvió defecto: **la locomoción se veía trabada y al correr además frenaba**. No era
+animación. La colisión cercana se rehacía con un solo componente y dejaba al jugador sin suelo dos
+frames cada 312 cm, la velocidad caía a 0 y el selector elegía `Idle`: el ciclo de paso se
+reiniciaba 1,3 veces por segundo. Corregido con doble búfer de colisión y medido —de 53 cortes en
+40 s a 0, con 24 % más de distancia recorrida—, con guardián permanente en el smoke. Detalle en
+`KNOWN_ISSUES`.
+
+**Queda pendiente que el propietario vuelva a mirar la locomoción ya corregida.** Con eso, el
+criterio humano de la puerta queda entero.
+
+En la misma sesión reportó tres cosas del protagonista que **no bloquean esta puerta** —falta
+quitarse el casco, mano de primera persona distinta a la de tercera y escáner visible sólo en
+primera—: son entregables de la **Fase 5** y están en `BACKLOG.md`.
+
 Fase activa, puerta de salida y cuarentena de pruebas. Es el archivo que un agente lee para saber
 **qué está permitido hacer hoy**. Se actualiza al abrir y al cerrar cada fase.
 
@@ -8,9 +38,18 @@ detallados en `PLAN_TRANSICION_EJECUCION.md` §4.
 
 ---
 
-## Fase activa: **0 — Transición controlada**
+## Histórico: **0 — Transición controlada** — puerta PASADA
 
-Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión del propietario).
+Abierta y cerrada el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión del
+propietario). Los seis puntos de la puerta están cumplidos y el criterio de orientación lo
+confirmó el propietario jugando.
+
+> **Queda una confirmación pendiente, y no es de la puerta.** El arreglo del salto en movimiento
+> (`KNOWN_ISSUES`, 2026-09-09) está medido —racha en el aire de 1,02 s frente a los 116 s del
+> defecto— pero **no probado a mano**. Conviene un minuto de partida antes de dar por buena la
+> locomoción de la Fase 1, porque es lo último que se tocó de lo que ya funcionaba.
+>
+> La **Fase 1 puede empezar**: su primer entregable no depende de esa confirmación.
 
 ### Puerta de salida
 
@@ -19,8 +58,7 @@ Abierta el 2026-09-09. Documentos y spike técnico **en paralelo** (decisión de
 - [x] Existe la etiqueta `pre-transicion-plana` y su build recuperable está documentada.
 - [x] La cuarentena de §Cuarentena está poblada, con fase de retorno por prueba.
 - [x] La calibración Blender → Unreal respeta escala y ejes (`evidencia/CALIBRACION_BLENDER_UNREAL.md`).
-- [~] El personaje se sostiene de pie: **medido**, vuelta completa a la esfera con 0,0% de frames desalineados (`-AstraeonSmokePlanetWalk`). Falta sólo el juicio humano sobre **cómo se siente la cámara**,
-      probado a mano.
+- [x] El personaje se sostiene de pie y la cámara no rueda. **Confirmado a mano por el propietario el 2026-09-09**: cámara correcta y vuelta al mundo completa. Medido además con `-AstraeonSmokePlanetWalk`: 0,0% de frames desalineados en una vuelta entera.
 
 ### Rama documental
 
@@ -94,8 +132,8 @@ Ninguna empieza antes de que pase la puerta de la anterior.
 
 | Fase | Nombre | Puerta principal | Estado |
 |---:|---|---|---|
-| 0 | Transición controlada | ADR y documentos sincronizados; spike de gravedad radial en pie | **activa** |
-| 1 | Núcleo planetario | Gravedad y cámara estables sobre una esfera cerrada | pendiente |
+| 0 | Transición controlada | ADR y documentos sincronizados; spike de gravedad radial en pie | **PASADA** |
+| 1 | Núcleo planetario | Gravedad y cámara estables sobre una esfera cerrada | **en curso; puerta pendiente** |
 | 2 | Patches, LOD y precisión | Streaming sin grietas ni hitches; estado mutable persistente | pendiente |
 | 3 | La primera señal esférica | Vertical slice completo; **cuarentena vacía** | pendiente |
 | 4 | Planeta visual y biomas | Seis biomas y rendimiento aprobado | pendiente |

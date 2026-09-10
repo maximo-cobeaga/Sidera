@@ -149,7 +149,7 @@ Ejemplo aceptable: fabricar un aislante o filtro con materiales cuyas propiedade
 ### 3.10 Guardado
 
 - Seed y versión del generador.
-- Transform del jugador.
+- Ubicación planetaria del jugador: `BodyId`, dirección superficial, altitud y coordenadas locales (ADR 0004).
 - Estado ambiental relevante.
 - Inventario.
 - Descubrimientos.
@@ -303,7 +303,7 @@ Todo lo siguiente está congelado:
 - Vuelo libre y órbitas completas.
 - Civilizaciones y NPC sociales.
 - Idiomas y traductor avanzado.
-- Planetas completos.
+- Contenido masivo sobre planetas completos; la geometría esférica es fundacional (ADR 0004).
 - Construcción libre y colonias.
 - Farming avanzado.
 - Ejércitos e invasiones sistémicas.
@@ -321,4 +321,3 @@ El MVP termina con una build para prueba humana, no con nuevas funcionalidades. 
 - Reducir sistemas.
 - Rehacer una parte.
 - Iniciar la fase de mundo vivo.
-

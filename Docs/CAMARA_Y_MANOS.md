@@ -153,3 +153,25 @@ mecánica que los dispare —no hay agacharse en el juego—, y las poses de por
 (`OneHand_*`, `TwoHand_*`, `Grip_*`) necesitan mezcla por capas sobre la locomoción, que la
 reproducción de un solo nodo no da. Ninguna de las dos es un id mal escrito: son trabajo
 pendiente con nombre.
+
+## Primera y tercera persona no comparten manos — PENDIENTE, Fase 5
+
+Anotado el 2026-09-10 tras la prueba humana. Este documento describe arriba cómo se alternan las
+dos vistas; lo que no decía es que **no muestran el mismo personaje**.
+
+| | Primera persona | Tercera persona |
+|---|---|---|
+| malla | `SK_Human_HandsFP_Blockout` | `SK_Astraeon_Player` |
+| esqueleto | `SKEL_Humanoid_A`, 57 huesos | `SK_Astraeon_Player_Skeleton`, 75 huesos |
+| origen | blockout generado | protagonista retopologizado, 65.284 tris, 4 LOD |
+| herramienta en mano | sí, `socket_tool_r`; escáner por defecto | ninguna: ese hueso no existe en su esqueleto |
+
+Las dos consecuencias que se ven jugando son las que reportó el propietario: la mano de primera
+persona es de peor factura que la del cuerpo, y el escáner aparece en una vista y no en la otra.
+La que no se ve, pero cuesta más, es que **cada animación hay que pulirla dos veces** —una por
+juego de clips— y que `BodyCounterpart()` existe sólo para traducir entre ambos.
+
+La unificación sobre los brazos del protagonista es entregable de la **Fase 5** (*brazos de
+primera persona*, *cuerpo completo para sombras*). Hasta entonces la divergencia se conoce y se
+acepta; lo que no se hace es parchearla suelta, porque medir un agarre nuevo contra `hand_r` del
+esqueleto del protagonista es trabajo que la unificación tira.

@@ -56,10 +56,12 @@ sólo gira mientras el taladro está en la mano.
 
 La selección de clip es un estado pequeño en C++ sobre `PlayAnimation`, **no un
 AnimBlueprint**: es Q1 y evita depender de un asset de Blueprint que ningún generador
-reproduce. Los clips cortan, sin BlendSpace ni transiciones.
+reproduce. No hay BlendSpace todavía; los cambios locomotores aplican histeresis y conservan
+la fase normalizada para no reiniciar el ciclo visiblemente.
 
 - Locomoción: caer → `Jump`; recién aterrizado (0,6 s) → `Land`; ≥620 cm/s → `Run`;
-  ≥10 cm/s → `Walk`; si no → `Idle`.
+  ≥16 cm/s → `Walk`; al desacelerar, `Run` se conserva hasta 560 cm/s y `Walk` hasta 6 cm/s;
+  si no → `Idle`.
 - Gestos puntuales, que interrumpen la locomoción durante la duración del clip:
 
   | Acción | Gesto |

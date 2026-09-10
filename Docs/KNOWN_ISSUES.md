@@ -1,4 +1,113 @@
-# Problemas conocidos — ASTRAEON
+
+## 2026-09-10 — Resuelto: la locomoción se cortaba 1,3 veces por segundo, y no era animación
+
+Segunda prueba humana sobre `TL_11_CubeSphereClosed`. El propietario reportó que **el caminar se
+ve trabado, como si el paso se cortara antes de terminar**, que al correr pasa lo mismo y que
+además **avanza poco y se frena**. Su sospecha era la animación. No lo era.
+
+**Lo que descartó el control.** Se instrumentó el smoke con `-AstraeonNoJump` —caminar sin saltar
+ni una vez— y contadores de reparto de clips. Resultado sobre 40 s en línea recta a velocidad
+constante:
+
+~~~text
+cayendo=0.0%   clip de aterrizaje=0.0%   clip Walk_F=99.0%   clip Idle=1.0%
+cambios de clip=107 (2,67 por segundo)
+transicion Walk_F->Idle = 53 veces
+velocidad de animacion min=0 media=444 max=553
+~~~
+
+Ni caída, ni clip de salto, ni de aterrizaje: **el clip oscilaba entre `Walk_F` e `Idle` 53 veces
+en 40 segundos**, y la velocidad de animación tocaba **exactamente 0**. El ciclo de paso dura
+1,2 s y se reiniciaba ~1,3 veces por segundo, así que nunca llegaba a completarse.
+
+**La causa.** `AAstraeonPlanetRuntime::PrepareCollision` rehacía la colisión cercana cada vez que
+el jugador se alejaba `0.5/FaceQuads` rad del centro del parche —**312 cm** a 200 m de radio— y
+para hacerlo usaba **un solo componente**: despegaba al personaje (`SetBase(nullptr)`), movía el
+componente y recocía su cuerpo físico en el sitio. Durante esos frames el jugador se quedaba sin
+suelo, `Velocity` caía a 0 y el selector devolvía `Idle`. Nunca llegaba a `Falling`, que es por lo
+que todas las pruebas anteriores pasaban en verde: el defecto vivía justo por debajo de lo que
+medían. La correlación es 1:1 — **55 reconstrucciones de colisión, 53 cortes de animación**.
+
+Por eso empeoraba al correr: el umbral es de distancia, no de tiempo. A 520 cm/s toca cada 0,57 s;
+a 900 cm/s, cada 0,35 s.
+
+- **Corregido**: doble búfer de colisión. El relevo se construye completo y se activa **antes** de
+  retirar el saliente, y al personaje se le pasa la base de uno a otro en vez de dejarlo sin
+  ninguna (`AstraeonPlanetRuntime.cpp`, `PrepareCollision`).
+- **Medido después**, mismos 40 s: `cambios de clip=1` (el arranque `Idle->Walk_F` y nada más),
+  `Walk_F=100,0%`. Corriendo: `Run_F=99,2%` y sólo las dos transiciones de arranque.
+- **Y no era sólo visual**: el recorrido en 40 s caminando pasó de **16.922 cm a 20.934 cm**, un
+  **24 % más**. El "avanza poco y se frena" era literal; cada corte costaba distancia real.
+- **Guardián permanente**: el smoke ahora falla si más del 0,5 % de los frames caen en `Idle`
+  mientras camina. El defecto medía ~1,0 %; el arreglo mide 0,00 %.
+- **Batería completa tras el arreglo**: `Automation` 75/75, `Cardinals` PASS, `Walk` de 250 s
+  `RESULTADO=OK` con 141.247 cm y **125 cambios de clip que son exactamente 62 saltos × 2 + 1
+  arranque**: ni un corte espurio.
+
+**Consecuencia para el pulido de brazos.** La queja de que *"el caminar no se lee natural"* tenía
+dos causas sumadas, y ésta era la ruidosa: un ciclo que se reinicia tres veces por vuelta se ve
+antinatural con cualquier pose. La abducción de 9,5° sigue siendo un defecto real y medido, pero
+**el juicio sobre los codos hay que rehacerlo ahora que el ciclo se reproduce entero**, antes de
+gastar otra pasada de Blender.
+
+**Deuda registrada, no bloqueante.** El parche de colisión abarca `6.0/FaceQuads` rad (~37 m a
+200 m de radio) pero se rehace cada `0.5/FaceQuads` (~3,1 m): doce veces más seguido de lo que su
+propio tamaño exige, recorriendo las 6.144 celdas de las seis caras y recociendo cada vez. Ya no
+se ve, pero es trabajo desperdiciado. Corresponde a la **Fase 2**, que es la dueña del anillo de
+colisión y del streaming por patches.
+
+## 2026-09-10 — Prueba humana: el pulido de brazos no convence y aparecen tres huecos de diseño
+
+El propietario jugó la variante integrada y devolvió cuatro observaciones. Sólo una es un defecto
+de algo que se declaró hecho; las otras tres describen trabajo que **nunca se hizo** y que la
+prueba puso a la vista.
+
+**1 — Los codos siguen pegados al cuerpo; el caminar no se lee natural.** No está resuelto.
+Medido sobre `Tools/Blender/main_character_anim.py`: `STAND` fija `upperarm_* X = -1,080 rad` y el
+brazo colgando en reposo es `-1,245` (`reach(0)`), así que la separación real del tórax es de
+**0,165 rad ≈ 9,5°**. Con la mochila y el volumen del traje encima, esa abducción se lee como
+brazos pinzados. Peor: `clavicle_l/r` sólo se toca dentro de `reach()`, o sea que en `Idle`,
+`Walk_*` y `Run_*` **los hombros nunca se abren** y toda la anchura de la silueta depende de ese
+único ángulo. El valor está escrito a mano **12 veces** en el archivo, de modo que subirlo en
+`STAND` no alcanza: cada clave de ciclo lo vuelve a escribir encima. La corrección es una
+constante de módulo más apertura de clavícula, no una edición puntual.
+
+**2 — No existe quitarse el casco.** Ni malla sin casco, ni animación, ni acción que la dispare.
+Hoy `Helmet` es una de las tres piezas fijas de equipo montadas en
+`AstraeonPlayerCharacter.cpp:158`. El documento rector ya lo tenía previsto: *personaje con casco*
+y *personaje sin casco* son entregables literales de la **Fase 5**.
+
+**3 — La mano de primera persona no es la del personaje.** La observación es correcta y el
+problema es estructural, no un ajuste de material. Primera persona usa
+`SK_Human_HandsFP_Blockout` sobre `SKEL_Humanoid_A` (57 huesos, blockout); el cuerpo usa
+`SK_Astraeon_Player_Skeleton` (75 huesos, 65.284 tris, 4 LOD, sets de textura
+Character/Suit/Gear/Helmet). Son dos assets de dos generaciones distintas conviviendo. Esa
+divergencia es la causa de `BodyCounterpart()` y de que el pulido de locomoción haya tenido que
+hacerse **dos veces**, una por juego de clips. Unificar primera persona sobre los brazos del
+protagonista borra la duplicación entera, no sólo el síntoma visual.
+
+**4 — El escáner aparece en la mano en primera persona y no en tercera.** Es consecuencia directa
+del punto anterior. `ToolMesh` cuelga de `socket_tool_r` **del rig de manos**
+(`AstraeonFirstPersonRigComponent.cpp:71`) con `SetOnlyOwnerSee(true)`, y con las manos vacías
+muestra el escáner por diseño (`:409`). El cuerpo de tercera no lleva herramienta porque
+`socket_tool_r` **no existe en su esqueleto**: lo crea `Tools/Blender/generators/tools_blockout.py`
+sobre el rig blockout. Ponérsela hoy al cuerpo no es enganchar un componente, es **medir un
+transform de agarre nuevo** contra `hand_r` del esqueleto del protagonista, y ese trabajo se tira
+a la basura al unificar. Por eso no se parchea suelto.
+
+Reparto por fases en `BACKLOG.md`: el punto 1 es tarea acotada de la Fase 1 en curso; los puntos
+2, 3 y 4 son **Fase 5 — Protagonista, Ítaca y vuelo**, que ya los declara como entregables.
+
+## Estado actualizado 2026-09-10 — pulido de locomoción integrado
+
+La primera pasada de pulido de brazos y salto ya está guardada, exportada e integrada en el
+runtime mediante `/Optimized_Polished`. Las pruebas de editor y build pasaron. Aún no se ha
+cerrado la medición cuantitativa de patinaje de pies ni la validación humana; no declarar esos dos
+aspectos como resueltos hasta completarlos.
+
+Corrección posterior: la observación del propietario era válida para primera persona. La pasada
+anterior sólo había pulido el cuerpo de sombra; ahora el runtime usa clips FP aislados con
+balanceo de brazos. Evidencia: `ContentPipeline/reports/polished_first_person_hands_validation.json`.
 
 ## 2026-09-09 — Resuelto: el salto se trababa al moverse en el aire
 
@@ -148,17 +257,22 @@ clips del protagonista.
 ## 2026-09-08 — Pendiente: la animación del protagonista se ve rara
 
 Reportado por el propietario tras probar el ejecutable, ya con el personaje visible:
-**camina raro, salta raro y los brazos se ven mal**. No es un fallo funcional —el personaje
-se ve, se mueve y el recorrido crítico pasa— sino calidad de animación.
+**camina raro, salta raro y los brazos se ven mal**. No era un fallo funcional —el personaje
+se veía y el recorrido crítico pasaba— sino calidad de animación.
 
-- **Motivo probable, ya medido**: los 45 clips del cuerpo posan **los brazos en cruz**, no al
+- **Causa corregida**: los clips locomotores tenían la pose base demasiado cerrada para el
+  volumen de las hombreras. Se reautorizaron en Blender `Idle`, `Walk_*` y `Run_*` con pose A
+  (`upperarm X = -1,08 rad`), dejando separación visible brazo/tórax sin convertirla en T.
+- **Causa histórica, ya medida**: los 45 clips del cuerpo posan **los brazos en cruz**, no al
   costado ni al frente. El eje que lleva el brazo al frente en este rig es Z y los clips lo
   usan entre 0,13 y 0,46; en `TwoHand_Idle` las manos quedan a **x = ±0,48 m** del cuerpo.
   La medición está en `PENDIENTE_PROTAGONISTA.md` §"Por qué se eligió convivir con dos
   esqueletos". El set nunca tuvo una pasada de pulido: se autorizó para validar el pipeline.
-- **En primera persona**, además, `AN_HandsFP_*` congela la pose de brazos del agarre de
-  escáner sobre todo el clip. Fue lo que metió las manos en el encuadre, pero implica que
-  los brazos **no se mueven** al caminar o correr.
+- **En primera persona, corregido**: `PolishedFP/AN_HandsFP_Polished_*` conserva el agarre del
+  escáner pero añade balanceo medido en Walk/Run y fases de Jump/Land.
+- **Corte de locomoción, corregido en runtime**: el selector tenía cambios instantáneos y
+  reiniciaba el ciclo al cruzar Idle/Walk/Run o al cambiar dirección. Ahora usa histeresis y
+  conserva la fase normalizada al pasar entre ciclos.
 - **El salto ya no es un clip suelto** (2026-09-09): despegue, vuelo y aterrizaje están
   encadenados. Sigue **sin medir** el patinaje de pies en el ciclo de caminata: velocidad del
   clip contra velocidad del `CharacterMovement`.
@@ -168,6 +282,11 @@ se ve, se mueve y el recorrido crítico pasa— sino calidad de animación.
   despegue/vuelo/aterrizaje. Reexportar e importar: la normalización de escala de raíz ya
   está enganchada a los scripts de importación, así que no hay que repetir aquella
   reparación.
+
+  **Avance 2026-09-10:** Blender quedó guardado, el FBX fue reexportado e importado en
+  `/Optimized_Polished`, el build Development se regeneró y pasaron Automation 75/75,
+  Critical, Package, PackagedCritical y PackagedVisual. Queda únicamente medir patinaje de
+  pies contra `CharacterMovement` y confirmar con una prueba humana sostenida.
 
 ## 2026-09-07 — Generación del protagonista: estimador ausente
 

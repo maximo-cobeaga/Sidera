@@ -1,5 +1,20 @@
 # Componentes pendientes de diseño y animación — ASTRAEON
 
+**Actualización 2026-09-10 (prueba humana):** el protagonista suma tres pendientes de arte que
+antes no estaban escritos, los tres de **Fase 5** y los tres ya previstos por el documento rector:
+malla y animación de **personaje sin casco**, **brazos de primera persona rehechos desde el
+protagonista** (hoy primera persona sigue siendo el blockout de 57 huesos) y **herramienta visible
+en tercera persona**. Además, el pulido de brazos de la locomoción **no pasó la prueba humana**:
+la abducción de hombro es de 9,5° y la clavícula está en cero en todos los ciclos. Detalle en
+`KNOWN_ISSUES.md`, reparto en `BACKLOG.md`.
+
+**Actualización 2026-09-10 (locomoción pulida integrada):** el cuerpo de sombra usa el lote
+`Optimized_Polished` exportado desde Blender y las manos FP usan `PolishedFP`, con movimiento real
+durante caminar, correr, salto y aterrizaje. La pose A de `Idle`, `Walk_*` y `Run_*` deja espacio
+entre brazos y tórax; C++ conserva la fase y aplica histeresis al cambiar de locomoción. Queda
+pendiente la medición de patinaje y la prueba humana; la referencia histórica de brazos congelados
+ya no describe el runtime actual.
+
 **Actualización 2026-09-06 (exterior de Ítaca y estaciones INTEGRADOS):** los §3.2 y §3.3 de
 este documento ya no describen el estado actual. Casco, motores, patines, antena, hoja de
 escotilla, consola de pilotaje y mesa de fabricación existen y están montados. Ver

@@ -1,6 +1,69 @@
 # Backlog — ASTRAEON
 
+## Estado vigente 2026-09-10 — Fase 1 en curso
+
+- [x] Contrato C++ `FAstraeonPlanetDefinition` validable.
+- [x] `FAstraeonPlanetCoordinates`: dirección unitaria ↔ cara/UV de cube-sphere.
+- [x] Tests `DirectionFaceUvRoundTrip`, `FaceEdgesMatch` y `Definition.Validation`.
+- [x] `FAstraeonPlanetSurface`: relieve radial determinista, continuidad e invalid inputs.
+- [x] `FAstraeonCubeSphereMesh`: seis caras, tiers Lab/Target/Stress y topología validada.
+- [x] Runtime de seis caras y `TL_11_CubeSphereClosed`.
+- [x] Smoke cardinal de polos, ecuador, aristas y esquinas.
+- [x] Caminata sostenida 270 s + captura 1920×1080 + baseline de rendimiento.
+- [ ] Reactivar `Astraeon.WorldGen.Terrain.Relief` y `Terrain.SurfaceContract` contra el
+      contrato radial; siguen en cuarentena hasta migrarlas sin debilitar sus aserciones.
+- [x] Sesión humana en `TL_11_CubeSphereClosed`, 2026-09-10: orientación, costura, salto y caída,
+      cámara y salto en movimiento **confirmados a mano**. Devolvió un defecto de locomoción.
+- [x] Corregido el corte de locomoción: la colisión cercana se rehacía con un solo componente y
+      dejaba al jugador sin suelo dos frames cada 312 cm. Doble búfer; de 53 cortes en 40 s a 0 y
+      24 % más de distancia recorrida. Guardián permanente en el smoke (`KNOWN_ISSUES`).
+- [ ] **Que el propietario vuelva a mirar la locomoción ya corregida.** Con eso el criterio humano
+      de la puerta queda entero, y recién ahí tiene sentido juzgar los codos.
+- [x] Pulido Bridge de brazos/salto guardado en Blender, importado como variante
+      `/Optimized_Polished` y verificado en editor y build Development.
+- [x] Pose A abierta en `Idle`, `Walk_*` y `Run_*`; histeresis y continuidad de fase en el
+      selector runtime para evitar cortes visibles al acelerar o cambiar entre ciclos.
+- [x] Validación humana de la variante pulida: hecha el 2026-09-10 y **devolvió defecto**. Los
+      codos siguen pegados al tórax y el caminar no se lee natural (`KNOWN_ISSUES`).
+- [ ] Abrir la abducción de hombro en `Idle`, `Walk_*` y `Run_*`. **No arrancar antes de la
+      re-mirada**: el ciclo se reiniciaba 1,3 veces por segundo, y eso se ve antinatural con
+      cualquier pose. Hoy son 9,5° sobre el brazo
+      colgando (`-1,080` frente a `-1,245`), escritos a mano 12 veces en
+      `Tools/Blender/main_character_anim.py`, y `clavicle_l/r` está en cero en toda la locomoción.
+      Convertirlo en constante de módulo, abrir la clavícula y revalidar a mano.
+- [ ] Medir patinaje de pies de la variante pulida contra `CharacterMovement`.
+
+Nota de corrección visual: el set FP anterior estaba congelado en la pose del escáner; la variante
+`PolishedFP` ya está conectada y validada con movimiento angular real.
+
+Este bloque vigente complementa las listas históricas inferiores; no se considera cerrada la
+Fase 1 hasta completar sus pruebas y su puerta de salida.
+
+## Fase 5 — Protagonista, Ítaca y vuelo: diferido a propósito
+
+Abierto por la prueba humana del 2026-09-10 (`KNOWN_ISSUES`). Los tres puntos ya son entregables
+literales de la Fase 5 en [ASTRAEON_TRANSICION_AL_JUEGO_OBJETIVO.md](ASTRAEON_TRANSICION_AL_JUEGO_OBJETIVO.md)
+§7 —*personaje con casco*, *personaje sin casco*, *brazos de primera persona*, *cuerpo completo
+para sombras*—, así que no son alcance nuevo: son alcance que la prueba puso a la vista antes de
+tiempo.
+
+- [ ] **Unificar las manos de primera persona con el protagonista.** Hoy primera persona es
+      `SK_Human_HandsFP_Blockout` sobre `SKEL_Humanoid_A` (57 huesos) y el cuerpo es
+      `SK_Astraeon_Player_Skeleton` (75 huesos). Al unificar desaparecen `BodyCounterpart()`, el
+      juego de clips duplicado y la obligación de pulir cada animación dos veces.
+- [ ] **Malla y animación de quitarse el casco**, más la acción que la dispara. La regla de cuándo
+      se puede se apoya en la habitabilidad que ya existe
+      (`Astraeon.Science.Environment.Breathability`); lo que falta es el arte y el gesto.
+- [ ] **Herramienta visible en tercera persona.** Exige medir un transform de agarre contra
+      `hand_r` del esqueleto del protagonista, porque `socket_tool_r` sólo existe en el rig
+      blockout. Se resuelve con la unificación y no antes: hacerlo suelto se tira a la basura.
+
+**Por qué no ahora.** `PLAN_TRANSICION_EJECUCION.md` §5 es explícito: el arte se mantiene en Q1 y
+**no se pule una fase que todavía no cerró**. Los tres puntos son rehacer assets del protagonista
+sobre una geometría de mundo que las Fases 1 y 2 todavía están cambiando.
+
 ## Fase 0 — Transición controlada, 2026-09-09
+
 
 Orden y criterios en [PLAN_TRANSICION_EJECUCION.md](PLAN_TRANSICION_EJECUCION.md) §4.
 Estado vivo con las casillas en [PHASE_STATUS.md](PHASE_STATUS.md).
@@ -15,14 +78,43 @@ Estado vivo con las casillas en [PHASE_STATUS.md](PHASE_STATUS.md).
       reproducible (`-AstraeonPerfBaseline`).
 - [x] Calibración Blender → Unreal: preset `UE57_AST_V1` congelado, `TL_00_AssetCalibration`,
       y static mesh, skeletal mesh, una Action y un shape key validados con números.
-- [ ] **Prueba humana**: caminar del polo al antípoda en `TL_10_RadialGravity` y confirmar que el
-      personaje se mantiene de pie sin que la cámara ruede. *Único punto abierto de la Fase 0.
-      Ningún script puede cerrarlo, y decide si la Fase 1 arranca o si primero hay que rehacer el
-      marco de cámara.*
+- [x] **Prueba humana**: cámara correcta y vuelta al mundo completa, confirmado por el propietario.
+      La primera pasada devolvió cuatro defectos con cuatro causas distintas; los cuatro corregidos
+      y medidos (`KNOWN_ISSUES`).
 
-**La Fase 0 está completa salvo esa prueba.** Todo lo automatizable pasó: 67 pruebas verdes,
-compilación limpia, calibración en verde y baseline registrado. La Fase 1 no empieza hasta que
-la partida humana cierre el criterio de orientación.
+**La puerta de la Fase 0 pasó entera.** 69 pruebas verdes, compilación limpia, calibración en
+verde, baseline registrado y el criterio de orientación confirmado jugando.
+
+## Fase 1 — Núcleo planetario, tareas de aceptación
+
+Orden y criterios en [PLAN_TRANSICION_EJECUCION.md](PLAN_TRANSICION_EJECUCION.md) §4.
+
+Reconciliada el 2026-09-10: esta lista se había quedado atrás respecto del bloque vigente de
+arriba y marcaba como abierto trabajo ya entregado. Un agente que la leyera creería que falta.
+
+- [x] **Un minuto de partida**: confirmado a mano por el propietario el 2026-09-10. El salto en
+      movimiento ya no traba el clip.
+- [x] `FAstraeonPlanetDefinition`: radio, masa, gravedad, nivel del mar, seeds, versión. Struct
+      C++, **no** Data Asset — se difiere a la Fase 4 a propósito.
+- [x] `FAstraeonPlanetCoordinates`: `DirectionFaceUvRoundTrip` cubre una dirección por cada una de
+      las seis caras y comprueba UV válida e identidad; `Topology.FaceEdgesMatch` cubre las
+      aristas; `Surface.ContinuityAndInvalidInput`, las entradas inválidas.
+- [ ] **Migrar `AstraeonTerrainField` al dominio radial.** Es el trabajo grande y el más
+      preparado: `GetHeightCm` ya es estática y pura de `(seed, x, y)`, escrita para que la
+      generación planetaria la consultara antes de que el terreno existiera.
+- [x] `APlanetRuntime` con las seis caras a LOD bajo, y `TL_11_CubeSphereClosed`.
+- [x] Tiers Lab / Target / Stress, cubiertos por `Planet.Topology.MeshAtEngineeringTiers`. El radio
+      es un dato (`RadiusCm`), no un `Scale`.
+- [x] Pruebas `Planet.Topology.FaceEdgesMatch` y `Planet.Height.Determinism`.
+- [~] `Planet.Gravity.CardinalPoints` **no existe con ese nombre**. Lo que la fase pedía lo cubre
+      el smoke `-AstraeonSmokePlanetCardinals` (`RunPlanetChecks.ps1 -Check Cardinals`), que
+      recorre las 26 direcciones: 6 centros de cara, 12 aristas y 8 esquinas. Es un desvío de
+      nomenclatura, no un hueco de cobertura, y hay que aceptarlo por escrito al cerrar la fase o
+      registrar el test con el nombre que pedía el plan.
+
+*Criterio de salida:* vuelta lógica completa sin perder orientación, sin costura abierta entre
+caras, salto y caída correctos en polos y bordes, misma seed = mismo relieve. Al cerrarla salen de
+cuarentena `Terrain.Relief` y `Terrain.SurfaceContract`.
 
 ## 2026-09-07 — Protagonista completo solicitado mediante Bridge
 
