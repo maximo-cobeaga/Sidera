@@ -24,6 +24,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Planet") int32 FaceQuads = 32;
 	UPROPERTY(EditAnywhere, Category="Planet") double GravityMS2 = 9.81;
 	UPROPERTY(EditAnywhere, Category="Planet") TObjectPtr<UMaterialInterface> SurfaceMaterial;
+	// Off in LOD-only labs (TL_12): nothing stands on the surface, so no near collision is built.
+	UPROPERTY(EditAnywhere, Category="Planet") bool bNearCollision = true;
 	UFUNCTION(BlueprintCallable, Category="Planet") bool Rebuild();
 	UFUNCTION(BlueprintPure, Category="Planet") FVector GetSurfacePointCm(FVector Direction, double AltitudeCm=0.0) const;
 	static AAstraeonPlanetRuntime* FindActive(const UWorld* World);
@@ -39,6 +41,12 @@ public:
 	// the player sees and the ground the player stands on differ there.
 	int32 GetGroundMismatchFrames() const { return GroundMismatchFrames; }
 	int32 GetGroundCheckedFrames() const { return GroundCheckedFrames; }
+	int32 GetPatchComponentCount() const { return Backend.IsValid() ? Backend->GetComponentCount() : 0; }
+	// Game-thread cost of selection + scheduling + uploads, per frame.
+	static constexpr double PatchWorkBudgetMs = 2.0;
+	double GetMaxPatchWorkMs() const { return MaxPatchWorkMs; }
+	double GetMeanPatchWorkMs() const { return PatchWorkFrames>0 ? SumPatchWorkMs/PatchWorkFrames : 0.0; }
+	int32 GetPatchWorkFramesOverBudget() const { return PatchWorkFramesOverBudget; }
 	virtual void Tick(float DeltaSeconds) override;
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -46,7 +54,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
 	void UpdatePatches(float DeltaSeconds);
-	bool ObserverBodyCm(FVector& OutPosition, FVector& OutVelocity) const;
+	FVector ObserverBodyCm() const;
 	UPROPERTY() TArray<TObjectPtr<UProceduralMeshComponent>> Faces;
 	// Dos secciones de colision que se alternan. Con una sola habia que moverla y recocer su
 	// cuerpo fisico en el sitio, y el jugador se quedaba sin suelo mientras tanto.
@@ -65,7 +73,12 @@ private:
 	TUniquePtr<FAstraeonPlanetProceduralPatchBackend> Backend;
 	TUniquePtr<FAstraeonPlanetPatchManager> Patches;
 	float SinceSelection = 0.f;
+	FVector ObserverAtSelection = FVector::ZeroVector;
 	bool bFacesRetired = false;
 	int32 GroundMismatchFrames = 0;
 	int32 GroundCheckedFrames = 0;
+	double MaxPatchWorkMs = 0.0;
+	double SumPatchWorkMs = 0.0;
+	int32 PatchWorkFrames = 0;
+	int32 PatchWorkFramesOverBudget = 0;
 };

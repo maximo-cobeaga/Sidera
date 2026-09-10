@@ -25,8 +25,14 @@ confirma sólo revisiones vigentes, libera lo que sale y releva sin agujeros.
 caras sólo se ven hasta la primera cobertura. La colisión sigue siendo el parche cercano de
 Fase 1, ahora sobre la rejilla del patch más fino (64 en Lab), probada triángulo por triángulo.
 **89/89 Automation**, cardinales 26/26, caminata de 250 s en verde con 0 frames de suelo
-desalineado. `-AstraeonPlanetLegacyFaces` vuelve a las seis caras. Siguiente paso: P2.3-C,
-`TL_12_PatchLOD` a 50 km y su smoke.
+desalineado. `-AstraeonPlanetLegacyFaces` vuelve a las seis caras.
+
+**P2.3-C hecho.** `TL_12_PatchLOD` (50 km, sin colisión) y su smoke de vuelo: 918 relevos sin
+un agujero, patch más fino bajo la cámara el 100 % del tiempo a ras del suelo, faldón medido
+suficiente también para delta 2. Insights mostró un selector cuadrático de 19 ms por llamada;
+ahora es 1,1 ms con resultado idéntico y el p99 del vuelo pasó de 33,6 a 5,2 ms. El observador
+del LOD es la cámara. **91/91 Automation.** Siguiente paso: P2.3-D, prueba humana en `TL_11` y
+`TL_12`, y cierre de P2.3.
 
 ## Estado actualizado 2026-09-10 — Fase 1: relieve de dos capas y cuarentena resuelta
 

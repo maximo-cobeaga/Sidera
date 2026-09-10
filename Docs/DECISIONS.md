@@ -29,6 +29,19 @@ exacto; el runtime lo dice con un `Warning` y usa las seis caras, en vez de deja
 desalineado en silencio. Selección cada 0,1 s y 2 subidas por frame: provisionales, se miden en
 `TL_12`.
 
+`TL_12` (C). El observador del LOD pasa a ser la cámara y no el pawn: el detalle sigue a lo que
+se ve, y así un vuelo scripteado funciona sin inventar otro pawn. La velocidad para la
+predicción se toma entre selecciones, no del pawn. `bNearCollision` apaga la colisión cercana
+en laboratorios de LOD. El smoke falla sólo por invariantes duros —agujero o solape en pantalla,
+build fallido, componentes sin cota o ruta que no asienta—; todo lo demás se mide primero y los
+umbrales se ponen después.
+
+El perfil de `TL_12` mostró un selector cuadrático. Se reemplaza por cola de prioridad y
+balanceo incremental, sin cambiar un solo resultado: la clausura 2:1 de un quadtree es única y
+se conserva el desempate. La versión anterior queda como `SelectReference` y una prueba compara
+las dos en 624 vistas. No se lleva la selección a un worker todavía: con 1,1 ms de media ya no
+es el cuello de botella, y moverla agrega latencia y otra cola.
+
 Desvío del plan: no se sube `MaxTrackedPatches` de 64 a 512. El gestor libera cada dirección
 del streaming apenas recoge su resultado, así que ese registro cuenta trabajo pendiente —acotado
 por los 2 trabajos simultáneos— y el conjunto confirmado es del gestor. La cola se abstrae en

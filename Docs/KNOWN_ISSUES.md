@@ -1,21 +1,28 @@
 ## 2026-09-10 — Deuda de integración de Fase 2 tras P2.1/P2.2
 
-- **Alta, abierta:** el runtime continúa con seis caras fijas; el servicio de workers todavía
-  no está conectado a un selector quadtree/LOD. El constructor sí se comparte con `TL_11`.
-  No usar esta iteración como evidencia de streaming jugable a 500 km.
-- **Media, abierta:** faldón predeterminado de 100 cm sin dimensionamiento frente al error de
-  LOD. Las muestras compartidas coinciden, pero eso no demuestra que el borde interpolado
-  fino/grueso quede cubierto en una ruta visible. Medir en P2.3 antes de ajustar o hacer stitching.
-- **Media, abierta (P2.3-A):** durante un relevo el conjunto visible puede superar el tope de
-  la selección: 462 patches medidos contra un objetivo de hasta 384, porque conviven saliente y
-  entrante. Además el delta de LOD visible puede ser 2 un instante, y el faldón está dimensionado
-  para 1. Medir en `TL_12` (P2.3-C) conteo máximo, grietas y coste antes de acotar.
-- **Baja, abierta (P2.3-A):** si el objetivo cambia más rápido de lo que se construye, un padre
-  puede quedarse en pantalla mucho tiempo esperando a sus cuatro hijos. No hay agujero, pero sí
-  detalle demorado. Medir el tiempo de asentamiento en el smoke de `TL_12`.
-- **Baja, abierta (P2.3-B):** con patches la caminata de `TL_11` bajó de 209,3 a 203,8 FPS
-  medios y el p99 subió de 5,56 a 5,81 ms. Un 3 %, sin atribuir; puede ser el faldón o las 24
-  secciones contra 6. Se perfila con Insights en `TL_12`.
+- **Resuelto (P2.3-B/C):** el runtime renderiza por patches con workers y selector LOD en
+  `TL_11` y `TL_12`. Sigue sin ser evidencia a 500 km: Target se prueba en P2.5.
+- **Resuelto (P2.3-C):** el faldón está medido. El runtime no usa los 100 cm por defecto sino
+  `SkirtDepthCm` por nivel, y cubre la grieta fino/grueso con margen: 0,78 del faldón en delta
+  1 y 0,86 en delta 2, a 500 km. Muestreo, no recorrido exhaustivo. Stitching no hace falta.
+- **Resuelto (P2.3-C):** los 462 patches visibles eran de la ruta sintética de la prueba. En
+  el vuelo de `TL_12` el máximo fue 393 visibles y 397 componentes; el delta 2 estuvo en pantalla
+  el 0,10 % de los frames y el faldón lo cubre.
+- **Mitigado (P2.3-C):** padre esperando a sus hijos si el objetivo cambia muy rápido. Bajo 100 m
+  el patch más fino estuvo debajo de la cámara el 100 % de los frames, y la ruta asienta al
+  parar. No se midió el tiempo de asentamiento de cada relevo.
+- **Resuelto (P2.3-C):** la caída del 3 % en `TL_11` no se repite (206,9 FPS, p99 5,57 ms).
+- **Resuelto (P2.3-C):** el selector LOD era cuadrático, con 19,3 ms de media y 34,7 de máximo
+  por llamada en `TL_12` (p99 33,6 ms). Cola de prioridad y balanceo incremental: 1,12 ms de media
+  y 2,57 de máximo, con resultado probado idéntico. `SelectReference` conserva el original sólo
+  para esa prueba.
+- **Baja, abierta (P2.3-C):** la selección aún cuesta hasta ~2,6 ms en el hilo de juego cada
+  0,1 s con 384 hojas, más ~0,6 ms de validación en `SetTarget`. Si Target o P2.5 lo empujan
+  por encima del presupuesto, el selector es una función pura: puede ir a un worker.
+- **Baja, abierta:** `FScreenshotRequest` cuesta entre 80 y 660 ms por captura. Es el origen del
+  pico de 400 ms de todos los baselines y de los 3 hitches del vuelo (atribuido por tiempos en
+  Insights). Las capturas de los smokes caen dentro de la ventana de perfil; hay que tenerlo en
+  cuenta al leer "hitches > 50 ms", o sacarlas fuera de esa ventana.
 - **Baja, abierta (P2.3-B):** el puente de colisión exacto sólo cabe hasta una rejilla de 128
   quads por cara (radio ≤ 448 m con la configuración actual). Por encima, el runtime avisa con
   un `Warning` y vuelve a las seis caras. `TL_12` no usa colisión; P2.4 quita el límite.

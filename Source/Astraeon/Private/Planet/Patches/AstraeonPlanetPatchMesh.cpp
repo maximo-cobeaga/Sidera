@@ -1,5 +1,6 @@
 #include "Planet/Patches/AstraeonPlanetPatchMesh.h"
 #include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 bool FAstraeonPlanetPatchBuildOptions::IsValid() const
 {
@@ -33,6 +34,7 @@ EAstraeonPatchBuildStatus FAstraeonPlanetPatchMesh::Build(const FAstraeonPlanetD
 	const FAstraeonPlanetPatchBuildOptions& Options, FAstraeonPlanetPatchBuildResult& Out,
 	const std::atomic<bool>* Cancelled)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(Astraeon_PlanetPatches_Build);
 	Out = {};
 	const auto IsCancelled = [Cancelled]() { return Cancelled && Cancelled->load(std::memory_order_relaxed); };
 	if (IsCancelled()) return EAstraeonPatchBuildStatus::Cancelled;

@@ -35,6 +35,10 @@ struct ASTRAEON_API FAstraeonPlanetLODManager
 {
 	static bool Select(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetLODView& View,
 		const FAstraeonPlanetLODSettings& Settings, FAstraeonPlanetLODSelection& Out);
+	// The first, quadratic implementation: rescans every leaf per split. Kept only so a test
+	// can prove `Select` returns exactly the same leaves. Never call it at runtime.
+	static bool SelectReference(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetLODView& View,
+		const FAstraeonPlanetLODSettings& Settings, FAstraeonPlanetLODSelection& Out);
 	// First level whose cell is no wider than MinCellSpanCm. Depends on the radius, not the view.
 	static uint8 FinestAllowedLod(const FAstraeonPlanetDefinition& Planet, const FAstraeonPlanetLODSettings& Settings);
 	static bool SameLevelNeighbor(const FAstraeonPlanetPatchAddress& Address, EAstraeonPatchEdge Edge,
@@ -43,6 +47,8 @@ struct ASTRAEON_API FAstraeonPlanetLODManager
 	// A visible set mid-relay only guarantees the partition.
 	static bool ValidatePartition(const TArray<FAstraeonPlanetPatchAddress>& Leaves, FString* Reason = nullptr);
 	static bool ValidateCover(const TArray<FAstraeonPlanetPatchAddress>& Leaves, FString* Reason = nullptr);
+	// Largest LOD difference across any shared edge of a partition; -1 if not a partition.
+	static int32 MaxNeighborLodDelta(const TArray<FAstraeonPlanetPatchAddress>& Leaves);
 	static bool Less(const FAstraeonPlanetPatchAddress& A, const FAstraeonPlanetPatchAddress& B);
 	static double SkirtDepthCm(const FAstraeonPlanetDefinition& Planet,
 		const FAstraeonPlanetPatchAddress& Address, int32 Quads);

@@ -1,3 +1,84 @@
+## 2026-09-10 — Fase 2, P2.3-C: `TL_12_PatchLOD`, faldón medido y selector lineal
+
+Mapa `TL_12_PatchLOD` generado por `Scripts/Editor/CreatePatchLODTestMap.py`: 50 km de radio,
+sin colisión cercana (`bNearCollision=false`). Smoke `AstraeonPlanetPatchLODSmoke`: cámara
+scripteada, 185 s. A 20 m del suelo cruza la esquina +X/+Y/+Z, sube a 300 km, baja y sigue a
+20 m la arista +X/+Z, y termina 10 s quieta. El pawn queda congelado y oculto.
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' AstraeonEditor Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat' Astraeon Win64 Development 'C:\Users\MAXIMO\Desktop\Astraeon\Astraeon.uproject' -WaitMutex
+.\Scripts\RunPlanetChecks.ps1 -Check Automation
+.\Scripts\RunPlanetChecks.ps1 -Check PatchLODMap
+.\Scripts\RunPlanetChecks.ps1 -Check PatchLOD -Profile -Trace
+.\Scripts\RunPlanetChecks.ps1 -Check Cardinals
+.\Scripts\RunPlanetChecks.ps1 -Check Walk -Profile
+```
+
+Resultados: editor y juego Development **`Succeeded`**, sin warnings; **91/91 Automation**;
+mapa `PASS` validado al recargar; **`TL_12` `RESULTADO=OK`**; cardinales 26/26; caminata de
+250 s en verde (141.216 cm, 62 saltos, 0 frames en Idle, 0 de 52.495 con suelo desalineado).
+
+**Vuelo en `TL_12`**, corrida final:
+
+| Medida | Valor |
+|---|---|
+| Primera cobertura | 1,12 s, 384 patches |
+| Auditorías de pantalla (una por relevo) | 754, **ningún agujero ni solape** |
+| Pedidos / confirmados / relevos | 2.679 / 2.679 / 918; 0 fallos, 0 obsoletos |
+| Patches visibles máx. / componentes máx. | 393 / 397 (tope 1.024) |
+| Delta de LOD 2 en pantalla | 0,10 % de los frames |
+| Bajo 100 m con el patch más fino debajo | **100 %** (27.072 frames) |
+| Asentamiento con la cámara quieta | sí |
+
+**Faldón medido** (`LOD.SkirtsCoverCoarseNeighbourSeams`). Mayor grieta entre el vértice fino
+y la cuerda gruesa, dividida por el faldón que la tapa, en seis caras, una costura y un borde
+interior, 1.024 celdas por línea y todos los niveles que el selector produce:
+
+| Radio | Delta 1 | Delta 2 |
+|---|---|---|
+| 200 m | 0,005 | — |
+| 50 km | 0,646 | 0,746 |
+| 500 km | 0,777 | 0,855 |
+
+Todo por debajo de 1: el faldón cubre también el delta 2 de los relevos. Ahora la prueba lo
+exige para los dos deltas. Es un muestreo, no un recorrido exhaustivo de todas las celdas.
+
+**El perfil encontró un defecto y se corrigió.** Primera corrida: p99 **33,61 ms**. Unreal
+Insights (`TimingInsights.ExportTimerStatistics`, hilo de juego):
+
+| Temporizador | Antes: llamadas, media, máx. | Después |
+|---|---|---|
+| `Astraeon_PlanetLOD_Select` | 1.819, **19,3 ms**, 34,7 ms | 1.823, **1,12 ms**, 2,57 ms |
+| `AstraeonPlanetRuntime` (total del vuelo) | 37,0 s | 4,1 s |
+| `Astraeon_PlanetPatches_Update` | 0,02 ms, 1,2 ms | 0,02 ms, 0,7 ms |
+| `Astraeon_PlanetPatches_Commit` | 0,08 ms, 0,5 ms | 0,08 ms, 0,3 ms |
+
+Causa: por cada subdivisión, el selector reordenaba todas las hojas, recalculaba el error de
+cada una y rebalanceaba el árbol entero. Ahora usa cola de prioridad y balanceo incremental, con
+el resultado probado idéntico en 624 vistas (`LOD.FastSelectionMatchesReference`: 0,26 contra
+3,43 ms por llamada de media).
+
+| Perfil del vuelo | FPS medio | p99 | Hitches > 50 ms |
+|---|---|---|---|
+| [Antes](evidencia/perf_baseline_20260910_113607.json) | 195,6 | 33,61 ms | 3 |
+| [Después, con traza](evidencia/perf_baseline_20260910_114754.json) | 228,0 | 5,22 ms | 3 |
+| [Final](evidencia/perf_baseline_20260910_120014.json) | 227,8 | 5,19 ms | 3 |
+
+**Los 3 hitches son las capturas de pantalla.** En la traza, los frames de más de 50 ms caen a
+38,2, 108,4 y 158,4 s: separados 70,3 y 50,0 s, igual que las capturas a los 30, 100 y 150 s de
+la ruta. Explica también el pico aislado de 400 ms de todos los baselines anteriores: la caminata
+saca una captura y tiene un hitch. Queda así el trabajo de patches en el hilo de juego: media
+0,096 ms y máximo 4,38 ms, en los frames con selección (una cada 0,1 s).
+
+Regresión de `TL_11` tras cambiar el observador del LOD de pawn a cámara:
+[perfil](evidencia/perf_baseline_20260910_115327.json) 206,9 FPS, p99 5,57 ms (línea base
+Fase 1: 209,3 y 5,56). La caída del 3 % registrada en B no se repite.
+
+Capturas inspeccionadas: `PatchLOD_Corner`, `PatchLOD_Orbit` y `PatchLOD_Edge`. Terreno
+continuo hasta el horizonte en la esquina y en la arista, esfera entera sin huecos desde órbita.
+Traza de Insights: `Saved/Profiling/Planet_PatchLOD.utrace`, 545 MB, fuera del repositorio.
+
 ## 2026-09-10 — Fase 2, P2.3-B: `TL_11` renderiza por patches
 
 Implementación en `Planet/Patches/AstraeonPlanetProceduralPatchBackend.*` y

@@ -64,6 +64,15 @@ P2.3. No acredita todavía streaming
 visible en Target, colisión por anillos, transición de frame ni persistencia de criaturas.
 La cuarentena y los ocho criterios de salida permanecen abiertos.
 
+### Avance técnico 2026-09-10 — P2.3 A/B/C
+
+`TL_11` renderiza por patches con workers, y la colisión coincide triángulo por triángulo con lo
+visible. `TL_12_PatchLOD` (50 km) vuela 185 s y hace 918 relevos sin un agujero; el faldón está
+medido y cubre delta 1 y 2. Insights encontró un selector cuadrático y se corrigió: p99 del vuelo
+de 33,6 a 5,2 ms. **91/91 Automation.** Falta la prueba humana (P2.3-D). Esto aporta evidencia a
+"sin grietas en la ruta de prueba" y a "sin hitches recurrentes", pero **ninguna casilla de la
+puerta se marca todavía**: la puerta pide Target a 500 km, colisión por anillos y estado mutable.
+
 ### Deuda que esta fase hereda y debe pagar
 
 El parche de colisión abarca ~37 m pero se rehace cada 3,1 m: doce veces más seguido de lo que su

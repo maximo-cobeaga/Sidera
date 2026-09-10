@@ -25,6 +25,7 @@
 #include "Tests/AstraeonItacaInputSmoke.h"
 #include "Tests/AstraeonPlanetWalkSmoke.h"
 #include "Tests/AstraeonPlanetCardinalSmoke.h"
+#include "Tests/AstraeonPlanetPatchLODSmoke.h"
 #include "Tests/AstraeonRegionArtSmoke.h"
 #include "Environment/AstraeonItacaInterior.h"
 #include "WorldGen/AstraeonRegionMarker.h"
@@ -89,6 +90,8 @@ void AAstraeonGameModeBase::BeginPlay()
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokePlanetCardinals")))
 		GetWorld()->SpawnActor<AAstraeonPlanetCardinalSmoke>();
+	if (FParse::Param(FCommandLine::Get(), TEXT("AstraeonSmokePatchLOD")))
+		GetWorld()->SpawnActor<AAstraeonPlanetPatchLODSmoke>();
 
 	// The MVP starts at a minimal C++ menu. Region materialization happens after
 	// StartSelectedNewGame or ContinueSavedGame in AAstraeonPlayerController.

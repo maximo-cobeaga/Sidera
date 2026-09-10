@@ -1,6 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Misc/AutomationTest.h"
 #include "Planet/LOD/AstraeonPlanetLODManager.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
 #include "HAL/PlatformTime.h"
 
 namespace AstraeonLODTests
@@ -102,6 +103,9 @@ bool FAstraeonLODCoverTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Partition rejects a hole"), FAstraeonPlanetLODManager::ValidatePartition(Holed));
 	auto Overlapped = Leaves; Overlapped.Add(Child);
 	TestFalse(TEXT("Partition rejects overlap"), FAstraeonPlanetLODManager::ValidatePartition(Overlapped));
+	TestEqual(TEXT("Six roots have delta zero"), FAstraeonPlanetLODManager::MaxNeighborLodDelta(Roots()), 0);
+	TestEqual(TEXT("Unbalanced partition reports delta two"), FAstraeonPlanetLODManager::MaxNeighborLodDelta(Leaves), 2);
+	TestEqual(TEXT("Delta of a non-partition is an error"), FAstraeonPlanetLODManager::MaxNeighborLodDelta(Holed), -1);
 	FAstraeonPlanetLODView V; V.ObserverBodyCm = FVector(1,0,0) * 50001000.0;
 	FAstraeonPlanetLODSettings S; S.MaxPatches = 6;
 	FAstraeonPlanetLODSelection Out;
@@ -110,6 +114,117 @@ bool FAstraeonLODCoverTest::RunTest(const FString& Parameters)
 	S.MaxPatches = 5;
 	TestFalse(TEXT("Impossible budget rejected"), FAstraeonPlanetLODManager::Select(Planet(50000000.0),V,S,Out));
 	TestTrue(TEXT("Failed selection clears result"), Out.Leaves.IsEmpty());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonLODFastSelectTest, "Astraeon.Planet.LOD.FastSelectionMatchesReference",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonLODFastSelectTest::RunTest(const FString& Parameters)
+{
+	// TL_12 measured the first selector at 19 ms per call. The fast one must be a pure speedup:
+	// same leaves, same budget flag, same finest level, for every view tried here.
+	using namespace AstraeonLODTests;
+	double FastSeconds = 0, ReferenceSeconds = 0;
+	int32 Cases = 0, BudgetLimited = 0;
+	for (double Radius : {20000.0, 5000000.0, 50000000.0, 250000000.0})
+	for (int32 X = -1; X <= 1; ++X)
+	for (int32 Y = -1; Y <= 1; ++Y)
+	for (int32 Z = -1; Z <= 1; ++Z)
+	for (double Altitude : {2000.0, 100000.0, 10000000.0})
+	for (int32 Budget : {384, 60})
+	{
+		if (!X && !Y && !Z) continue;
+		// Off the exact cardinal: an irregular offset avoids only testing symmetric ties.
+		const FVector Dir = (FVector(X, Y, Z) + FVector(0.137, -0.071, 0.029) * (X + 2 * Y + 3 * Z)).GetSafeNormal();
+		if (Dir.IsNearlyZero()) continue;
+		const auto P = Planet(Radius);
+		FAstraeonPlanetLODView V; V.ObserverBodyCm = Dir * (Radius + Altitude);
+		V.VelocityBodyCmS = FVector::CrossProduct(Dir, FVector(0.3, 0.2, 1)).GetSafeNormal() * 5000.0;
+		FAstraeonPlanetLODSettings S; S.MaxPatches = Budget;
+		FAstraeonPlanetLODSelection Fast, Reference;
+		double Start = FPlatformTime::Seconds();
+		const bool bFast = FAstraeonPlanetLODManager::Select(P, V, S, Fast);
+		FastSeconds += FPlatformTime::Seconds() - Start;
+		Start = FPlatformTime::Seconds();
+		const bool bReference = FAstraeonPlanetLODManager::SelectReference(P, V, S, Reference);
+		ReferenceSeconds += FPlatformTime::Seconds() - Start;
+		++Cases; BudgetLimited += Reference.bBudgetLimited;
+		if (!TestEqual(TEXT("Same success"), bFast, bReference)
+			|| !TestTrue(FString::Printf(TEXT("Same leaves (radius %.0f, dir %s, altitude %.0f, budget %d)"), Radius, *Dir.ToString(), Altitude, Budget),
+				Fast.Leaves == Reference.Leaves)
+			|| !TestEqual(TEXT("Same budget flag"), Fast.bBudgetLimited, Reference.bBudgetLimited)
+			|| !TestEqual(TEXT("Same finest level"), Fast.FinestAllowedLod, Reference.FinestAllowedLod)) return false;
+	}
+	TestTrue(TEXT("Budget pressure was exercised"), BudgetLimited > 0 && BudgetLimited < Cases);
+	TestTrue(TEXT("Fast path is faster"), FastSeconds < ReferenceSeconds);
+	AddInfo(FString::Printf(TEXT("FastSelect cases=%d budget_limited=%d fast_ms_per_call=%.3f reference_ms_per_call=%.3f"),
+		Cases, BudgetLimited, 1000.0 * FastSeconds / Cases, 1000.0 * ReferenceSeconds / Cases));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FAstraeonLODSkirtTest, "Astraeon.Planet.LOD.SkirtsCoverCoarseNeighbourSeams",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FAstraeonLODSkirtTest::RunTest(const FString& Parameters)
+{
+	// Where a fine patch meets a coarser one, the coarse edge is a straight chord between two
+	// shared samples and the fine edge has extra samples in between. The crack between them is
+	// hidden only if the skirt hanging from the upper edge reaches below the lower one: a fine
+	// vertex above the chord needs the fine skirt, one below it needs the coarse skirt.
+	using namespace AstraeonLODTests;
+	const FAstraeonPlanetLODSettings Settings;
+	const int32 Q = Settings.Quads;
+	constexpr int32 CellsPerLine = 1024;
+	for (double Radius : {20000.0, 5000000.0, 50000000.0})
+	{
+		const auto P = Planet(Radius);
+		const auto Position = [&P](EAstraeonPlanetFace Face, double U, double V)
+		{
+			const FVector Dir = FAstraeonPlanetCoordinates::FaceUvToDirection(Face, FVector2D(U, V));
+			return Dir * (P.RadiusCm + FAstraeonPlanetSurface::SampleRadialHeightCm(P, Dir));
+		};
+		const uint8 Finest = FAstraeonPlanetLODManager::FinestAllowedLod(P, Settings);
+		for (int32 Delta = 1; Delta <= 2; ++Delta)
+		{
+			double WorstRatio = 0, WorstAbove = 0, WorstBelow = 0;
+			for (int32 Fine = Delta; Fine <= Finest; ++Fine)
+			{
+				FAstraeonPlanetPatchAddress FineA; FineA.Lod = uint8(Fine);
+				FAstraeonPlanetPatchAddress CoarseA; CoarseA.Lod = uint8(Fine - Delta);
+				const double FineSkirt = FAstraeonPlanetLODManager::SkirtDepthCm(P, FineA, Q);
+				const double CoarseSkirt = FAstraeonPlanetLODManager::SkirtDepthCm(P, CoarseA, Q);
+				const int64 Cells = (int64(1) << (Fine - Delta)) * Q;
+				const int64 Stride = FMath::Max<int64>(1, Cells / CellsPerLine);
+				double Above = 0, Below = 0;
+				for (uint8 F = 0; F < 6; ++F)
+				for (const int64 Column : {int64(0), Cells / 2}) // A cube-face seam and an interior patch boundary.
+				for (int64 J = 0; J < Cells; J += Stride)
+				{
+					const EAstraeonPlanetFace Face = EAstraeonPlanetFace(F);
+					const double U = -1.0 + 2.0 * double(Column) / double(Cells);
+					const double V0 = -1.0 + 2.0 * double(J) / double(Cells), V1 = -1.0 + 2.0 * double(J + 1) / double(Cells);
+					const FVector C0 = Position(Face, U, V0), D = Position(Face, U, V1) - C0;
+					for (int32 K = 1; K < (1 << Delta); ++K)
+					{
+						const FVector FineVertex = Position(Face, U, FMath::Lerp(V0, V1, double(K) / (1 << Delta)));
+						const FVector Ray = FineVertex.GetSafeNormal();
+						// Chord point on the same ray: the offset perpendicular to the ray vanishes.
+						const FVector C0Perp = C0 - (C0 | Ray) * Ray, DPerp = D - (D | Ray) * Ray;
+						const double S = -(C0Perp | DPerp) / FMath::Max(DPerp.SizeSquared(), UE_DOUBLE_SMALL_NUMBER);
+						const double Gap = FineVertex.Size() - ((C0 + S * D) | Ray);
+						Above = FMath::Max(Above, Gap); Below = FMath::Max(Below, -Gap);
+					}
+				}
+				WorstAbove = FMath::Max(WorstAbove, Above); WorstBelow = FMath::Max(WorstBelow, Below);
+				WorstRatio = FMath::Max(WorstRatio, FMath::Max(Above / FineSkirt, Below / CoarseSkirt));
+				// Delta 2 only exists mid-relay, but it is on screen then: measured 0.855 of the
+				// skirt at Target on 2026-09-10, so the delta-1 sizing covers it as well.
+				TestTrue(FString::Printf(TEXT("Fine skirt hides fine-above-chord crack (radius %.0f, lod %d, delta %d)"), Radius, Fine, Delta), Above <= FineSkirt);
+				TestTrue(FString::Printf(TEXT("Coarse skirt hides fine-below-chord crack (radius %.0f, lod %d, delta %d)"), Radius, Fine, Delta), Below <= CoarseSkirt);
+			}
+			AddInfo(FString::Printf(TEXT("SkirtSeams radius_cm=%.0f delta=%d finest=%d worst_above_cm=%.2f worst_below_cm=%.2f worst_gap_over_skirt=%.3f"),
+				Radius, Delta, Finest, WorstAbove, WorstBelow, WorstRatio));
+		}
+	}
 	return true;
 }
 #endif

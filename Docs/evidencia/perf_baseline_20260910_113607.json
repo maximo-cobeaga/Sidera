@@ -1,0 +1,18 @@
+{
+	"timestamp": "2026-09-10T11:36:07.616Z",
+	"map": "TL_12_PatchLOD",
+	"warmup_seconds": 5,
+	"sample_seconds": 170,
+	"frame_count": 33260,
+	"mean_fps": 195.64657189391548,
+	"median_frame_ms": 4.3500997126102448,
+	"p99_frame_ms": 33.612956479191773,
+	"worst_frame_ms": 400.00000596046448,
+	"hitches_over_50ms": 3,
+	"memory_start_mb": 2413.3671875,
+	"memory_end_mb": 2409.48046875,
+	"command_line": "-unattended -nosplash -nop4 -abslog=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Logs\\Planet_PatchLOD.log /Game/Maps/TL_12_PatchLOD -game -RenderOffscreen -windowed -ForceRes -ResX=1920 -ResY=1080 -AstraeonSmokePatchLOD -AstraeonPerfBaseline -AstraeonPerfWarmup=5 -AstraeonPerfSeconds=170 -AstraeonPerfKeepRunning -trace=cpu,frame,bookmark,log -tracefile=C:\\Users\\MAXIMO\\Desktop\\Astraeon\\Saved\\Profiling\\Planet_PatchLOD.utrace",
+	"build_configuration": "Development",
+	"viewport_width": 1920,
+	"viewport_height": 1080
+}

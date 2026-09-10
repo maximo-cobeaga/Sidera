@@ -1,5 +1,8 @@
 #include "AstraeonHUD.h"
 #include "Planet/AstraeonPlanetRuntime.h"
+#include "Planet/Surface/AstraeonPlanetSurface.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Engine/World.h"
 
 #include "AstraeonGameInstance.h"
 #include "AstraeonPlayerController.h"
@@ -51,12 +54,20 @@ void AAstraeonHUD::DrawHUD()
 	if (!bMenuVisible && AstraeonCharacter)
 	if (const auto* Planet=AAstraeonPlanetRuntime::FindActive(GetWorld()))
 	{
-		const FVector D=(AstraeonCharacter->GetActorLocation()-Planet->GetActorLocation()).GetSafeNormal();
+		// What is seen: the camera, which in TL_12 flies apart from the frozen pawn.
+		const FVector Eye=PlayerOwner && PlayerOwner->PlayerCameraManager
+			? PlayerOwner->PlayerCameraManager->GetCameraLocation() : AstraeonCharacter->GetActorLocation();
+		const FVector D=(Eye-Planet->GetActorLocation()).GetSafeNormal();
 		const auto Address=FAstraeonPlanetCoordinates::DirectionToFaceUv(D);
-		Lines={TEXT("TL_11 | Nucleo planetario - laboratorio"),
+		const double AltitudeM=(FVector::Dist(Eye,Planet->GetActorLocation())-Planet->RadiusCm
+			-FAstraeonPlanetSurface::SampleRadialHeightCm(Planet->GetDefinition(),D))/100.0;
+		const auto* Patches=Planet->GetPatchManager();
+		Lines={FString::Printf(TEXT("%s | Nucleo planetario - laboratorio"),*UWorld::RemovePIEPrefix(GetWorld()->GetMapName())),
 			FString::Printf(TEXT("Radio %.2f km | Seed %d | Cara %d | UV %.3f %.3f"),Planet->RadiusCm/100000.0,Planet->BodySeed,int32(Address.Face),Address.Uv.X,Address.Uv.Y),
-			FString::Printf(TEXT("Direccion %s | Centro %s"),*D.ToString(),*Planet->GetActorLocation().ToString()),
-			FString::Printf(TEXT("Colision cercana: %d triangulos"),Planet->GetCollisionTriangleCount()),
+			FString::Printf(TEXT("Direccion %s | Altitud %.0f m"),*D.ToString(),AltitudeM),
+			FString::Printf(TEXT("%s | Colision cercana: %d triangulos"),
+				Patches?*FString::Printf(TEXT("Patches visibles: %d"),Patches->GetVisibleCount()):TEXT("Caras fijas"),
+				Planet->GetCollisionTriangleCount()),
 			TEXT("WASD caminar | Raton mirar | Espacio saltar | V camara")};
 	}
 	UFont* Font = GEngine->GetMediumFont() ? GEngine->GetMediumFont() : GEngine->GetSmallFont();

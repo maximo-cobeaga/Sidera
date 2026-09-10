@@ -13,6 +13,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Camera/PlayerCameraManager.h"
+#include "HAL/PlatformTime.h"
 
 namespace
 {
@@ -71,7 +72,7 @@ bool AAstraeonPlanetRuntime::Rebuild()
 	const auto P=GetDefinition();
 	// Same builder, same integer global grid and same diagonals: a whole face at
 	// Quads << FinestLod has exactly the vertices and triangles of the finest patches.
-	CollisionQuads = Patches.IsValid()
+	CollisionQuads = Patches.IsValid() && bNearCollision
 		? int32(FMath::Min<int64>(int64(LODSettings.Quads) << FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings), MaxBuilderQuads+1))
 		: FaceQuads;
 	if (!P.IsValid() || FaceQuads<4 || FaceQuads>MaxBuilderQuads || !FMath::IsPowerOfTwo(FaceQuads) || CollisionQuads>MaxBuilderQuads
@@ -91,11 +92,22 @@ bool AAstraeonPlanetRuntime::Rebuild()
 		if (SurfaceMaterial) Faces[I]->SetMaterial(0,SurfaceMaterial);
 	}
 	bFacesRetired=false;
+	if (!bNearCollision)
+	{
+		for (auto* Buffer:{NearCollision.Get(),NearCollisionRelay.Get()})
+		{
+			Buffer->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Buffer->ClearAllMeshSections();
+		}
+		CollisionTriangles=0;
+		return true;
+	}
 	return PrepareCollision(FVector(0,0,1),true);
 }
 
 bool AAstraeonPlanetRuntime::PrepareCollision(const FVector& Direction, bool bForce)
 {
+	if (!bNearCollision) return false;
 	FVector Unit;
 	if (FaceData.Num()!=6 || !FAstraeonPlanetCoordinates::TryNormalizeDirection(Direction,Unit)) return false;
 	if (!bForce && FVector::DotProduct(Unit,CollisionDirection)>FMath::Cos(0.5/FaceQuads)) return true;
@@ -159,7 +171,7 @@ void AAstraeonPlanetRuntime::BeginPlay()
 	{
 		const auto P=GetDefinition();
 		const int64 Grid=int64(LODSettings.Quads) << FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings);
-		if (Grid<=MaxBuilderQuads)
+		if (!bNearCollision || Grid<=MaxBuilderQuads)
 		{
 			Streaming=MakeUnique<FAstraeonPlanetStreamingManager>();
 			Backend=MakeUnique<FAstraeonPlanetProceduralPatchBackend>(*GetRootComponent(),SurfaceMaterial);
@@ -179,9 +191,9 @@ void AAstraeonPlanetRuntime::EndPlay(const EEndPlayReason::Type Reason)
 	if (Patches.IsValid())
 	{
 		const auto& S=Patches->GetStats();
-		UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: patches requests=%d commits=%d relays=%d stale=%d failures=%d cancels=%d visible=%d components=%d ground_mismatch=%d/%d"),
+		UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: patches requests=%d commits=%d relays=%d stale=%d failures=%d cancels=%d visible=%d components=%d ground_mismatch=%d/%d work_ms mean=%.3f max=%.2f over_%.0fms=%d"),
 			S.Requests,S.Commits,S.Relays,S.StaleDrops,S.Failures,S.Cancels,Patches->GetVisibleCount(),Backend->GetComponentCount(),
-			GroundMismatchFrames,GroundCheckedFrames);
+			GroundMismatchFrames,GroundCheckedFrames,GetMeanPatchWorkMs(),MaxPatchWorkMs,PatchWorkBudgetMs,PatchWorkFramesOverBudget);
 		// The manager releases through the queue and backend, so it goes first.
 		Patches->Reset();
 	}
@@ -197,40 +209,37 @@ void AAstraeonPlanetRuntime::Tick(float DeltaSeconds)
 	{
 		if (auto* Character=Cast<ACharacter>(PC->GetPawn()))
 			Character->GetCharacterMovement()->AddTickPrerequisiteActor(this);
-		PrepareCollision(PC->GetPawn()->GetActorLocation()-GetActorLocation());
+		if (bNearCollision) PrepareCollision(PC->GetPawn()->GetActorLocation()-GetActorLocation());
 	}
 	if (Patches.IsValid()) UpdatePatches(DeltaSeconds);
 }
 
-bool AAstraeonPlanetRuntime::ObserverBodyCm(FVector& OutPosition, FVector& OutVelocity) const
+FVector AAstraeonPlanetRuntime::ObserverBodyCm() const
 {
-	OutVelocity=FVector::ZeroVector;
+	// Detail follows what is seen: the camera, which is the pawn's eyes in play and a scripted
+	// camera in TL_12. Its location is last frame's, one frame of lag the prediction absorbs.
+	// A camera inside the planet (or none) means nobody looks at the surface yet.
 	const auto* PC=GetWorld()->GetFirstPlayerController();
-	if (PC && PC->GetPawn())
-	{
-		OutPosition=PC->GetPawn()->GetActorLocation()-GetActorLocation();
-		OutVelocity=PC->GetPawn()->GetVelocity();
-		return true;
-	}
-	// Menu or spectator: detail follows the camera. A camera inside the planet (or none) means
-	// nobody is looking at the surface yet, so detail waits at the collision spot.
-	OutPosition = PC && PC->PlayerCameraManager
+	const FVector Camera = PC && PC->PlayerCameraManager
 		? PC->PlayerCameraManager->GetCameraLocation()-GetActorLocation()
 		: FVector::ZeroVector;
-	if (OutPosition.Size()<RadiusCm*0.5) OutPosition=CollisionDirection*(RadiusCm+1000.0);
-	return false;
+	if (Camera.Size()>=RadiusCm*0.5) return Camera;
+	if (PC && PC->GetPawn()) return PC->GetPawn()->GetActorLocation()-GetActorLocation();
+	return CollisionDirection*(RadiusCm+1000.0);
 }
 
 void AAstraeonPlanetRuntime::UpdatePatches(float DeltaSeconds)
 {
+	const double Start=FPlatformTime::Seconds();
 	const auto P=GetDefinition();
-	FVector Observer, Velocity;
-	const bool bPawn=ObserverBodyCm(Observer,Velocity);
+	const FVector Observer=ObserverBodyCm();
 	SinceSelection+=DeltaSeconds;
 	if (Patches->GetTarget().IsEmpty() || SinceSelection>=SelectionIntervalSeconds)
 	{
-		SinceSelection=0.f;
-		FAstraeonPlanetLODView View; View.ObserverBodyCm=Observer; View.VelocityBodyCmS=Velocity;
+		// Velocity over the whole interval, not one frame: steadier, and any source of motion.
+		FAstraeonPlanetLODView View; View.ObserverBodyCm=Observer;
+		View.VelocityBodyCmS = Patches->GetTarget().IsEmpty() ? FVector::ZeroVector : (Observer-ObserverAtSelection)/SinceSelection;
+		SinceSelection=0.f; ObserverAtSelection=Observer;
 		FAstraeonPlanetLODSelection Selection;
 		if (!FAstraeonPlanetLODManager::Select(P,View,LODSettings,Selection)
 			|| !Patches->SetTarget(P,Selection.Leaves,LODSettings.Quads,Observer))
@@ -243,15 +252,20 @@ void AAstraeonPlanetRuntime::UpdatePatches(float DeltaSeconds)
 		bFacesRetired=true;
 		UE_LOG(LogTemp,Display,TEXT("PlanetRuntime: first patch cover visible=%d; fixed faces retired"),Patches->GetVisibleCount());
 	}
-	if (bFacesRetired && bPawn)
+	const auto* PC=GetWorld()->GetFirstPlayerController();
+	if (bFacesRetired && bNearCollision && PC && PC->GetPawn())
 	{
 		FAstraeonPlanetPatchAddress Under;
-		if (FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId,Observer,FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings),Under))
+		if (FAstraeonPlanetPatchAddress::TryFromDirection(P.BodyId,PC->GetPawn()->GetActorLocation()-GetActorLocation(),
+			FAstraeonPlanetLODManager::FinestAllowedLod(P,LODSettings),Under))
 		{
 			++GroundCheckedFrames;
 			if (!Patches->IsVisible(Under)) ++GroundMismatchFrames;
 		}
 	}
+	const double Ms=(FPlatformTime::Seconds()-Start)*1000.0;
+	MaxPatchWorkMs=FMath::Max(MaxPatchWorkMs,Ms); SumPatchWorkMs+=Ms; ++PatchWorkFrames;
+	PatchWorkFramesOverBudget+=Ms>PatchWorkBudgetMs;
 }
 
 AAstraeonPlanetRuntime* AAstraeonPlanetRuntime::FindActive(const UWorld* World)

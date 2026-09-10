@@ -16,6 +16,37 @@ namespace
 		do { if (Leaves.Contains(Query)) { Out = Query; return true; } } while (Query.TryParent(Query));
 		return false; // This neighbour is subdivided; its fine leaves check us in turn.
 	}
+	// Splits Root, then restores the 2:1 balance checking only leaves created since: before the
+	// split the tree was balanced, so only a new, finer leaf can sit next to a too-coarse one.
+	// The balanced closure is unique, so the result equals the full-rescan `Balance`.
+	bool SplitAndBalance(FSet& Leaves, const FAddress& Root, int32 Budget, TArray<FAddress>& Created)
+	{
+		TArray<FAddress> Work;
+		const auto SplitNode = [&](const FAddress& A)
+		{
+			Leaves.Remove(A);
+			for (uint8 Q = 0; Q < 4; ++Q) { FAddress Child; A.TryChild(Q, Child); Leaves.Add(Child); Created.Add(Child); Work.Add(Child); }
+		};
+		SplitNode(Root);
+		while (!Work.IsEmpty())
+		{
+			const FAddress A = Work.Pop(EAllowShrinking::No);
+			if (!Leaves.Contains(A)) continue;
+			for (uint8 E = 0; E < 4; ++E)
+			{
+				FAddress Neighbor, Cover;
+				if (!FAstraeonPlanetLODManager::SameLevelNeighbor(A, EAstraeonPatchEdge(E), Neighbor)) return false;
+				if (CoveringLeaf(Leaves, Neighbor, Cover) && A.Lod > Cover.Lod + 1)
+				{
+					if (Leaves.Num() + 3 > Budget) return false;
+					SplitNode(Cover);
+					Work.Add(A); // Its other edges, and this one against the new finer neighbour.
+					break;
+				}
+			}
+		}
+		return true;
+	}
 	bool Balance(FSet& Leaves, int32 Budget)
 	{
 		for (;;)
@@ -122,6 +153,22 @@ bool FAstraeonPlanetLODManager::ValidatePartition(const TArray<FAddress>& Leaves
 	return Partition(Leaves, 2 * FAstraeonPlanetLODSettings::MaxAllowedPatches, Set, Reason);
 }
 
+int32 FAstraeonPlanetLODManager::MaxNeighborLodDelta(const TArray<FAddress>& Leaves)
+{
+	FSet Set;
+	if (!Partition(Leaves, 2 * FAstraeonPlanetLODSettings::MaxAllowedPatches, Set, nullptr)) return -1;
+	int32 Worst = 0;
+	for (const auto& A : Leaves)
+	for (uint8 E = 0; E < 4; ++E)
+	{
+		// Seen from the finer side: a coarser neighbour is found by walking up.
+		FAddress Neighbor, Cover;
+		if (SameLevelNeighbor(A, EAstraeonPatchEdge(E), Neighbor) && CoveringLeaf(Set, Neighbor, Cover))
+			Worst = FMath::Max(Worst, int32(A.Lod) - int32(Cover.Lod));
+	}
+	return Worst;
+}
+
 bool FAstraeonPlanetLODManager::ValidateCover(const TArray<FAddress>& Leaves, FString* Reason)
 {
 	const auto Fail = [Reason](const TCHAR* Text) { if (Reason) *Reason = Text; return false; };
@@ -139,22 +186,73 @@ bool FAstraeonPlanetLODManager::ValidateCover(const TArray<FAddress>& Leaves, FS
 	return true;
 }
 
+namespace
+{
+	bool ValidSelectionInput(const FAstraeonPlanetDefinition& P, const FAstraeonPlanetLODView& V, const FAstraeonPlanetLODSettings& S)
+	{
+		return P.IsValid() && !V.ObserverBodyCm.ContainsNaN() && V.ObserverBodyCm.Size() >= P.RadiusCm * 0.5
+			&& !V.VelocityBodyCmS.ContainsNaN() && FMath::IsFinite(V.VerticalFovDegrees)
+			&& V.VerticalFovDegrees >= 10 && V.VerticalFovDegrees <= 150 && V.ViewHeightPixels >= 1 && V.ViewHeightPixels <= 16384
+			&& S.MaxPatches >= 6 && S.MaxPatches <= FAstraeonPlanetLODSettings::MaxAllowedPatches
+			&& S.Quads >= 4 && S.Quads <= 128 && FMath::IsPowerOfTwo(S.Quads)
+			&& FMath::IsFinite(S.MinCellSpanCm) && S.MinCellSpanCm >= 1
+			&& FMath::IsFinite(S.MaxErrorPixels) && S.MaxErrorPixels > 0
+			&& FMath::IsFinite(S.PredictionSeconds) && S.PredictionSeconds >= 0 && S.PredictionSeconds <= 10;
+	}
+	FSet Roots(FName Body)
+	{
+		FSet Leaves;
+		for (uint8 Face = 0; Face < 6; ++Face) { FAddress Root; Root.BodyId = Body; Root.Face = EAstraeonPlanetFace(Face); Leaves.Add(Root); }
+		return Leaves;
+	}
+}
+
 bool FAstraeonPlanetLODManager::Select(const FAstraeonPlanetDefinition& P, const FAstraeonPlanetLODView& V,
 	const FAstraeonPlanetLODSettings& S, FAstraeonPlanetLODSelection& Out)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(Astraeon_PlanetLOD_Select);
 	Out = {};
-	if (!P.IsValid() || V.ObserverBodyCm.ContainsNaN() || V.ObserverBodyCm.Size() < P.RadiusCm * 0.5
-		|| V.VelocityBodyCmS.ContainsNaN() || !FMath::IsFinite(V.VerticalFovDegrees)
-		|| V.VerticalFovDegrees < 10 || V.VerticalFovDegrees > 150 || V.ViewHeightPixels < 1 || V.ViewHeightPixels > 16384
-		|| S.MaxPatches < 6 || S.MaxPatches > FAstraeonPlanetLODSettings::MaxAllowedPatches
-		|| S.Quads < 4 || S.Quads > 128 || !FMath::IsPowerOfTwo(S.Quads)
-		|| !FMath::IsFinite(S.MinCellSpanCm) || S.MinCellSpanCm < 1
-		|| !FMath::IsFinite(S.MaxErrorPixels) || S.MaxErrorPixels <= 0
-		|| !FMath::IsFinite(S.PredictionSeconds) || S.PredictionSeconds < 0 || S.PredictionSeconds > 10) return false;
+	if (!ValidSelectionInput(P, V, S)) return false;
 	Out.FinestAllowedLod = FinestAllowedLod(P, S);
-	FSet Leaves;
-	for (uint8 Face = 0; Face < 6; ++Face) { FAddress Root; Root.BodyId = P.BodyId; Root.Face = EAstraeonPlanetFace(Face); Leaves.Add(Root); }
+	FSet Leaves = Roots(P.BodyId);
+	// Same choice as the reference: largest error first, ties to the first address in `Less`
+	// order. Each error is computed once; split leaves leave stale entries, skipped on pop.
+	struct FCandidate { double Error; FAddress Address; };
+	const auto First = [](const FCandidate& A, const FCandidate& B)
+	{
+		return A.Error != B.Error ? A.Error > B.Error : Less(A.Address, B.Address);
+	};
+	TArray<FCandidate> Heap;
+	const auto Consider = [&](const FAddress& A)
+	{
+		if (A.Lod >= Out.FinestAllowedLod) return;
+		const double Error = Priority(P, V, S, A);
+		if (Error > S.MaxErrorPixels) Heap.HeapPush({Error, A}, First);
+	};
+	for (const auto& Root : Leaves) Consider(Root);
+	TArray<FAddress> Created;
+	for (;;)
+	{
+		while (!Heap.IsEmpty() && !Leaves.Contains(Heap.HeapTop().Address)) Heap.HeapPopDiscard(First, EAllowShrinking::No);
+		if (Heap.IsEmpty()) break;
+		if (Leaves.Num() + 3 > S.MaxPatches) { Out.bBudgetLimited = true; break; }
+		FSet Trial = Leaves;
+		Created.Reset();
+		if (!SplitAndBalance(Trial, Heap.HeapTop().Address, S.MaxPatches, Created)) { Out.bBudgetLimited = true; break; }
+		Leaves = MoveTemp(Trial);
+		for (const auto& A : Created) if (Leaves.Contains(A)) Consider(A);
+	}
+	Out.Leaves = Leaves.Array(); Out.Leaves.Sort(Less);
+	return ValidateCover(Out.Leaves);
+}
+
+bool FAstraeonPlanetLODManager::SelectReference(const FAstraeonPlanetDefinition& P, const FAstraeonPlanetLODView& V,
+	const FAstraeonPlanetLODSettings& S, FAstraeonPlanetLODSelection& Out)
+{
+	Out = {};
+	if (!ValidSelectionInput(P, V, S)) return false;
+	Out.FinestAllowedLod = FinestAllowedLod(P, S);
+	FSet Leaves = Roots(P.BodyId);
 	for (;;)
 	{
 		TArray<FAddress> Ordered = Leaves.Array(); Ordered.Sort(Less);
